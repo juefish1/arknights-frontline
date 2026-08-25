@@ -1,0 +1,26 @@
+# macOS Finder metadata
+.DS_Store
+
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Ll]ogs/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Tt]est[Rr]esults/
+UserSettings/
+MemoryCaptures/
+Recordings/
+
+# IDE and generated solution files
+.vs/
+.idea/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+

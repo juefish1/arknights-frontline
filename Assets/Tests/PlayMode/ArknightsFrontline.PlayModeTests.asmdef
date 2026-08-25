@@ -1,0 +1,19 @@
+{
+  "name": "ArknightsFrontline.PlayModeTests",
+  "rootNamespace": "ArknightsFrontline.Tests.PlayMode",
+  "references": [
+    "ArknightsFrontline.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
