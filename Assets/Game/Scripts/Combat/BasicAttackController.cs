@@ -16,6 +16,7 @@ namespace ArknightsFrontline.Combat
 
         private void Awake()
         {
+            AttackRequested += SpawnProjectile;
             CombatUnit combatUnit = GetComponent<CombatUnit>();
             if (combatUnit != null)
             {
@@ -25,6 +26,7 @@ namespace ArknightsFrontline.Combat
 
         private void OnDestroy()
         {
+            AttackRequested -= SpawnProjectile;
             if (owner != null)
             {
                 owner.Died -= OnOwnerDied;
@@ -142,6 +144,18 @@ namespace ArknightsFrontline.Combat
         private void OnOwnerDied(CombatUnit _)
         {
             ClearTarget();
+        }
+
+        private void SpawnProjectile(CombatUnit attacker, CombatUnit attackTarget)
+        {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            GameObject projectileObject = new GameObject("Projectile");
+            Projectile projectile = projectileObject.AddComponent<Projectile>();
+            projectile.Initialize(attacker, attackTarget, attacker.AttackPower, 16f);
         }
     }
 }

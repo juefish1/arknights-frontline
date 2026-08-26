@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Camera;
+using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
+using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -27,6 +29,7 @@ namespace ArknightsFrontline.Editor
             Material blueMaterial = GetOrCreateMaterial("BlueArena.mat", new Color(0.1f, 0.35f, 0.9f));
             Material redMaterial = GetOrCreateMaterial("RedArena.mat", new Color(0.9f, 0.15f, 0.15f));
             Material laneMaterial = GetOrCreateMaterial("Lane.mat", new Color(0.25f, 0.25f, 0.25f));
+            GetOrCreateMaterial("YellowProjectile.mat", Color.yellow);
             int groundLayer = EnsureLayer("Ground");
             int targetableLayer = EnsureLayer("Targetable");
 
@@ -43,6 +46,7 @@ namespace ArknightsFrontline.Editor
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
             GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial);
+            CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer);
             CreateDirectionalLight();
             MobaCameraController cameraController = CreateMainCamera();
             cameraController.SetCenteringTarget(player.transform);
@@ -105,8 +109,25 @@ namespace ArknightsFrontline.Editor
 
             UnitMotor motor = player.AddComponent<UnitMotor>();
             motor.Configure(5f, ArenaLayout.CreateDefault());
-            player.AddComponent<PlayerCommandController>();
+            PlayerCommandController commands = player.AddComponent<PlayerCommandController>();
+            CombatUnit combatUnit = player.AddComponent<CombatUnit>();
+            combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, true);
+            BasicAttackController attack = player.AddComponent<BasicAttackController>();
+            CombatCommandResolver resolver = player.AddComponent<CombatCommandResolver>();
+            resolver.Configure(combatUnit, motor, commands, attack);
             return player;
+        }
+
+        private static void CreateTrainingDummy(Transform parent, Material material, int targetableLayer)
+        {
+            GameObject dummy = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            dummy.name = "TrainingDummy_Red";
+            dummy.transform.SetParent(parent, false);
+            dummy.transform.position = new Vector3(20f, 1f, 0f);
+            dummy.layer = targetableLayer;
+            dummy.GetComponent<Renderer>().sharedMaterial = material;
+            CombatUnit combatUnit = dummy.AddComponent<CombatUnit>();
+            combatUnit.Configure(TeamId.Red, Altitude.Ground, 40f, 0f, 2f, 0f, 0f, false, false);
         }
 
         private static void CreateDirectionalLight()

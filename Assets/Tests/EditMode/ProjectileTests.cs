@@ -1,0 +1,78 @@
+using System.Collections.Generic;
+using ArknightsFrontline.Combat;
+using ArknightsFrontline.Common;
+using NUnit.Framework;
+using UnityEngine;
+
+namespace ArknightsFrontline.Tests.EditMode
+{
+    public sealed class ProjectileTests
+    {
+        private readonly List<GameObject> gameObjects = new List<GameObject>();
+
+        [TearDown]
+        public void TearDown()
+        {
+            foreach (GameObject gameObject in gameObjects)
+            {
+                Object.DestroyImmediate(gameObject);
+            }
+
+            gameObjects.Clear();
+        }
+
+        [Test]
+        public void ProjectileDamagesLegalTargetAtArrival()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(4f, 0f, 0f), 40f, 0f, 2f, false);
+            Projectile projectile = CreateProjectile();
+
+            projectile.Initialize(attacker, target, 12f, 16f);
+            projectile.Tick(10f);
+
+            Assert.That(target.CurrentHealth, Is.EqualTo(target.MaxHealth - 10f));
+            Assert.That(projectile.IsFinished, Is.True);
+            Assert.That(projectile.GetComponent<Renderer>(), Is.Not.Null);
+        }
+
+        [Test]
+        public void ProjectileDoesNotDamageTargetThatDiedBeforeArrival()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(4f, 0f, 0f), 40f, 0f, 2f, false);
+            Projectile projectile = CreateProjectile();
+            projectile.Initialize(attacker, target, 12f, 16f);
+            target.TakePhysicalDamage(100f);
+
+            projectile.Tick(10f);
+
+            Assert.That(target.CurrentHealth, Is.EqualTo(0f));
+            Assert.That(projectile.IsFinished, Is.True);
+        }
+
+        private CombatUnit CreateUnit(
+            string name,
+            TeamId team,
+            Vector3 position,
+            float health,
+            float attackPower,
+            float defense,
+            bool canAttackGround)
+        {
+            GameObject gameObject = new GameObject(name);
+            gameObjects.Add(gameObject);
+            gameObject.transform.position = position;
+            CombatUnit unit = gameObject.AddComponent<CombatUnit>();
+            unit.Configure(team, Altitude.Ground, health, attackPower, defense, 6f, 0.5f, canAttackGround, false);
+            return unit;
+        }
+
+        private Projectile CreateProjectile()
+        {
+            GameObject gameObject = new GameObject("Projectile");
+            gameObjects.Add(gameObject);
+            return gameObject.AddComponent<Projectile>();
+        }
+    }
+}

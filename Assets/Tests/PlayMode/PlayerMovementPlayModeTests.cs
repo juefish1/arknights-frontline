@@ -1,7 +1,9 @@
 using System.Collections;
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Camera;
+using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
+using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
 using NUnit.Framework;
 using UnityEngine;
@@ -42,8 +44,27 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(player, Is.Not.Null);
             Assert.That(player.GetComponent<UnitMotor>(), Is.Not.Null);
             Assert.That(player.GetComponent<PlayerCommandController>(), Is.Not.Null);
+            Assert.That(player.GetComponent<CombatUnit>(), Is.Not.Null);
+            Assert.That(player.GetComponent<CombatCommandResolver>(), Is.Not.Null);
+            Assert.That(player.GetComponent<BasicAttackController>(), Is.Not.Null);
             Assert.That(UnityEngine.Camera.main.GetComponent<MobaCameraController>().CenteringTarget,
                 Is.EqualTo(player.transform));
+        }
+
+        [UnityTest]
+        public IEnumerator PrototypeArenaContainsRedGroundTrainingDummy()
+        {
+            SceneManager.LoadScene("PrototypeArena");
+            yield return null;
+
+            GameObject dummy = GameObject.Find("TrainingDummy_Red");
+            Assert.That(dummy, Is.Not.Null);
+            CombatUnit unit = dummy.GetComponent<CombatUnit>();
+            Assert.That(unit, Is.Not.Null);
+            Assert.That(unit.Team, Is.EqualTo(TeamId.Red));
+            Assert.That(unit.Altitude, Is.EqualTo(Altitude.Ground));
+            Assert.That(dummy.GetComponent<Collider>(), Is.Not.Null);
+            Assert.That(dummy.layer, Is.EqualTo(LayerMask.NameToLayer("Targetable")));
         }
     }
 }
