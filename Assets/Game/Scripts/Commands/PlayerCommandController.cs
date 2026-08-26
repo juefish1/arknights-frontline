@@ -161,7 +161,6 @@ namespace ArknightsFrontline.Commands
             }
 
             attackMoveState.Confirm();
-            isAttackMoveHeld = false;
             if (TryGetPointerHit(out RaycastHit hit)
                 && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
             {

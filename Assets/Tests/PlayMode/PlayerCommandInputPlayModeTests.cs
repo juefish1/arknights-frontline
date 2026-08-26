@@ -55,6 +55,30 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ConfirmingAttackWhileQRemainsHeldPreservesHoldState()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            target.layer = LayerMask.NameToLayer("Targetable");
+            controller.Issue(UnitCommand.Move(Vector3.zero));
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Attack));
+            Assert.That(controller.IsAttackMoveHeld, Is.True);
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
         public IEnumerator DefaultSharedRightClickCancelsArmedCommandWithoutMoving()
         {
             Mouse mouse = InputSystem.AddDevice<Mouse>();
