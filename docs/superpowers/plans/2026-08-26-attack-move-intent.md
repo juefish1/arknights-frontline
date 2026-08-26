@@ -235,8 +235,38 @@ git add Assets/Game/Scripts/Commands/PlayerCommandController.cs Assets/Tests/Edi
 git commit -m "fix: respect attack-move click occlusion"
 ```
 
+### Task 4: Make the occlusion regression synchronize physics deterministically
+
+**Files:**
+- Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
+
+**Interfaces:**
+- Consumes: the wall and target transforms created by `QPlusWallOccludingTargetIssuesNearestInRangeIntent` and `Physics.SyncTransforms()`.
+- Produces: a deterministic first-hit occlusion regression with no production behavior change.
+
+- [ ] **Step 1: Synchronize the new colliders before dispatching input**
+
+In `QPlusWallOccludingTargetIssuesNearestInRangeIntent`, insert this line immediately after setting the wall and target transforms/layers and before `Press(keyboard.qKey)`:
+
+```csharp
+Physics.SyncTransforms();
+```
+
+This is required because the test creates and moves colliders then performs an immediate raycast through an Input System callback in the same frame. Do not add a frame yield before the click because that would let the player motor advance and weaken the explicit stopped-motion assertion.
+
+- [ ] **Step 2: Run the focused PlayMode class**
+
+Run `ArknightsFrontline.Tests.PlayMode.PlayerCommandInputPlayModeTests` from a disposable clean checkout with the installed Unity editor. Expected when Unity licensing starts: all five input tests pass. If it fails before compilation with the local licensing `ResponseCode: 505 / Unsupported protocol version '1.18.1'`, record that limitation without claiming a test pass.
+
+- [ ] **Step 3: Commit only the regression test**
+
+```bash
+git add Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs.meta
+git commit -m "test: synchronize attack-move occlusion setup"
+```
+
 ## Plan self-review
 
-- Spec coverage: Tasks 1–3 cover Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, physical click occlusion, mandatory motor stop/no destination, commandless cancellation, state consumption, and the explicit Stage 3 ownership boundary.
+- Spec coverage: Tasks 1–4 cover Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, deterministic physical click occlusion, mandatory motor stop/no destination, commandless cancellation, state consumption, and the explicit Stage 3 ownership boundary.
 - Placeholder scan: no TODO/TBD or undefined follow-up behavior appears in an implementation step; Stage 3 is explicitly excluded rather than deferred inside this task.
 - Type consistency: `AttackNearestInRange()`, `UnitCommandKind.AttackNearestInRange`, `AttackMoveState.Confirm()`, and nullable `CurrentCommand` use the same names in tests and production steps.
