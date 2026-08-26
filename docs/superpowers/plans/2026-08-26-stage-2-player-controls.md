@@ -13,7 +13,7 @@
 - 只实现阶段 2 的玩家操作：不引入战斗、目标伤害、兵线、AI、技能或 HUD。
 - 输入默认值为：右键移动/直接攻击、`Q` 攻击移动、`S` 停止、`W/E/R` 技能槽、`B` 撤退、`Space` 镜头居中；所有动作必须可重绑定。
 - 指针位置为 `<Pointer>/position`；确认是 `<Mouse>/leftButton`；取消是 `<Keyboard>/escape` 和 `<Mouse>/rightButton`。
-- `PlayerCommandController` 只射线检测 `Ground` 和 `Targetable` 层；右键在攻击移动瞄准时只取消、不移动。
+- `PlayerCommandController` 对鼠标使用默认物理射线层（忽略 `Ignore Raycast`），只把最近命中的 `Targetable` 视为可选中目标；墙体和其他最近碰撞体都必须阻挡后方目标的选择。右键在攻击移动瞄准时只取消、不移动。
 - `Q` 后左键命中 `Targetable` 时记录 `Attack(target)` 意图；命中 `Ground`、墙体、其他不可选中对象或没有射线命中时记录 `AttackNearestInRange()` 意图。阶段 2 不判断合法性或范围，也不追击或造成伤害。
 - `AttackNearestInRange()` 必须停止已有移动，且没有目标时绝不向左键位置移动；阶段 3 才会解析该意图。
 - 运行时代码在 `Assets/Game/Scripts`，测试在 `Assets/Tests`。不得提交 `Library/`、`Temp/`、`Logs/`、`Builds/`、`TestResults/`、`.DS_Store`、构建日志或用户未跟踪的 ProjectSettings/Packages 修改。
@@ -155,7 +155,7 @@ Expected: compiler failures because `UnitMotor` and `AttackMoveState` do not exi
 
 `UnitMotor` uses `Vector3.MoveTowards` on XZ in `Tick`, clamps all destinations through `ArenaLayout`, uses `Update` to call `Tick(Time.deltaTime)`, and exposes `IsMoving`. `AttackMoveState` has no Unity dependencies: `Arm` sets `IsArmed`; `Confirm` and `Cancel` only disarm.
 
-`PlayerCommandController` owns `GameInputActions`, enables/disables them with the component, raycasts only `Ground` and `Targetable` layer masks, exposes `Issue(UnitCommand)` and records `CurrentCommand`. Right-click ground issues `Move`; right-click target issues `Attack`; `Q` arms attack move; its next left click always disarms it, then issues `Attack(target)` for `Targetable` or `AttackNearestInRange()` for every other click. Both attack intents stop the existing motor movement and cause no damage or pursuit in this stage. `S` issues `Stop`; `Esc` and right click while armed cancel without issuing movement. `Space` calls `MobaCameraController.CenterOn(transform)`.
+`PlayerCommandController` owns `GameInputActions`, enables/disables them with the component, raycasts against the default physical layers (therefore ignores `Ignore Raycast`) and only treats the nearest hit as selectable when it is `Targetable`; a wall or any other nearer collider blocks a target behind it. It exposes `Issue(UnitCommand)` and records `CurrentCommand`. Right-click ground issues `Move`; right-click target issues `Attack`; `Q` arms attack move; its next left click always disarms it, then issues `Attack(target)` for a nearest `Targetable` hit or `AttackNearestInRange()` for every other click. Both attack intents stop the existing motor movement and cause no damage or pursuit in this stage. `S` issues `Stop`; `Esc` and right click while armed cancel without issuing movement. `Space` calls `MobaCameraController.CenterOn(transform)`.
 
 Update the deterministic builder to create blue capsule `Player_Exusiai` at blue deployment with `UnitMotor` and `PlayerCommandController`, configure motor speed `5`, create/assign `Ground` and `Targetable` layers as needed, and assign the main camera's centering target to the player. Do not alter the Stage 1 arena geometry.
 

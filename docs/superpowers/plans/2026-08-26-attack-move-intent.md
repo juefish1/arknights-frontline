@@ -11,8 +11,8 @@
 ## Global Constraints
 
 - Keep production code under `Assets/Game/Scripts` and tests under `Assets/Tests`; do not modify user-owned scene, package or ProjectSettings changes.
-- Do not reference `CombatUnit`, target legality, attack range, pursuit, damage, physics obstacles beyond the existing click raycast, or any Stage 3 type.
-- `Q` plus `Targetable` left click emits `UnitCommand.Attack(target)`; all other Q-plus-left clicks emit `UnitCommand.AttackNearestInRange()`.
+- Do not reference `CombatUnit`, target legality, attack range, pursuit, damage, or any Stage 3 type. The input layer may use the first physical raycast hit only to classify a click; it must not perform combat line-of-sight or range evaluation.
+- `Q` plus a nearest `Targetable` left-click hit emits `UnitCommand.Attack(target)`; all other Q-plus-left clicks, including a wall or other nearer collider that occludes a target, emit `UnitCommand.AttackNearestInRange()`.
 - `AttackNearestInRange()` and `Attack(target)` stop an existing `UnitMotor` movement. Neither command may set a movement destination in Stage 2.
 - Existing direct right-click behavior stays unchanged: ground moves, target emits `Attack(target)`, right click while Q is armed only cancels.
 - Run Unity tests in a disposable clean checkout if active Unity package imports cause unrelated compilation errors. Do not commit `Library/`, `Temp/`, `Logs/`, `TestResults/`, build logs or unrelated user files.
@@ -185,8 +185,58 @@ git add Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs Assets/Tests/Pl
 git commit -m "test: cover attack-move click classification"
 ```
 
+### Task 3: Respect physical click occlusion and assert commandless cancellation
+
+**Files:**
+- Modify: `Assets/Game/Scripts/Commands/PlayerCommandController.cs`
+- Modify: `Assets/Tests/EditMode/PlayerCommandControllerTests.cs`
+- Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
+
+**Interfaces:**
+- Consumes: `Physics.DefaultRaycastLayers`, existing `TryRaycast`, real Input System device helpers, and nullable `CurrentCommand`.
+- Produces: first-hit click classification in which a wall blocks a target behind it, plus regressions for occlusion and no-command cancellation.
+
+- [ ] **Step 1: Write the failing regression tests**
+
+In `PlayerCommandInputPlayModeTests`, add `QPlusWallOccludingTargetIssuesNearestInRangeIntent`. Create the existing main camera and player already moving; create a wide default-layer cube wall centered on the camera's center ray before a `Targetable` cube, then press Q and left mouse at screen center. After one frame assert:
+
+```csharp
+Assert.That(controller.IsAttackMoveArmed, Is.False);
+Assert.That(motor.IsMoving, Is.False);
+Assert.That(controller.CurrentTarget, Is.Null);
+Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+```
+
+Destroy player, camera, wall, and target in the test. The wall must be created on the default layer; the target must be behind it on `Targetable`.
+
+In `PlayerCommandControllerTests.ArmedRightClickIsCancelledByTheMoveClickPathBeforeRaycasting`, add `Assert.That(controller.CurrentCommand.HasValue, Is.False);` after cancellation, proving no `Move`, `Attack`, or nearest-target intent was issued.
+
+- [ ] **Step 2: Run the targeted tests and verify RED**
+
+Run the PlayerCommandInput PlayMode test class and the PlayerCommandController EditMode class with the installed Unity command. Expected before implementation: the wall test fails because the Ground/Targetable-only mask skips the wall and picks the target. If Unity cannot initialize its local licensing client before compilation, record the exact failure and do not call the test successful.
+
+- [ ] **Step 3: Implement nearest-physical-hit classification**
+
+In `TryRaycast`, replace the `LayerMask.GetMask("Ground", "Targetable")` value with `Physics.DefaultRaycastLayers`:
+
+```csharp
+Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
+return Physics.Raycast(ray, out hit, Mathf.Infinity, Physics.DefaultRaycastLayers);
+```
+
+Do not add target line-of-sight, combat range, legality, or pursuit logic. `HandleMoveClick` keeps moving only when the nearest hit is `Ground`; `OnConfirm` keeps issuing `Attack(target)` only when the nearest hit is `Targetable`.
+
+- [ ] **Step 4: Verify GREEN and commit only task files**
+
+Run focused tests, then the full EditMode and PlayMode suites in the clean checkout when the Unity licensing client permits startup. Commit only the source/test files and their existing metadata:
+
+```bash
+git add Assets/Game/Scripts/Commands/PlayerCommandController.cs Assets/Tests/EditMode/PlayerCommandControllerTests.cs Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs Assets/Game/Scripts/Commands/PlayerCommandController.cs.meta Assets/Tests/EditMode/PlayerCommandControllerTests.cs.meta Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs.meta
+git commit -m "fix: respect attack-move click occlusion"
+```
+
 ## Plan self-review
 
-- Spec coverage: Tasks 1–2 cover Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, mandatory motor stop/no destination, state consumption, and the explicit Stage 3 ownership boundary.
+- Spec coverage: Tasks 1–3 cover Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, physical click occlusion, mandatory motor stop/no destination, commandless cancellation, state consumption, and the explicit Stage 3 ownership boundary.
 - Placeholder scan: no TODO/TBD or undefined follow-up behavior appears in an implementation step; Stage 3 is explicitly excluded rather than deferred inside this task.
 - Type consistency: `AttackNearestInRange()`, `UnitCommandKind.AttackNearestInRange`, `AttackMoveState.Confirm()`, and nullable `CurrentCommand` use the same names in tests and production steps.

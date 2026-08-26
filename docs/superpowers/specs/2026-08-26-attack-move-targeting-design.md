@@ -15,6 +15,8 @@
 
 在这个阶段，`Targetable` 仅表示可由鼠标选中，并不等价于战斗合法。输入层不能检查阵营、死亡、空地类别、无敌、攻击距离或障碍物；这些信息属于战斗域。
 
+输入层必须先取得鼠标射线命中的最近物理碰撞体（忽略 Unity 的 `Ignore Raycast` 层），再按该碰撞体是否位于 `Targetable` 层分类。墙体或其他普通碰撞体在前方时属于不可选中点击，不能穿透它们把后方的 `Targetable` 当作指定目标。
+
 ## 阶段边界
 
 阶段 2 的 `PlayerCommandController` 是意图生产者。它将最后一次发出的不可变 `UnitCommand` 保存为 `CurrentCommand`，供后续战斗层消费。它不调用未来的 `CombatUnit`、`TargetRules`、`TargetSelector` 或伤害代码。
