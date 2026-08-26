@@ -18,6 +18,8 @@ namespace ArknightsFrontline.Commands
 
         public GameObject CurrentTarget => currentTarget;
 
+        public bool IsAttackMoveArmed => attackMoveState.IsArmed;
+
         private void Awake()
         {
             motor = GetComponent<UnitMotor>();
@@ -73,7 +75,12 @@ namespace ArknightsFrontline.Commands
             }
         }
 
-        private void OnMoveClick(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        public void ArmAttackMove()
+        {
+            attackMoveState.Arm();
+        }
+
+        public void HandleMoveClick()
         {
             if (attackMoveState.IsArmed)
             {
@@ -98,9 +105,14 @@ namespace ArknightsFrontline.Commands
             }
         }
 
+        private void OnMoveClick(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            HandleMoveClick();
+        }
+
         private void OnAttackMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            attackMoveState.Arm();
+            ArmAttackMove();
         }
 
         private void OnConfirm(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -127,7 +139,10 @@ namespace ArknightsFrontline.Commands
 
         private void OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            attackMoveState.Cancel();
+            if (context.control.device is UnityEngine.InputSystem.Keyboard)
+            {
+                attackMoveState.Cancel();
+            }
         }
 
         private void OnCenterCamera(UnityEngine.InputSystem.InputAction.CallbackContext context)
