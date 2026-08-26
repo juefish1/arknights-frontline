@@ -263,7 +263,7 @@ public void ProjectileDamagesLegalTargetAtArrival()
 }
 ```
 
-Configure target defense as `2f`, and add a test where the target dies before arrival; it must not lose additional health.
+Configure target defense as `2f`, and add a test where the target dies before arrival; it must not lose additional health. Add a separate test where the attacker dies before arrival and the still-alive target remains at full health: this proves the impact path rechecks `TargetRules.IsLegal`, rather than relying on dead targets ignoring damage. Create two projectile objects and assert their renderers share one material, so every attack cannot allocate a new material.
 
 Required PlayMode test: create a configured player with the Task 2 components and a red ground target initially outside the player’s range. Issue `UnitCommand.Attack(target.gameObject)`, repeatedly call resolver/attack/projectile tick with `0.05f` until the target dies, and assert that the player first moved, then stopped in range, spawned visible projectile objects, and target `IsDead` becomes true.
 
@@ -275,11 +275,11 @@ Run `ProjectileTests|BasicCombatPlayModeTests|PlayerMovementPlayModeTests`; expe
 
 - [ ] **Step 3: Implement deterministic projectile and integrate it**
 
-`Projectile.Initialize` stores attacker, target, non-negative damage and positive speed (minimum `0.01f`), starts at attacker position, and sets a small visible sphere renderer. `Tick` moves in XZ toward the target's current position using `Vector3.MoveTowards`; on arrival, it applies `target.TakePhysicalDamage(Mathf.Max(1f, damage - target.Defense))` only if `TargetRules.IsLegal(attacker, target)` is still true, then marks `IsFinished` and destroys its object in runtime. If either unit is invalid/dead before arrival, it finishes without damage.
+`Projectile.Initialize` stores attacker, target, non-negative damage and positive speed (minimum `0.01f`), starts at attacker position, and sets a small visible sphere renderer. All projectiles share one cached yellow material; do not create a `Material` per projectile or leave runtime materials undisposed after projectile destruction. `Tick` moves in XZ toward the target's current position using `Vector3.MoveTowards`; on arrival, it applies `target.TakePhysicalDamage(Mathf.Max(1f, damage - target.Defense))` only if `TargetRules.IsLegal(attacker, target)` is still true, then marks `IsFinished` and destroys its object in runtime. If either unit is invalid/dead before arrival, it finishes without damage.
 
 `BasicAttackController` subscribes its own attack request path in `Awake` and creates a childless `GameObject("Projectile")` with `Projectile` at the attacker position, initializing damage with owner `AttackPower` and speed `16f`. Keep `AttackRequested` public for Task 2 tests.
 
-Extend `PrototypeSceneBuilder` to create a reusable yellow projectile material, add combat components/configuration to player (`Blue`, ground, max health `100`, attack `12`, defense `2`, range `6`, interval `0.5`, attacks ground and air), and create `TrainingDummy_Red` at `(20, 1, 0)` as a red cube in `Targetable` layer (`Red`, ground, max health `40`, attack `0`, defense `2`, range `0`, interval `0`, no attack capabilities). Do not add combat behavior to towers.
+Extend `PrototypeSceneBuilder` to add combat components/configuration to player (`Blue`, ground, max health `100`, attack `12`, defense `2`, range `6`, interval `0.5`, attacks ground and air), and create `TrainingDummy_Red` at `(20, 1, 0)` as a red cube in `Targetable` layer (`Red`, ground, max health `40`, attack `0`, defense `2`, range `0`, interval `0`, no attack capabilities). Do not add combat behavior to towers.
 
 - [ ] **Step 4: Run full GREEN and manual gate**
 
