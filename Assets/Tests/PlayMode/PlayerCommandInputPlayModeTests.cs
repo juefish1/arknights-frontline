@@ -101,6 +101,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
+            Physics.SyncTransforms();
             Press(keyboard.qKey);
             Press(mouse.leftButton);
             yield return null;
