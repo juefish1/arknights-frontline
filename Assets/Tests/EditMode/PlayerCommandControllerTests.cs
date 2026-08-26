@@ -20,6 +20,7 @@ namespace ArknightsFrontline.Tests.EditMode
             controller.HandleMoveClick();
 
             Assert.That(controller.IsAttackMoveArmed, Is.False);
+            Assert.That(controller.CurrentCommand.HasValue, Is.False);
             Object.DestroyImmediate(player);
         }
 

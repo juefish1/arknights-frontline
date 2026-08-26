@@ -215,9 +215,8 @@ namespace ArknightsFrontline.Commands
                 return false;
             }
 
-            int raycastLayers = LayerMask.GetMask("Ground", "Targetable");
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
-            return Physics.Raycast(ray, out hit, Mathf.Infinity, raycastLayers);
+            return Physics.Raycast(ray, out hit, Mathf.Infinity, Physics.DefaultRaycastLayers);
         }
 
         private void QueueMoveClick(InputControl control)
