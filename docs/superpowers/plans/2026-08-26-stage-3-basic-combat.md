@@ -111,7 +111,7 @@ git commit -m "feat: add combat units and target rules"
 
 **Interfaces:**
 - Consumes: Task 1 types, `PlayerCommandController.CurrentCommand`, `UnitMotor`, `UnitCommandKind`, and `UnitCommand.TargetObject`.
-- Produces: `CombatCommandResolver.Configure(CombatUnit, UnitMotor, PlayerCommandController, BasicAttackController)`, `Tick(float)`, `CurrentTarget`; `BasicAttackController.Configure(CombatUnit)`, `SetTarget(CombatUnit)`, `ClearTarget()`, `Tick(float)`, `AttackRequested`.
+- Produces: `CombatCommandResolver.Configure(CombatUnit, UnitMotor, PlayerCommandController, BasicAttackController)`, `Tick(float)`, `CurrentTarget`; `BasicAttackController.Configure(CombatUnit)`, `SetTarget(CombatUnit)`, `ClearTarget()`, `Tick(float)`, `CurrentTarget`, `AttackRequested`.
 
 - [ ] **Step 1: Write the failing resolver and attack-timer tests**
 
@@ -151,11 +151,23 @@ public void AttackTimerRaisesOneRequestPerIntervalForInRangeLegalTarget()
 
     Assert.That(requestCount, Is.EqualTo(2));
 }
+
+[Test]
+public void AttackTimerEmitsEveryPositiveIntervalCrossedByOneTick()
+{
+    attack.SetTarget(target);
+    attack.Tick(0f);
+    attack.Tick(1.2f);
+
+    Assert.That(requestCount, Is.EqualTo(3));
+}
 ```
 
-Add tests that invalidating a target clears it, `Move` and `Stop` clear attack state, and `AttackNearestInRange` picks the nearest legal target currently in range.
+Use an attack interval of `0.5f` in the second example: it proves the immediate request plus two elapsed interval requests. Add tests that invalidating a target clears it, `Move` and `Stop` clear attack state, and `AttackNearestInRange` picks the nearest legal target currently in range.
 
 Add a `PlayerCommandControllerTests` case that kills the player's `CombatUnit`, calls `controller.Issue(UnitCommand.Move(new Vector3(10f, 0f, 0f)))`, and verifies the motor remains stopped and `CurrentCommand` has not been replaced.
+
+Add a resolver death-subscription test that first resolves an in-range target, starts a motor destination, calls `owner.TakePhysicalDamage(100f)`, then immediately asserts `motor.IsMoving == false`, `resolver.CurrentTarget == null`, and `attack.CurrentTarget == null` before any subsequent `Tick`. Add a moving-target pursuit test: issue a distant `Attack(target)`, resolve once, move target from the X axis to `(8f, 0f, 8f)`, resolve again, tick the motor once, and assert the player has moved in positive Z as well as positive X. The existing `Move` test must tick the motor after resolver processing and assert it advances toward its Stage 2 destination.
 
 - [ ] **Step 2: Run focused EditMode tests and observe RED**
 
@@ -169,7 +181,7 @@ Run `CombatCommandResolverTests|BasicAttackControllerTests`; expected compilatio
 - for `AttackNearestInRange`, choose via `TargetSelector`; missing target calls `ClearCombatTarget`; found target stops motor and sets it for attack;
 - for `Move`, `Stop`, or absent command, call `ClearCombatTarget` without replacing a Move destination.
 
-`ClearCombatTarget` clears the stored target and calls `BasicAttackController.ClearTarget()`. `CombatCommandResolver.Tick` first checks its owner: when dead it stops the motor and clears attack state; it also subscribes to `CombatUnit.Died` to make that stop immediate. `BasicAttackController` subscribes to owner death and clears its target. `BasicAttackController.Tick` only accumulates time while its target remains legal and within the owner’s XZ `AttackRange`; on the first eligible tick and then every `AttackInterval`, it invokes `AttackRequested(owner, target)`. An interval of `0f` may emit at most one request per `Tick` call.
+`ClearCombatTarget` clears the stored target and calls `BasicAttackController.ClearTarget()`. `CombatCommandResolver.Tick` first checks its owner: when dead it stops the motor and clears attack state; it also subscribes to `CombatUnit.Died` to make that stop immediate. `BasicAttackController` exposes nullable `CurrentTarget`, subscribes to owner death and clears it immediately. `BasicAttackController.Tick` only accumulates time while its target remains legal and within the owner’s XZ `AttackRange`; on the first eligible tick it invokes `AttackRequested(owner, target)`. Thereafter, for every positive `AttackInterval` crossed by the non-negative `deltaTime`, it invokes another request and subtracts that interval from accumulated elapsed time; an interval of `0f` may emit at most one request per `Tick` call.
 
 Modify `PlayerCommandController.Issue` to look up an attached `CombatUnit` and return before assigning `CurrentCommand` or touching the motor when that unit is dead. This is the only Stage 3 dependency added to the player command component; it prevents new input from restarting a dead player.
 
