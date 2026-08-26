@@ -142,8 +142,51 @@ git add Assets/Game/Scripts/Commands/UnitCommand.cs Assets/Game/Scripts/Commands
 git commit -m "fix: record attack-move intents without ground movement"
 ```
 
+### Task 2: Cover selectable and no-hit Q-click classification
+
+**Files:**
+- Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
+
+**Interfaces:**
+- Consumes: `PlayerCommandController.CurrentCommand`, `CurrentTarget`, `UnitCommandKind.Attack`, `UnitCommandKind.AttackNearestInRange`, and real Input System mouse/keyboard devices.
+- Produces: regression coverage for both previously untested Q-plus-left branches; no production API change.
+
+- [ ] **Step 1: Add the two PlayMode regressions**
+
+Add a test named `QPlusSelectableClickIssuesAttackIntentForThatTarget` that creates a player already moving, the existing main camera, and a cube at the center ray intersection on layer `Targetable`. It presses `Q`, presses left mouse, yields one frame, then asserts:
+
+```csharp
+Assert.That(controller.IsAttackMoveArmed, Is.False);
+Assert.That(motor.IsMoving, Is.False);
+Assert.That(controller.CurrentTarget, Is.EqualTo(target));
+Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Attack));
+Assert.That(controller.CurrentCommand.Value.TargetObject, Is.EqualTo(target));
+```
+
+Add a test named `QPlusNoHitIssuesNearestInRangeIntentWithoutMovement` that creates a player already moving and the existing main camera but no `Ground` or `Targetable` collider. It presses `Q`, presses left mouse, yields one frame, then asserts the same disarmed/stopped/null-target conditions as the ground test and `CurrentCommand.Value.Kind == UnitCommandKind.AttackNearestInRange`.
+
+Both tests must use `InputSystem.AddDevice`, `Press`, and the existing camera helper; each must destroy every created player, camera, and target object.
+
+- [ ] **Step 2: Run the targeted PlayMode suite**
+
+Run:
+
+```bash
+UNITY_EDITOR_BIN="/Applications/Unity/Unity-6000.3.15f1/Unity.app/Contents/MacOS/Unity"
+"$UNITY_EDITOR_BIN" -batchmode -nographics -projectPath "$PWD" -runTests -testPlatform PlayMode -testFilter "ArknightsFrontline.Tests.PlayMode.PlayerCommandInputPlayModeTests" -testResults "$PWD/TestResults/attack-move-classification.xml" -logFile "$PWD/TestResults/attack-move-classification.log"
+```
+
+Expected: all `PlayerCommandInputPlayModeTests` pass. If Unity cannot initialize the local licensing client before compilation, record the exact environment error and do not represent it as a test pass.
+
+- [ ] **Step 3: Commit only the updated test and metadata**
+
+```bash
+git add Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs.meta
+git commit -m "test: cover attack-move click classification"
+```
+
 ## Plan self-review
 
-- Spec coverage: the plan covers Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, mandatory motor stop/no destination, state consumption, and the explicit Stage 3 ownership boundary.
+- Spec coverage: Tasks 1–2 cover Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, mandatory motor stop/no destination, state consumption, and the explicit Stage 3 ownership boundary.
 - Placeholder scan: no TODO/TBD or undefined follow-up behavior appears in an implementation step; Stage 3 is explicitly excluded rather than deferred inside this task.
 - Type consistency: `AttackNearestInRange()`, `UnitCommandKind.AttackNearestInRange`, `AttackMoveState.Confirm()`, and nullable `CurrentCommand` use the same names in tests and production steps.
