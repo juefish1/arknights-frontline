@@ -22,12 +22,15 @@ namespace ArknightsFrontline.Commands
         private bool hasPendingMoveClick;
         private bool pendingMoveClickWasArmed;
         private InputControl pendingMoveControl;
+        private bool isAttackMoveHeld;
 
         public GameObject CurrentTarget => currentTarget;
 
         public UnitCommand? CurrentCommand { get; private set; }
 
         public bool IsAttackMoveArmed => attackMoveState.IsArmed;
+
+        public bool IsAttackMoveHeld => isAttackMoveHeld;
 
         public InputActionAsset InputActions => input.Asset;
 
@@ -38,6 +41,7 @@ namespace ArknightsFrontline.Commands
             InputBindingStore.Load(input.Asset);
             input.MoveClick.performed += OnMoveClick;
             input.AttackMove.performed += OnAttackMove;
+            input.AttackMove.canceled += OnAttackMoveCanceled;
             input.Confirm.performed += OnConfirm;
             input.Stop.performed += OnStop;
             input.Cancel.performed += OnCancel;
@@ -51,6 +55,8 @@ namespace ArknightsFrontline.Commands
 
         private void OnDisable()
         {
+            isAttackMoveHeld = false;
+            attackMoveState.Cancel();
             input?.Gameplay.Disable();
         }
 
@@ -63,6 +69,7 @@ namespace ArknightsFrontline.Commands
 
             input.MoveClick.performed -= OnMoveClick;
             input.AttackMove.performed -= OnAttackMove;
+            input.AttackMove.canceled -= OnAttackMoveCanceled;
             input.Confirm.performed -= OnConfirm;
             input.Stop.performed -= OnStop;
             input.Cancel.performed -= OnCancel;
@@ -109,11 +116,11 @@ namespace ArknightsFrontline.Commands
         {
             if (attackMoveState.IsArmed)
             {
-                attackMoveState.Cancel();
+                CancelAttackMove();
                 return;
             }
 
-            if (!TryRaycast(out RaycastHit hit))
+            if (!TryGetPointerHit(out RaycastHit hit))
             {
                 return;
             }
@@ -137,18 +144,25 @@ namespace ArknightsFrontline.Commands
 
         private void OnAttackMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            isAttackMoveHeld = true;
             ArmAttackMove();
+        }
+
+        private void OnAttackMoveCanceled(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            CancelAttackMove();
         }
 
         private void OnConfirm(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            if (!attackMoveState.IsArmed)
+            if (!IsAttackMoveArmed || !IsAttackMoveHeld)
             {
                 return;
             }
 
             attackMoveState.Confirm();
-            if (TryRaycast(out RaycastHit hit)
+            isAttackMoveHeld = false;
+            if (TryGetPointerHit(out RaycastHit hit)
                 && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
             {
                 Issue(UnitCommand.Attack(hit.collider.gameObject));
@@ -170,7 +184,7 @@ namespace ArknightsFrontline.Commands
                 return;
             }
 
-            attackMoveState.Cancel();
+            CancelAttackMove();
             consumedCancelControl = context.control;
             consumedCancelFrame = Time.frameCount;
             if (hasPendingMoveClick && pendingMoveControl == context.control)
@@ -191,7 +205,7 @@ namespace ArknightsFrontline.Commands
             pendingMoveControl = null;
             if (wasArmed)
             {
-                attackMoveState.Cancel();
+                CancelAttackMove();
                 return;
             }
 
@@ -213,7 +227,7 @@ namespace ArknightsFrontline.Commands
             }
         }
 
-        private bool TryRaycast(out RaycastHit hit)
+        public bool TryGetPointerHit(out RaycastHit hit)
         {
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             if (mainCamera == null)
@@ -224,6 +238,12 @@ namespace ArknightsFrontline.Commands
 
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
             return Physics.Raycast(ray, out hit, Mathf.Infinity, Physics.DefaultRaycastLayers);
+        }
+
+        private void CancelAttackMove()
+        {
+            isAttackMoveHeld = false;
+            attackMoveState.Cancel();
         }
 
         private void QueueMoveClick(InputControl control)

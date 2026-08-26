@@ -13,6 +13,48 @@ namespace ArknightsFrontline.Tests.PlayMode
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
         [UnityTest]
+        public IEnumerator ReleasingQClearsAttackMoveHoldState()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            PlayerCommandController controller = CreateControllerAt(Vector3.zero, out _, out GameObject player);
+
+            Press(keyboard.qKey);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.True);
+            Assert.That(controller.IsAttackMoveHeld, Is.True);
+
+            Release(keyboard.qKey);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.False);
+            Assert.That(controller.IsAttackMoveHeld, Is.False);
+            Object.Destroy(player);
+        }
+
+        [UnityTest]
+        public IEnumerator ReleasingQPreventsLaterLeftClickFromIssuingAttackIntent()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(Vector3.zero, out _, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            target.layer = LayerMask.NameToLayer("Targetable");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            yield return null;
+            Release(keyboard.qKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
         public IEnumerator DefaultSharedRightClickCancelsArmedCommandWithoutMoving()
         {
             Mouse mouse = InputSystem.AddDevice<Mouse>();
