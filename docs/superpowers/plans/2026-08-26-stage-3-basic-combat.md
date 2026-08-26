@@ -174,13 +174,37 @@ public void CatchUpStopsWhenAnAttackCallbackInvalidatesTarget()
     Assert.That(requestCount, Is.EqualTo(2));
     Assert.That(attack.CurrentTarget, Is.Null);
 }
+
+[Test]
+public void InitialRequestClearsTargetWhenCallbackInvalidatesIt()
+{
+    attack.SetTarget(target);
+    attack.AttackRequested += (_, requestedTarget) => requestedTarget.TakePhysicalDamage(100f);
+
+    attack.Tick(0f);
+
+    Assert.That(attack.CurrentTarget, Is.Null);
+}
+
+[Test]
+public void ZeroIntervalRequestClearsTargetWhenCallbackInvalidatesIt()
+{
+    owner.Configure(TeamId.Blue, Altitude.Ground, 100f, 10f, 0f, 5f, 0f, true, false);
+    attack.SetTarget(target);
+    attack.Tick(0f);
+    attack.AttackRequested += (_, requestedTarget) => requestedTarget.TakePhysicalDamage(100f);
+
+    attack.Tick(0f);
+
+    Assert.That(attack.CurrentTarget, Is.Null);
+}
 ```
 
 Use an attack interval of `0.5f` in the second example: it proves the immediate request plus two elapsed interval requests. Add tests that invalidating a target clears it, `Move` and `Stop` clear attack state, and `AttackNearestInRange` picks the nearest legal target currently in range.
 
 Add a `PlayerCommandControllerTests` case that kills the player's `CombatUnit`, calls `controller.Issue(UnitCommand.Move(new Vector3(10f, 0f, 0f)))`, and verifies the motor remains stopped and `CurrentCommand` has not been replaced.
 
-The callback-invalidating test uses a target with health `10f` and an attack interval `0.5f`; after the initial request, exactly the first catch-up request runs and kills the target, so no second catch-up request may occur. Add a resolver death-subscription test that first resolves an in-range target, starts a motor destination, calls `owner.TakePhysicalDamage(100f)`, then immediately asserts `motor.IsMoving == false`, `resolver.CurrentTarget == null`, and `attack.CurrentTarget == null` before any subsequent `Tick`. Add a direct `BasicAttackController` death-subscription assertion: set a target, kill its owner, and assert `attack.CurrentTarget == null` before calling `Tick`. Add a moving-target pursuit test: issue a distant `Attack(target)`, resolve once, move target from the X axis to `(8f, 0f, 8f)`, resolve again, tick the motor once, and assert the player has moved in positive Z as well as positive X. The existing `Move` test must issue `Move(new Vector3(10f, 0f, 5f))`, tick the motor after resolver processing, and assert it advances in both positive X and positive Z toward that exact Stage 2 destination.
+The callback-invalidating test uses a target with health `10f` and an attack interval `0.5f`; after the initial request, exactly the first catch-up request runs and kills the target, so no second catch-up request may occur. Repeat the same immediate-clear assertion for both the initial request and a zero-interval repeat request after a previously valid initial request. Add a resolver death-subscription test that first resolves an in-range target, starts a motor destination, calls `owner.TakePhysicalDamage(100f)`, then immediately asserts `motor.IsMoving == false`, `resolver.CurrentTarget == null`, and `attack.CurrentTarget == null` before any subsequent `Tick`. Add a direct `BasicAttackController` death-subscription assertion: set a target, kill its owner, and assert `attack.CurrentTarget == null` before calling `Tick`. Add a moving-target pursuit test: issue a distant `Attack(target)`, resolve once, move target from the X axis to `(8f, 0f, 8f)`, resolve again, tick the motor once, and assert the player has moved in positive Z as well as positive X. The existing `Move` test must issue `Move(new Vector3(10f, 0f, 5f))`, tick the motor after resolver processing, and assert it advances in both positive X and positive Z toward that exact Stage 2 destination.
 
 - [ ] **Step 2: Run focused EditMode tests and observe RED**
 
@@ -194,7 +218,7 @@ Run `CombatCommandResolverTests|BasicAttackControllerTests`; expected compilatio
 - for `AttackNearestInRange`, choose via `TargetSelector`; missing target calls `ClearCombatTarget`; found target stops motor and sets it for attack;
 - for `Move`, `Stop`, or absent command, call `ClearCombatTarget` without replacing a Move destination.
 
-`ClearCombatTarget` clears the stored target and calls `BasicAttackController.ClearTarget()`. `CombatCommandResolver.Tick` first checks its owner: when dead it stops the motor and clears attack state; it also subscribes to `CombatUnit.Died` to make that stop immediate. `BasicAttackController` exposes nullable `CurrentTarget`, subscribes to owner death and clears it immediately. `BasicAttackController.Tick` only accumulates time while its target remains legal and within the owner’s XZ `AttackRange`; on the first eligible tick it invokes `AttackRequested(owner, target)`. Thereafter, for every positive `AttackInterval` crossed by the non-negative `deltaTime`, it invokes another request and subtracts that interval from accumulated elapsed time. After each event invocation it must re-run its legal/in-range check; if the callback killed, changed team/class, or moved the target out of range, it clears the target and stops the loop. An interval of `0f` may emit at most one request per `Tick` call.
+`ClearCombatTarget` clears the stored target and calls `BasicAttackController.ClearTarget()`. `CombatCommandResolver.Tick` first checks its owner: when dead it stops the motor and clears attack state; it also subscribes to `CombatUnit.Died` to make that stop immediate. `BasicAttackController` exposes nullable `CurrentTarget`, subscribes to owner death and clears it immediately. Every `AttackRequested` invocation—initial request, zero-interval request, and positive-interval catch-up request—must pass through one helper that re-runs the legal/in-range check afterward. If the callback killed, changed team/class, or moved the target out of range, the helper clears the target and reports failure; positive-interval catch-up then stops its loop. An interval of `0f` may emit at most one request per `Tick` call.
 
 Modify `PlayerCommandController.Issue` to look up an attached `CombatUnit` and return before assigning `CurrentCommand` or touching the motor when that unit is dead. This is the only Stage 3 dependency added to the player command component; it prevents new input from restarting a dead player.
 
