@@ -3,6 +3,7 @@ using ArknightsFrontline.Camera;
 using ArknightsFrontline.Input;
 using ArknightsFrontline.Movement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace ArknightsFrontline.Commands
 {
@@ -15,15 +16,23 @@ namespace ArknightsFrontline.Commands
         private GameInputActions input;
         private UnitMotor motor;
         private GameObject currentTarget;
+        private InputControl consumedCancelControl;
+        private int consumedCancelFrame = -1;
+        private bool hasPendingMoveClick;
+        private bool pendingMoveClickWasArmed;
+        private InputControl pendingMoveControl;
 
         public GameObject CurrentTarget => currentTarget;
 
         public bool IsAttackMoveArmed => attackMoveState.IsArmed;
 
+        public InputActionAsset InputActions => input.Asset;
+
         private void Awake()
         {
             motor = GetComponent<UnitMotor>();
             input = new GameInputActions();
+            InputBindingStore.Load(input.Asset);
             input.MoveClick.performed += OnMoveClick;
             input.AttackMove.performed += OnAttackMove;
             input.Confirm.performed += OnConfirm;
@@ -64,12 +73,15 @@ namespace ArknightsFrontline.Commands
             {
                 case UnitCommandKind.Move:
                 case UnitCommandKind.AttackMove:
+                    currentTarget = null;
                     motor.SetDestination(command.Destination);
                     break;
                 case UnitCommandKind.Attack:
+                    motor.Stop();
                     currentTarget = command.TargetObject;
                     break;
                 case UnitCommandKind.Stop:
+                    currentTarget = null;
                     motor.Stop();
                     break;
             }
@@ -107,7 +119,7 @@ namespace ArknightsFrontline.Commands
 
         private void OnMoveClick(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            HandleMoveClick();
+            QueueMoveClick(context.control);
         }
 
         private void OnAttackMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -139,10 +151,37 @@ namespace ArknightsFrontline.Commands
 
         private void OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            if (context.control.device is UnityEngine.InputSystem.Keyboard)
+            if (!attackMoveState.IsArmed)
+            {
+                return;
+            }
+
+            attackMoveState.Cancel();
+            consumedCancelControl = context.control;
+            consumedCancelFrame = Time.frameCount;
+            if (hasPendingMoveClick && pendingMoveControl == context.control)
+            {
+                hasPendingMoveClick = false;
+            }
+        }
+
+        private void Update()
+        {
+            if (!hasPendingMoveClick)
+            {
+                return;
+            }
+
+            bool wasArmed = pendingMoveClickWasArmed;
+            hasPendingMoveClick = false;
+            pendingMoveControl = null;
+            if (wasArmed)
             {
                 attackMoveState.Cancel();
+                return;
             }
+
+            HandleMoveClick();
         }
 
         private void OnCenterCamera(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -172,6 +211,18 @@ namespace ArknightsFrontline.Commands
             int raycastLayers = LayerMask.GetMask("Ground", "Targetable");
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
             return Physics.Raycast(ray, out hit, Mathf.Infinity, raycastLayers);
+        }
+
+        private void QueueMoveClick(InputControl control)
+        {
+            if (consumedCancelFrame == Time.frameCount && consumedCancelControl == control)
+            {
+                return;
+            }
+
+            hasPendingMoveClick = true;
+            pendingMoveClickWasArmed = attackMoveState.IsArmed;
+            pendingMoveControl = control;
         }
     }
 }

@@ -2,7 +2,9 @@
   "name": "ArknightsFrontline.PlayModeTests",
   "rootNamespace": "ArknightsFrontline.Tests.PlayMode",
   "references": [
-    "ArknightsFrontline.Runtime"
+    "ArknightsFrontline.Runtime",
+    "Unity.InputSystem",
+    "Unity.InputSystem.TestFramework"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
