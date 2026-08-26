@@ -6,29 +6,45 @@ namespace ArknightsFrontline.Combat
 {
     public sealed class CombatUnit : MonoBehaviour
     {
-        public TeamId Team { get; private set; }
+        [SerializeField] private TeamId team;
+        [SerializeField] private Altitude altitude;
+        [SerializeField] private float maxHealth;
+        [SerializeField] private float currentHealth;
+        [SerializeField] private float attackPower;
+        [SerializeField] private float defense;
+        [SerializeField] private float attackRange;
+        [SerializeField] private float attackInterval;
+        [SerializeField] private bool canAttackGround;
+        [SerializeField] private bool canAttackAir;
 
-        public Altitude Altitude { get; private set; }
+        public TeamId Team => team;
 
-        public float MaxHealth { get; private set; }
+        public Altitude Altitude => altitude;
 
-        public float CurrentHealth { get; private set; }
+        public float MaxHealth => maxHealth;
 
-        public float AttackPower { get; private set; }
+        public float CurrentHealth => currentHealth;
 
-        public float Defense { get; private set; }
+        public float AttackPower => attackPower;
 
-        public float AttackRange { get; private set; }
+        public float Defense => defense;
 
-        public float AttackInterval { get; private set; }
+        public float AttackRange => attackRange;
 
-        public bool CanAttackGround { get; private set; }
+        public float AttackInterval => attackInterval;
 
-        public bool CanAttackAir { get; private set; }
+        public bool CanAttackGround => canAttackGround;
 
-        public bool IsDead => CurrentHealth <= 0f;
+        public bool CanAttackAir => canAttackAir;
+
+        public bool IsDead => currentHealth <= 0f;
 
         public event Action<CombatUnit> Died;
+
+        private void Awake()
+        {
+            currentHealth = maxHealth;
+        }
 
         public void Configure(
             TeamId team,
@@ -41,16 +57,16 @@ namespace ArknightsFrontline.Combat
             bool canAttackGround,
             bool canAttackAir)
         {
-            Team = team;
-            Altitude = altitude;
-            MaxHealth = Mathf.Max(1f, maxHealth);
-            CurrentHealth = MaxHealth;
-            AttackPower = attackPower;
-            Defense = Mathf.Max(0f, defense);
-            AttackRange = Mathf.Max(0f, attackRange);
-            AttackInterval = Mathf.Max(0f, attackInterval);
-            CanAttackGround = canAttackGround;
-            CanAttackAir = canAttackAir;
+            this.team = team;
+            this.altitude = altitude;
+            this.maxHealth = Mathf.Max(1f, maxHealth);
+            currentHealth = this.maxHealth;
+            this.attackPower = attackPower;
+            this.defense = Mathf.Max(0f, defense);
+            this.attackRange = Mathf.Max(0f, attackRange);
+            this.attackInterval = Mathf.Max(0f, attackInterval);
+            this.canAttackGround = canAttackGround;
+            this.canAttackAir = canAttackAir;
         }
 
         public void TakePhysicalDamage(float damage)
@@ -60,7 +76,7 @@ namespace ArknightsFrontline.Combat
                 return;
             }
 
-            CurrentHealth = Mathf.Max(0f, CurrentHealth - Mathf.Max(0f, damage));
+            currentHealth = Mathf.Max(0f, currentHealth - Mathf.Max(0f, damage));
             if (IsDead)
             {
                 Died?.Invoke(this);
