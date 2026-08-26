@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Camera;
+using ArknightsFrontline.Commands;
+using ArknightsFrontline.Movement;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -25,6 +27,8 @@ namespace ArknightsFrontline.Editor
             Material blueMaterial = GetOrCreateMaterial("BlueArena.mat", new Color(0.1f, 0.35f, 0.9f));
             Material redMaterial = GetOrCreateMaterial("RedArena.mat", new Color(0.9f, 0.15f, 0.15f));
             Material laneMaterial = GetOrCreateMaterial("Lane.mat", new Color(0.25f, 0.25f, 0.25f));
+            int groundLayer = EnsureLayer("Ground");
+            int targetableLayer = EnsureLayer("Targetable");
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -32,14 +36,16 @@ namespace ArknightsFrontline.Editor
             GameObject arenaRoot = new GameObject("ArenaBootstrap");
             ArenaBootstrap arena = arenaRoot.AddComponent<ArenaBootstrap>();
 
-            CreateLane(arenaRoot.transform, laneMaterial);
-            Transform blueTower = CreateTower(arenaRoot.transform, "BlueTower", layout.BlueTower, blueMaterial);
-            Transform redTower = CreateTower(arenaRoot.transform, "RedTower", layout.RedTower, redMaterial);
+            CreateLane(arenaRoot.transform, laneMaterial, groundLayer);
+            Transform blueTower = CreateTower(arenaRoot.transform, "BlueTower", layout.BlueTower, blueMaterial, targetableLayer);
+            Transform redTower = CreateTower(arenaRoot.transform, "RedTower", layout.RedTower, redMaterial, targetableLayer);
             arena.AssignTowers(blueTower, redTower);
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
+            GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial);
             CreateDirectionalLight();
-            CreateMainCamera();
+            MobaCameraController cameraController = CreateMainCamera();
+            cameraController.SetCenteringTarget(player.transform);
             CreateUiRoots();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -47,16 +53,22 @@ namespace ArknightsFrontline.Editor
             AssetDatabase.SaveAssets();
         }
 
-        private static void CreateLane(Transform parent, Material material)
+        private static void CreateLane(Transform parent, Material material, int groundLayer)
         {
             GameObject lane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             lane.name = "Lane";
             lane.transform.SetParent(parent, false);
             lane.transform.localScale = new Vector3(10f, 1f, 2.4f);
+            lane.layer = groundLayer;
             lane.GetComponent<Renderer>().sharedMaterial = material;
         }
 
-        private static Transform CreateTower(Transform parent, string towerName, Vector3 position, Material material)
+        private static Transform CreateTower(
+            Transform parent,
+            string towerName,
+            Vector3 position,
+            Material material,
+            int targetableLayer)
         {
             GameObject tower = new GameObject(towerName);
             tower.transform.SetParent(parent, false);
@@ -67,6 +79,7 @@ namespace ArknightsFrontline.Editor
             visual.transform.SetParent(tower.transform, false);
             visual.transform.localPosition = new Vector3(0f, 3f, 0f);
             visual.transform.localScale = new Vector3(3f, 6f, 3f);
+            visual.layer = targetableLayer;
             visual.GetComponent<Renderer>().sharedMaterial = material;
 
             return tower.transform;
@@ -82,6 +95,20 @@ namespace ArknightsFrontline.Editor
             marker.GetComponent<Renderer>().sharedMaterial = material;
         }
 
+        private static GameObject CreatePlayer(Transform parent, Vector3 deployment, Material material)
+        {
+            GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            player.name = "Player_Exusiai";
+            player.transform.SetParent(parent, false);
+            player.transform.position = deployment + Vector3.up;
+            player.GetComponent<Renderer>().sharedMaterial = material;
+
+            UnitMotor motor = player.AddComponent<UnitMotor>();
+            motor.Configure(5f, ArenaLayout.CreateDefault());
+            player.AddComponent<PlayerCommandController>();
+            return player;
+        }
+
         private static void CreateDirectionalLight()
         {
             GameObject lightObject = new GameObject("Directional Light");
@@ -91,7 +118,7 @@ namespace ArknightsFrontline.Editor
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
         }
 
-        private static void CreateMainCamera()
+        private static MobaCameraController CreateMainCamera()
         {
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -100,7 +127,7 @@ namespace ArknightsFrontline.Editor
                 Quaternion.Euler(50f, 0f, 0f));
             UnityEngine.Camera camera = cameraObject.AddComponent<UnityEngine.Camera>();
             camera.orthographic = false;
-            cameraObject.AddComponent<MobaCameraController>();
+            return cameraObject.AddComponent<MobaCameraController>();
         }
 
         private static void CreateUiRoots()
@@ -141,6 +168,34 @@ namespace ArknightsFrontline.Editor
             scenes.RemoveAll(scene => scene.path == ScenePath);
             scenes.Add(new EditorBuildSettingsScene(ScenePath, true));
             EditorBuildSettings.scenes = scenes.ToArray();
+        }
+
+        private static int EnsureLayer(string layerName)
+        {
+            SerializedObject tagManager = new SerializedObject(
+                AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            SerializedProperty layers = tagManager.FindProperty("layers");
+            for (int index = 8; index < layers.arraySize; index++)
+            {
+                SerializedProperty layer = layers.GetArrayElementAtIndex(index);
+                if (layer.stringValue == layerName)
+                {
+                    return index;
+                }
+            }
+
+            for (int index = 8; index < layers.arraySize; index++)
+            {
+                SerializedProperty layer = layers.GetArrayElementAtIndex(index);
+                if (string.IsNullOrEmpty(layer.stringValue))
+                {
+                    layer.stringValue = layerName;
+                    tagManager.ApplyModifiedPropertiesWithoutUndo();
+                    return index;
+                }
+            }
+
+            throw new UnityException("No user layers are available for " + layerName + ".");
         }
 
         private static void EnsureFolder(string parent, string folderName)

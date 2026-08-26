@@ -14,7 +14,10 @@ namespace ArknightsFrontline.Camera
         private readonly ArenaLayout layout = ArenaLayout.CreateDefault();
         private readonly Vector3 cameraOffset = new Vector3(0f, 35f, -28f);
 
+        [SerializeField] private Transform centeringTarget;
         private Vector3 focusPosition;
+
+        public Transform CenteringTarget => centeringTarget;
 
         private void Awake()
         {
@@ -55,6 +58,16 @@ namespace ArknightsFrontline.Camera
 
             focusPosition = layout.Clamp(target.position);
             ApplyFocus();
+        }
+
+        public void SetCenteringTarget(Transform target)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            centeringTarget = target;
         }
 
         public static Vector3 CalculateEdgePanVelocity(Vector2 pointerPosition, Vector2 screenSize)
