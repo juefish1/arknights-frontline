@@ -90,7 +90,7 @@ namespace ArknightsFrontline.Tests.EditMode
             resolver.Tick(0f);
 
             controller.Issue(kind == UnitCommandKind.Move
-                ? UnitCommand.Move(new Vector3(10f, 0f, 0f))
+                ? UnitCommand.Move(new Vector3(10f, 0f, 5f))
                 : UnitCommand.Stop());
             resolver.Tick(0f);
             Vector3 positionBeforeMotorTick = motor.transform.position;
@@ -103,6 +103,7 @@ namespace ArknightsFrontline.Tests.EditMode
             if (kind == UnitCommandKind.Move)
             {
                 Assert.That(motor.transform.position.x, Is.GreaterThan(positionBeforeMotorTick.x));
+                Assert.That(motor.transform.position.z, Is.GreaterThan(positionBeforeMotorTick.z));
             }
         }
 

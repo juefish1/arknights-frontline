@@ -106,6 +106,11 @@ namespace ArknightsFrontline.Combat
             {
                 elapsedSinceAttack -= interval;
                 AttackRequested?.Invoke(owner, target);
+                if (!HasLegalTargetInRange())
+                {
+                    ClearTarget();
+                    break;
+                }
             }
         }
 
