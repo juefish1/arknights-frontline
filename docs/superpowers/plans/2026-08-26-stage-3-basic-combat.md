@@ -111,11 +111,11 @@ git commit -m "feat: add combat units and target rules"
 
 **Interfaces:**
 - Consumes: Task 1 types, `PlayerCommandController.CurrentCommand`, `UnitMotor`, `UnitCommandKind`, and `UnitCommand.TargetObject`.
-- Produces: `CombatCommandResolver.Tick(float)`, `CurrentTarget`; `BasicAttackController.SetTarget(CombatUnit)`, `ClearTarget()`, `Tick(float)`, `AttackRequested`.
+- Produces: `CombatCommandResolver.Configure(CombatUnit, UnitMotor, PlayerCommandController, BasicAttackController)`, `Tick(float)`, `CurrentTarget`; `BasicAttackController.Configure(CombatUnit)`, `SetTarget(CombatUnit)`, `ClearTarget()`, `Tick(float)`, `AttackRequested`.
 
 - [ ] **Step 1: Write the failing resolver and attack-timer tests**
 
-Test a player object with `UnitMotor`, `PlayerCommandController`, `CombatUnit`, `CombatCommandResolver`, and `BasicAttackController` configured through public test setup methods. Required behaviors:
+Test a player object with `UnitMotor`, `PlayerCommandController`, `CombatUnit`, `CombatCommandResolver`, and `BasicAttackController`. Call `attack.Configure(playerUnit)` followed by `resolver.Configure(playerUnit, motor, controller, attack)` after every component exists; runtime `Awake` may call the same configuration with `GetComponent` dependencies. Required behaviors:
 
 ```csharp
 [Test]
@@ -163,7 +163,7 @@ Run `CombatCommandResolverTests|BasicAttackControllerTests`; expected compilatio
 
 - [ ] **Step 3: Implement resolver and attack timing**
 
-`CombatCommandResolver` requires `CombatUnit`, `UnitMotor`, `PlayerCommandController`, and `BasicAttackController`. On every `Tick`, inspect `CurrentCommand`:
+`CombatCommandResolver.Configure(CombatUnit owner, UnitMotor unitMotor, PlayerCommandController commandSource, BasicAttackController attackController)` stores non-null dependencies; `Awake` obtains the same four components and calls `Configure` when present. `BasicAttackController.Configure(CombatUnit owner)` stores the non-null owner; `Awake` calls it with `GetComponent<CombatUnit>()` when present. On every resolver `Tick`, inspect `CurrentCommand`:
 
 - for `Attack`, resolve `TargetObject.GetComponent<CombatUnit>()`; invalid targets call `ClearCombatTarget`; valid out-of-range targets call `motor.SetDestination(target.transform.position)` and clear `BasicAttackController`; valid in-range targets call `motor.Stop()`, store target, and `SetTarget(target)`;
 - for `AttackNearestInRange`, choose via `TargetSelector`; missing target calls `ClearCombatTarget`; found target stops motor and sets it for attack;
