@@ -10,6 +10,8 @@ namespace ArknightsFrontline.Combat
         private float elapsedSinceAttack;
         private bool hasRequestedFirstAttack;
 
+        public CombatUnit CurrentTarget => target;
+
         public event Action<CombatUnit, CombatUnit> AttackRequested;
 
         private void Awake()
@@ -100,13 +102,11 @@ namespace ArknightsFrontline.Combat
             }
 
             elapsedSinceAttack += Mathf.Max(0f, deltaTime);
-            if (elapsedSinceAttack < interval)
+            while (elapsedSinceAttack >= interval)
             {
-                return;
+                elapsedSinceAttack -= interval;
+                AttackRequested?.Invoke(owner, target);
             }
-
-            elapsedSinceAttack -= interval;
-            AttackRequested?.Invoke(owner, target);
         }
 
         private bool HasLegalTargetInRange()

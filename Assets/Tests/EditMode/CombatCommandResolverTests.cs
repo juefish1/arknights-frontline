@@ -93,11 +93,17 @@ namespace ArknightsFrontline.Tests.EditMode
                 ? UnitCommand.Move(new Vector3(10f, 0f, 0f))
                 : UnitCommand.Stop());
             resolver.Tick(0f);
+            Vector3 positionBeforeMotorTick = motor.transform.position;
+            motor.Tick(0.1f);
             int requestCount = CountAttackRequests(attack);
 
             Assert.That(resolver.CurrentTarget, Is.Null);
             Assert.That(requestCount, Is.EqualTo(0));
             Assert.That(motor.IsMoving, Is.EqualTo(kind == UnitCommandKind.Move));
+            if (kind == UnitCommandKind.Move)
+            {
+                Assert.That(motor.transform.position.x, Is.GreaterThan(positionBeforeMotorTick.x));
+            }
         }
 
         [Test]
@@ -115,6 +121,41 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(resolver.CurrentTarget, Is.EqualTo(nearest));
             Assert.That(resolver.CurrentTarget, Is.Not.EqualTo(farther));
             Assert.That(motor.IsMoving, Is.False);
+        }
+
+        [Test]
+        public void OwnerDeathImmediatelyStopsMotorAndClearsResolverAndAttackTargets()
+        {
+            CreatePlayer(out GameObject player, out UnitMotor motor, out PlayerCommandController controller,
+                out CombatCommandResolver resolver, out BasicAttackController attack);
+            CombatUnit owner = player.GetComponent<CombatUnit>();
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, false);
+            controller.Issue(UnitCommand.Attack(target.gameObject));
+            resolver.Tick(0f);
+            motor.SetDestination(new Vector3(10f, 0f, 0f));
+
+            owner.TakePhysicalDamage(100f);
+
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(resolver.CurrentTarget, Is.Null);
+            Assert.That(attack.CurrentTarget, Is.Null);
+        }
+
+        [Test]
+        public void PursuitRefreshesDestinationWhenTargetMoves()
+        {
+            CreatePlayer(out GameObject player, out UnitMotor motor, out PlayerCommandController controller,
+                out CombatCommandResolver resolver, out _);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(8f, 0f, 0f), 1f, false);
+            controller.Issue(UnitCommand.Attack(target.gameObject));
+            resolver.Tick(0f);
+            target.transform.position = new Vector3(8f, 0f, 8f);
+
+            resolver.Tick(0f);
+            motor.Tick(0.1f);
+
+            Assert.That(player.transform.position.x, Is.GreaterThan(0f));
+            Assert.That(player.transform.position.z, Is.GreaterThan(0f));
         }
 
         private void CreatePlayer(

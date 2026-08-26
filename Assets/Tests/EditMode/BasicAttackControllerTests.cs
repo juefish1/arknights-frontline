@@ -40,6 +40,23 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void AttackTimerEmitsEveryPositiveIntervalCrossedByOneTick()
+        {
+            CombatUnit player = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, 1f, false);
+            BasicAttackController attack = player.gameObject.AddComponent<BasicAttackController>();
+            attack.Configure(player);
+            int requestCount = 0;
+            attack.AttackRequested += (_, _) => requestCount++;
+
+            attack.SetTarget(target);
+            attack.Tick(0f);
+            attack.Tick(1.2f);
+
+            Assert.That(requestCount, Is.EqualTo(3));
+        }
+
+        [Test]
         public void InvalidTargetStopsFutureAttackRequests()
         {
             CombatUnit player = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
