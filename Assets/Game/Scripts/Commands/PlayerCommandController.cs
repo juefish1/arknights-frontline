@@ -24,6 +24,8 @@ namespace ArknightsFrontline.Commands
 
         public GameObject CurrentTarget => currentTarget;
 
+        public UnitCommand? CurrentCommand { get; private set; }
+
         public bool IsAttackMoveArmed => attackMoveState.IsArmed;
 
         public InputActionAsset InputActions => input.Asset;
@@ -69,16 +71,20 @@ namespace ArknightsFrontline.Commands
 
         public void Issue(UnitCommand command)
         {
+            CurrentCommand = command;
             switch (command.Kind)
             {
                 case UnitCommandKind.Move:
-                case UnitCommandKind.AttackMove:
                     currentTarget = null;
                     motor.SetDestination(command.Destination);
                     break;
                 case UnitCommandKind.Attack:
                     motor.Stop();
                     currentTarget = command.TargetObject;
+                    break;
+                case UnitCommandKind.AttackNearestInRange:
+                    currentTarget = null;
+                    motor.Stop();
                     break;
                 case UnitCommandKind.Stop:
                     currentTarget = null;
@@ -129,19 +135,20 @@ namespace ArknightsFrontline.Commands
 
         private void OnConfirm(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            if (!attackMoveState.IsArmed || !TryRaycast(out RaycastHit hit))
+            if (!attackMoveState.IsArmed)
             {
                 return;
             }
 
-            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground"))
+            attackMoveState.Confirm();
+            if (TryRaycast(out RaycastHit hit)
+                && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
             {
+                Issue(UnitCommand.Attack(hit.collider.gameObject));
                 return;
             }
 
-            Vector3 destination = layout.Clamp(hit.point);
-            attackMoveState.Confirm(destination);
-            Issue(UnitCommand.AttackMove(destination));
+            Issue(UnitCommand.AttackNearestInRange());
         }
 
         private void OnStop(UnityEngine.InputSystem.InputAction.CallbackContext context)

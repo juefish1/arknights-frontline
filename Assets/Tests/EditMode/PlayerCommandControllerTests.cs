@@ -54,17 +54,17 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void AttackToAttackMoveClearsTargetAndStartsMotor()
+        public void MoveToAttackNearestInRangeStopsMotorAndClearsTarget()
         {
             PlayerCommandController controller = CreateController(out UnitMotor motor, out GameObject player);
-            GameObject target = new GameObject("Target");
-            controller.Issue(UnitCommand.Attack(target));
+            controller.Issue(UnitCommand.Move(new Vector3(10f, 0f, 0f)));
 
-            controller.Issue(UnitCommand.AttackMove(new Vector3(10f, 0f, 0f)));
+            controller.Issue(UnitCommand.AttackNearestInRange());
 
             Assert.That(controller.CurrentTarget, Is.Null);
-            Assert.That(motor.IsMoving, Is.True);
-            Object.DestroyImmediate(target);
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand.HasValue, Is.True);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
             Object.DestroyImmediate(player);
         }
 

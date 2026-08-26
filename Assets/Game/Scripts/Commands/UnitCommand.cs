@@ -7,7 +7,7 @@ namespace ArknightsFrontline.Commands
     {
         Move,
         Attack,
-        AttackMove,
+        AttackNearestInRange,
         Stop
     }
 
@@ -41,9 +41,9 @@ namespace ArknightsFrontline.Commands
             return new UnitCommand(UnitCommandKind.Attack, default, targetObject);
         }
 
-        public static UnitCommand AttackMove(Vector3 destination)
+        public static UnitCommand AttackNearestInRange()
         {
-            return new UnitCommand(UnitCommandKind.AttackMove, destination, null);
+            return new UnitCommand(UnitCommandKind.AttackNearestInRange, default, null);
         }
 
         public static UnitCommand Stop()

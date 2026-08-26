@@ -34,6 +34,31 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator QPlusGroundClickIssuesNearestInRangeIntentWithoutMovement()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            controller.Issue(UnitCommand.Move(Vector3.zero));
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(controller.IsAttackMoveArmed, Is.False);
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
+        }
+
+        [UnityTest]
         public IEnumerator SavedCancelRebindingIsLoadedAndCancelsTheControllerOwnedActionAsset()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
