@@ -2,7 +2,8 @@
   "name": "ArknightsFrontline.EditModeTests",
   "rootNamespace": "ArknightsFrontline.Tests.EditMode",
   "references": [
-    "ArknightsFrontline.Runtime"
+    "ArknightsFrontline.Runtime",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [
     "Editor"
