@@ -51,6 +51,34 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(projectile.IsFinished, Is.True);
         }
 
+        [Test]
+        public void ProjectileDoesNotDamageStillAliveTargetWhenAttackerDiesBeforeArrival()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(4f, 0f, 0f), 40f, 0f, 2f, false);
+            Projectile projectile = CreateProjectile();
+            projectile.Initialize(attacker, target, 12f, 16f);
+            attacker.TakePhysicalDamage(100f);
+
+            projectile.Tick(10f);
+
+            Assert.That(target.CurrentHealth, Is.EqualTo(target.MaxHealth));
+            Assert.That(projectile.IsFinished, Is.True);
+        }
+
+        [Test]
+        public void ProjectilesShareOneCachedYellowMaterial()
+        {
+            Projectile firstProjectile = CreateProjectile();
+            Projectile secondProjectile = CreateProjectile();
+            Renderer firstRenderer = firstProjectile.GetComponent<Renderer>();
+            Renderer secondRenderer = secondProjectile.GetComponent<Renderer>();
+
+            Assert.That(firstRenderer.sharedMaterial, Is.Not.Null);
+            Assert.That(secondRenderer.sharedMaterial, Is.SameAs(firstRenderer.sharedMaterial));
+            Assert.That(firstRenderer.sharedMaterial.color, Is.EqualTo(Color.yellow));
+        }
+
         private CombatUnit CreateUnit(
             string name,
             TeamId team,

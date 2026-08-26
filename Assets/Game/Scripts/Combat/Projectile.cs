@@ -7,6 +7,8 @@ namespace ArknightsFrontline.Combat
     {
         private const float MinimumSpeed = 0.01f;
 
+        private static Material sharedYellowMaterial;
+
         private CombatUnit attacker;
         private CombatUnit target;
         private float damage;
@@ -93,20 +95,41 @@ namespace ArknightsFrontline.Combat
                 meshRenderer = gameObject.AddComponent<MeshRenderer>();
             }
 
+            meshRenderer.sharedMaterial = GetSharedYellowMaterial();
+
+            transform.localScale = Vector3.one * 0.25f;
+        }
+
+        private static Material GetSharedYellowMaterial()
+        {
+            if (sharedYellowMaterial != null)
+            {
+                return sharedYellowMaterial;
+            }
+
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null)
             {
                 shader = Shader.Find("Standard");
             }
 
-            if (shader != null)
+            if (shader == null)
             {
-                Material material = new Material(shader);
-                material.color = Color.yellow;
-                meshRenderer.sharedMaterial = material;
+                shader = Shader.Find("Unlit/Color");
             }
 
-            transform.localScale = Vector3.one * 0.25f;
+            if (shader == null)
+            {
+                throw new InvalidOperationException("No shader is available for projectile rendering.");
+            }
+
+            sharedYellowMaterial = new Material(shader)
+            {
+                name = "ProjectileYellow",
+                hideFlags = HideFlags.DontSave
+            };
+            sharedYellowMaterial.color = Color.yellow;
+            return sharedYellowMaterial;
         }
 
         private void Finish()

@@ -29,7 +29,6 @@ namespace ArknightsFrontline.Editor
             Material blueMaterial = GetOrCreateMaterial("BlueArena.mat", new Color(0.1f, 0.35f, 0.9f));
             Material redMaterial = GetOrCreateMaterial("RedArena.mat", new Color(0.9f, 0.15f, 0.15f));
             Material laneMaterial = GetOrCreateMaterial("Lane.mat", new Color(0.25f, 0.25f, 0.25f));
-            GetOrCreateMaterial("YellowProjectile.mat", Color.yellow);
             int groundLayer = EnsureLayer("Ground");
             int targetableLayer = EnsureLayer("Targetable");
 
