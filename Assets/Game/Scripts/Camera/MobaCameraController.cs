@@ -31,7 +31,9 @@ namespace ArknightsFrontline.Camera
             }
 
             Vector2 pointerPosition = mouse.position.ReadValue();
-            Vector3 edgeMovement = GetEdgeMovement(pointerPosition);
+            Vector3 edgeMovement = CalculateEdgePanVelocity(
+                pointerPosition,
+                new Vector2(Screen.width, Screen.height));
             focusPosition = layout.Clamp(focusPosition + edgeMovement * Time.deltaTime);
 
             if (mouse.middleButton.isPressed)
@@ -55,14 +57,14 @@ namespace ArknightsFrontline.Camera
             ApplyFocus();
         }
 
-        private Vector3 GetEdgeMovement(Vector2 pointerPosition)
+        public static Vector3 CalculateEdgePanVelocity(Vector2 pointerPosition, Vector2 screenSize)
         {
             Vector3 movement = Vector3.zero;
             if (pointerPosition.x <= EdgeThresholdPixels)
             {
                 movement.x -= MovementSpeed;
             }
-            else if (pointerPosition.x >= Screen.width - EdgeThresholdPixels)
+            else if (pointerPosition.x >= screenSize.x - EdgeThresholdPixels)
             {
                 movement.x += MovementSpeed;
             }
@@ -71,12 +73,12 @@ namespace ArknightsFrontline.Camera
             {
                 movement.z -= MovementSpeed;
             }
-            else if (pointerPosition.y >= Screen.height - EdgeThresholdPixels)
+            else if (pointerPosition.y >= screenSize.y - EdgeThresholdPixels)
             {
                 movement.z += MovementSpeed;
             }
 
-            return movement;
+            return movement == Vector3.zero ? Vector3.zero : movement.normalized * MovementSpeed;
         }
 
         private void ApplyFocus()
