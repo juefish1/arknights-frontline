@@ -1,0 +1,87 @@
+using System;
+using ArknightsFrontline.Arena;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace ArknightsFrontline.Camera
+{
+    public sealed class MobaCameraController : MonoBehaviour
+    {
+        private const float EdgeThresholdPixels = 20f;
+        private const float MovementSpeed = 18f;
+        private const float DragWorldUnitsPerPixel = 0.03f;
+
+        private readonly ArenaLayout layout = ArenaLayout.CreateDefault();
+        private readonly Vector3 cameraOffset = new Vector3(0f, 35f, -28f);
+
+        private Vector3 focusPosition;
+
+        private void Awake()
+        {
+            focusPosition = layout.Clamp(transform.position - cameraOffset);
+            ApplyFocus();
+        }
+
+        private void Update()
+        {
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
+            {
+                return;
+            }
+
+            Vector2 pointerPosition = mouse.position.ReadValue();
+            Vector3 edgeMovement = GetEdgeMovement(pointerPosition);
+            focusPosition = layout.Clamp(focusPosition + edgeMovement * Time.deltaTime);
+
+            if (mouse.middleButton.isPressed)
+            {
+                Vector2 dragDelta = mouse.delta.ReadValue();
+                focusPosition = layout.Clamp(
+                    focusPosition - new Vector3(dragDelta.x, 0f, dragDelta.y) * DragWorldUnitsPerPixel);
+            }
+
+            ApplyFocus();
+        }
+
+        public void CenterOn(Transform target)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            focusPosition = layout.Clamp(target.position);
+            ApplyFocus();
+        }
+
+        private Vector3 GetEdgeMovement(Vector2 pointerPosition)
+        {
+            Vector3 movement = Vector3.zero;
+            if (pointerPosition.x <= EdgeThresholdPixels)
+            {
+                movement.x -= MovementSpeed;
+            }
+            else if (pointerPosition.x >= Screen.width - EdgeThresholdPixels)
+            {
+                movement.x += MovementSpeed;
+            }
+
+            if (pointerPosition.y <= EdgeThresholdPixels)
+            {
+                movement.z -= MovementSpeed;
+            }
+            else if (pointerPosition.y >= Screen.height - EdgeThresholdPixels)
+            {
+                movement.z += MovementSpeed;
+            }
+
+            return movement;
+        }
+
+        private void ApplyFocus()
+        {
+            transform.position = focusPosition + cameraOffset;
+        }
+    }
+}
