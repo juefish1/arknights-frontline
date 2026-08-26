@@ -1,0 +1,149 @@
+# Attack-Move Intent Semantics Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Make `Q` followed by left click emit an explicit attack intent without ever converting a non-selectable click into movement.
+
+**Architecture:** `UnitCommand` gains a targetless `AttackNearestInRange` intent and `PlayerCommandController` records every issued command in `CurrentCommand`. `AttackMoveState` owns only the one-click armed state. Stage 2 classifies the hit as selectable versus non-selectable and stops the motor for both attack intents; Stage 3 will consume the intent to apply legality, range, nearest-target selection, pursuit and damage.
+
+**Tech Stack:** Unity 6000.3.15f1, Unity Input System 1.17.0, NUnit, Unity Test Framework, C# 9 with brace namespaces, macOS.
+
+## Global Constraints
+
+- Keep production code under `Assets/Game/Scripts` and tests under `Assets/Tests`; do not modify user-owned scene, package or ProjectSettings changes.
+- Do not reference `CombatUnit`, target legality, attack range, pursuit, damage, physics obstacles beyond the existing click raycast, or any Stage 3 type.
+- `Q` plus `Targetable` left click emits `UnitCommand.Attack(target)`; all other Q-plus-left clicks emit `UnitCommand.AttackNearestInRange()`.
+- `AttackNearestInRange()` and `Attack(target)` stop an existing `UnitMotor` movement. Neither command may set a movement destination in Stage 2.
+- Existing direct right-click behavior stays unchanged: ground moves, target emits `Attack(target)`, right click while Q is armed only cancels.
+- Run Unity tests in a disposable clean checkout if active Unity package imports cause unrelated compilation errors. Do not commit `Library/`, `Temp/`, `Logs/`, `TestResults/`, build logs or unrelated user files.
+
+---
+
+### Task 1: Represent and issue attack intents without movement
+
+**Files:**
+- Modify: `Assets/Game/Scripts/Commands/UnitCommand.cs`
+- Modify: `Assets/Game/Scripts/Commands/AttackMoveState.cs`
+- Modify: `Assets/Game/Scripts/Commands/PlayerCommandController.cs`
+- Modify: `Assets/Tests/EditMode/UnitCommandTests.cs`
+- Modify: `Assets/Tests/EditMode/AttackMoveStateTests.cs`
+- Modify: `Assets/Tests/EditMode/PlayerCommandControllerTests.cs`
+- Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
+
+**Interfaces:**
+- Consumes: existing `UnitMotor.Stop()`, `GameInputActions`, `AttackMoveState.IsArmed`, and `UnitCommand.Attack(GameObject)`.
+- Produces: `UnitCommandKind.AttackNearestInRange`, `UnitCommand.AttackNearestInRange()`, `AttackMoveState.Confirm()`, and nullable `PlayerCommandController.CurrentCommand`.
+
+- [ ] **Step 1: Write failing EditMode tests for the new command and state API**
+
+Replace the destination-carrying test with the following tests and remove every assertion that depends on `AttackMove(Vector3)` or `LastDestination`:
+
+```csharp
+[Test]
+public void AttackNearestInRangeCommandHasNoTargetOrDestination()
+{
+    UnitCommand command = UnitCommand.AttackNearestInRange();
+
+    Assert.That(command.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+    Assert.That(command.TargetObject, Is.Null);
+    Assert.That(command.Destination, Is.EqualTo(default(Vector3)));
+}
+
+[Test]
+public void ConfirmDisarmsAttackMove()
+{
+    AttackMoveState state = new AttackMoveState();
+    state.Arm();
+
+    state.Confirm();
+
+    Assert.That(state.IsArmed, Is.False);
+}
+```
+
+Add a controller test that starts a move, then issues `AttackNearestInRange()`, and verifies: the motor is no longer moving, `CurrentTarget` is null, `CurrentCommand.HasValue` is true, and `CurrentCommand.Value.Kind` is `AttackNearestInRange`.
+
+- [ ] **Step 2: Run the focused EditMode suite and verify RED**
+
+Run:
+
+```bash
+UNITY_EDITOR_BIN="/Applications/Unity/Unity-6000.3.15f1/Unity.app/Contents/MacOS/Unity"
+"$UNITY_EDITOR_BIN" -batchmode -nographics -projectPath "$PWD" -runTests -testPlatform EditMode -testFilter "ArknightsFrontline.Tests.EditMode.UnitCommandTests|ArknightsFrontline.Tests.EditMode.AttackMoveStateTests|ArknightsFrontline.Tests.EditMode.PlayerCommandControllerTests" -testResults "$PWD/TestResults/attack-move-intent-red.xml" -logFile "$PWD/TestResults/attack-move-intent-red.log"
+```
+
+Expected: compilation/test failures because `AttackNearestInRange`, parameterless `Confirm`, or `CurrentCommand` do not yet exist.
+
+- [ ] **Step 3: Implement the minimum command and state changes**
+
+Change `UnitCommandKind` to exactly `Move`, `Attack`, `AttackNearestInRange`, `Stop`; remove `AttackMove(Vector3)` and add:
+
+```csharp
+public static UnitCommand AttackNearestInRange()
+{
+    return new UnitCommand(UnitCommandKind.AttackNearestInRange, default, null);
+}
+```
+
+Make `AttackMoveState.Confirm()` parameterless and have it only set `IsArmed` to false. Remove `LastDestination` because a click location is no longer part of an attack-move intent.
+
+In `PlayerCommandController`, add:
+
+```csharp
+public UnitCommand? CurrentCommand { get; private set; }
+```
+
+At the beginning of `Issue(UnitCommand command)`, assign `CurrentCommand = command`. In the command switch, `Move` retains `SetDestination`; `Attack` retains `motor.Stop()` and sets `currentTarget`; `AttackNearestInRange` clears `currentTarget` and calls `motor.Stop()`; `Stop` keeps its existing clearing behavior. No attack intent calls `SetDestination`.
+
+- [ ] **Step 4: Write a failing PlayMode test for Q plus non-selectable click**
+
+In `PlayerCommandInputPlayModeTests`, make a configured player move first, arm Q, point the mouse at a `Ground` plane, press the left mouse button, yield one frame, then assert:
+
+```csharp
+Assert.That(controller.IsAttackMoveArmed, Is.False);
+Assert.That(motor.IsMoving, Is.False);
+Assert.That(controller.CurrentTarget, Is.Null);
+Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+```
+
+The test must use the real Input System path and existing `CreateMainCamera` helper; it must not invoke private callbacks via reflection.
+
+- [ ] **Step 5: Run that PlayMode test and verify RED**
+
+Run the Unity PlayMode command with `-testFilter "ArknightsFrontline.Tests.PlayMode.PlayerCommandInputPlayModeTests"` and expect the new assertion to fail because the current code only handles `Ground` in `OnConfirm` by setting an `AttackMove` destination.
+
+- [ ] **Step 6: Implement click classification and verify GREEN**
+
+Replace the armed branch of `OnConfirm` with this behavior:
+
+```csharp
+if (!attackMoveState.IsArmed)
+{
+    return;
+}
+
+attackMoveState.Confirm();
+if (TryRaycast(out RaycastHit hit)
+    && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
+{
+    Issue(UnitCommand.Attack(hit.collider.gameObject));
+    return;
+}
+
+Issue(UnitCommand.AttackNearestInRange());
+```
+
+Run the focused EditMode and `PlayerCommandInputPlayModeTests` suites again. Expected: all pass. Then run the full EditMode and PlayMode suites in the clean checkout. Expected: no compiler errors and all project tests pass.
+
+- [ ] **Step 7: Commit only this task's source, tests, and metadata**
+
+```bash
+git add Assets/Game/Scripts/Commands/UnitCommand.cs Assets/Game/Scripts/Commands/AttackMoveState.cs Assets/Game/Scripts/Commands/PlayerCommandController.cs Assets/Tests/EditMode/UnitCommandTests.cs Assets/Tests/EditMode/AttackMoveStateTests.cs Assets/Tests/EditMode/PlayerCommandControllerTests.cs Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs Assets/Game/Scripts/Commands/UnitCommand.cs.meta Assets/Game/Scripts/Commands/AttackMoveState.cs.meta Assets/Game/Scripts/Commands/PlayerCommandController.cs.meta Assets/Tests/EditMode/UnitCommandTests.cs.meta Assets/Tests/EditMode/AttackMoveStateTests.cs.meta Assets/Tests/EditMode/PlayerCommandControllerTests.cs.meta Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs.meta
+git commit -m "fix: record attack-move intents without ground movement"
+```
+
+## Plan self-review
+
+- Spec coverage: the plan covers Q plus selectable target as `Attack(target)`, Q plus every non-selectable click as nearest-in-range intent, mandatory motor stop/no destination, state consumption, and the explicit Stage 3 ownership boundary.
+- Placeholder scan: no TODO/TBD or undefined follow-up behavior appears in an implementation step; Stage 3 is explicitly excluded rather than deferred inside this task.
+- Type consistency: `AttackNearestInRange()`, `UnitCommandKind.AttackNearestInRange`, `AttackMoveState.Confirm()`, and nullable `CurrentCommand` use the same names in tests and production steps.
