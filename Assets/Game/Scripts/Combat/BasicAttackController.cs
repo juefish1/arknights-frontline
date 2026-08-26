@@ -90,14 +90,14 @@ namespace ArknightsFrontline.Combat
             if (!hasRequestedFirstAttack)
             {
                 hasRequestedFirstAttack = true;
-                AttackRequested?.Invoke(owner, target);
+                RequestAttack();
                 return;
             }
 
             float interval = owner.AttackInterval;
             if (interval <= 0f)
             {
-                AttackRequested?.Invoke(owner, target);
+                RequestAttack();
                 return;
             }
 
@@ -105,13 +105,23 @@ namespace ArknightsFrontline.Combat
             while (elapsedSinceAttack >= interval)
             {
                 elapsedSinceAttack -= interval;
-                AttackRequested?.Invoke(owner, target);
-                if (!HasLegalTargetInRange())
+                if (!RequestAttack())
                 {
-                    ClearTarget();
                     break;
                 }
             }
+        }
+
+        private bool RequestAttack()
+        {
+            AttackRequested?.Invoke(owner, target);
+            if (HasLegalTargetInRange())
+            {
+                return true;
+            }
+
+            ClearTarget();
+            return false;
         }
 
         private bool HasLegalTargetInRange()

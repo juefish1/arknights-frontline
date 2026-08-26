@@ -76,6 +76,37 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void InitialRequestClearsTargetWhenCallbackInvalidatesIt()
+        {
+            CombatUnit owner = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, 1f, false);
+            BasicAttackController attack = owner.gameObject.AddComponent<BasicAttackController>();
+            attack.Configure(owner);
+            attack.SetTarget(target);
+            attack.AttackRequested += (_, requestedTarget) => requestedTarget.TakePhysicalDamage(100f);
+
+            attack.Tick(0f);
+
+            Assert.That(attack.CurrentTarget, Is.Null);
+        }
+
+        [Test]
+        public void ZeroIntervalRequestClearsTargetWhenCallbackInvalidatesIt()
+        {
+            CombatUnit owner = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, 1f, false);
+            BasicAttackController attack = owner.gameObject.AddComponent<BasicAttackController>();
+            attack.Configure(owner);
+            attack.SetTarget(target);
+            attack.Tick(0f);
+            attack.AttackRequested += (_, requestedTarget) => requestedTarget.TakePhysicalDamage(100f);
+
+            attack.Tick(0f);
+
+            Assert.That(attack.CurrentTarget, Is.Null);
+        }
+
+        [Test]
         public void InvalidTargetStopsFutureAttackRequests()
         {
             CombatUnit player = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
