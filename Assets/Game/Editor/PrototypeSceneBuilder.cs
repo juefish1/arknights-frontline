@@ -111,6 +111,7 @@ namespace ArknightsFrontline.Editor
             PlayerCommandController commands = player.AddComponent<PlayerCommandController>();
             CombatUnit combatUnit = player.AddComponent<CombatUnit>();
             combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, true);
+            player.AddComponent<CommandFeedbackPresenter>();
             BasicAttackController attack = player.AddComponent<BasicAttackController>();
             CombatCommandResolver resolver = player.AddComponent<CombatCommandResolver>();
             resolver.Configure(combatUnit, motor, commands, attack);

@@ -44,6 +44,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(player, Is.Not.Null);
             Assert.That(player.GetComponent<UnitMotor>(), Is.Not.Null);
             Assert.That(player.GetComponent<PlayerCommandController>(), Is.Not.Null);
+            Assert.That(player.GetComponent<CommandFeedbackPresenter>(), Is.Not.Null);
             CombatUnit playerUnit = player.GetComponent<CombatUnit>();
             Assert.That(playerUnit, Is.Not.Null);
             Assert.That(playerUnit.Team, Is.EqualTo(TeamId.Blue));

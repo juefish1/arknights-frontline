@@ -1,6 +1,8 @@
 using System.Collections;
 using ArknightsFrontline.Arena;
+using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
+using ArknightsFrontline.Common;
 using ArknightsFrontline.Input;
 using ArknightsFrontline.Movement;
 using NUnit.Framework;
@@ -12,6 +14,81 @@ namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
+        [UnityTest]
+        public IEnumerator HeldQShowsTheConfiguredAttackRangeAndReleaseHidesIt()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
+
+            Press(keyboard.qKey);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+            Assert.That(feedback.RangeRingRadius, Is.EqualTo(6f));
+
+            Release(keyboard.qKey);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.False);
+            Object.Destroy(player);
+        }
+
+        [UnityTest]
+        public IEnumerator HoveringHostileLegalTargetSetsLegalHoverFeedback()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            yield return null;
+            Assert.That(feedback.IsHoveringLegalTarget, Is.True);
+
+            target.GetComponent<CombatUnit>().Configure(
+                TeamId.Blue, Altitude.Ground, 10f, 0f, 0f, 0f, 0f, false, false);
+            yield return null;
+            Assert.That(feedback.IsHoveringLegalTarget, Is.False);
+
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator HoveringTargetableWithoutCombatUnitDoesNotSetLegalHoverFeedback()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            target.layer = LayerMask.NameToLayer("Targetable");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            yield return null;
+            Assert.That(feedback.IsHoveringLegalTarget, Is.False);
+
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator HoveringDeadTargetDoesNotSetLegalHoverFeedback()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            target.GetComponent<CombatUnit>().TakePhysicalDamage(100f);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            yield return null;
+            Assert.That(feedback.IsHoveringLegalTarget, Is.False);
+
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
         [UnityTest]
         public IEnumerator ReleasingQClearsAttackMoveHoldState()
         {
@@ -240,6 +317,23 @@ namespace ArknightsFrontline.Tests.PlayMode
             motor = player.AddComponent<UnitMotor>();
             motor.Configure(5f, ArenaLayout.CreateDefault());
             return player.AddComponent<PlayerCommandController>();
+        }
+
+        private static CommandFeedbackPresenter CreateFeedbackPresenter(out GameObject player)
+        {
+            CreateControllerAt(Vector3.zero, out _, out player);
+            CombatUnit combatUnit = player.AddComponent<CombatUnit>();
+            combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, false);
+            return player.AddComponent<CommandFeedbackPresenter>();
+        }
+
+        private static GameObject CreateTargetableCube(TeamId team)
+        {
+            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            target.layer = LayerMask.NameToLayer("Targetable");
+            CombatUnit combatUnit = target.AddComponent<CombatUnit>();
+            combatUnit.Configure(team, Altitude.Ground, 10f, 0f, 0f, 0f, 0f, false, false);
+            return target;
         }
 
         private static GameObject CreateMainCamera()
