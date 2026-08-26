@@ -1,5 +1,7 @@
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Commands;
+using ArknightsFrontline.Combat;
+using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
 using NUnit.Framework;
 using UnityEngine;
@@ -82,6 +84,23 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.CurrentTarget, Is.Null);
             Assert.That(motor.IsMoving, Is.False);
             Object.DestroyImmediate(target);
+            Object.DestroyImmediate(player);
+        }
+
+        [Test]
+        public void DeadPlayerRejectsNewCommandsWithoutReplacingCurrentCommand()
+        {
+            PlayerCommandController controller = CreateController(out UnitMotor motor, out GameObject player);
+            CombatUnit unit = player.AddComponent<CombatUnit>();
+            unit.Configure(TeamId.Blue, Altitude.Ground, 10f, 1f, 0f, 1f, 1f, true, false);
+            controller.Issue(UnitCommand.Stop());
+            unit.TakePhysicalDamage(100f);
+
+            controller.Issue(UnitCommand.Move(new Vector3(10f, 0f, 0f)));
+
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand.HasValue, Is.True);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Stop));
             Object.DestroyImmediate(player);
         }
 

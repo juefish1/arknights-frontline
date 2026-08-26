@@ -1,5 +1,6 @@
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Camera;
+using ArknightsFrontline.Combat;
 using ArknightsFrontline.Input;
 using ArknightsFrontline.Movement;
 using UnityEngine;
@@ -71,6 +72,12 @@ namespace ArknightsFrontline.Commands
 
         public void Issue(UnitCommand command)
         {
+            CombatUnit combatUnit = GetComponent<CombatUnit>();
+            if (combatUnit != null && combatUnit.IsDead)
+            {
+                return;
+            }
+
             CurrentCommand = command;
             switch (command.Kind)
             {
