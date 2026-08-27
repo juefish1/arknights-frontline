@@ -50,6 +50,16 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(TargetSelector.FindNearestInRange(attacker), Is.EqualTo(expected));
         }
 
+        [Test]
+        public void SelectorSkipsCandidatesRejectedByFilter()
+        {
+            CombatUnit attacker = CreateUnitAt("Blue", TeamId.Blue, Altitude.Ground, Vector3.zero, 6f, true, false);
+            CombatUnit rejected = CreateUnitAt("Rejected", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 0f, false, false);
+            CombatUnit accepted = CreateUnitAt("Accepted", TeamId.Red, Altitude.Ground, new Vector3(4f, 0f, 0f), 0f, false, false);
+
+            Assert.That(TargetSelector.FindNearestInRange(attacker, candidate => candidate != rejected), Is.EqualTo(accepted));
+        }
+
         private CombatUnit CreateUnitAt(
             string name,
             TeamId team,

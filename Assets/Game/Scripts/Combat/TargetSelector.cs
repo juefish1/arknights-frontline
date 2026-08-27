@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ArknightsFrontline.Combat
@@ -5,6 +6,11 @@ namespace ArknightsFrontline.Combat
     public static class TargetSelector
     {
         public static CombatUnit FindNearestInRange(CombatUnit attacker)
+        {
+            return FindNearestInRange(attacker, null);
+        }
+
+        public static CombatUnit FindNearestInRange(CombatUnit attacker, Predicate<CombatUnit> filter)
         {
             if (attacker == null)
             {
@@ -19,6 +25,11 @@ namespace ArknightsFrontline.Combat
             foreach (CombatUnit candidate in Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.InstanceID))
             {
                 if (!TargetRules.IsLegal(attacker, candidate))
+                {
+                    continue;
+                }
+
+                if (filter != null && !filter(candidate))
                 {
                     continue;
                 }
