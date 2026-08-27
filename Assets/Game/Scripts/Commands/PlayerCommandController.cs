@@ -162,7 +162,9 @@ namespace ArknightsFrontline.Commands
 
             attackMoveState.Confirm();
             if (TryGetPointerHit(out RaycastHit hit)
-                && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
+                && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable")
+                && hit.collider.TryGetComponent(out CombatUnit target)
+                && TargetRules.IsLegal(GetComponent<CombatUnit>(), target))
             {
                 Issue(UnitCommand.Attack(hit.collider.gameObject));
                 return;
@@ -178,7 +180,7 @@ namespace ArknightsFrontline.Commands
 
         private void OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
-            if (!attackMoveState.IsArmed)
+            if (!attackMoveState.IsArmed && !isAttackMoveHeld)
             {
                 return;
             }
