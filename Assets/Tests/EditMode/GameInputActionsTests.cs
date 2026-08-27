@@ -13,7 +13,7 @@ namespace ArknightsFrontline.Tests.EditMode
             using (var input = new GameInputActions())
             {
                 Assert.That(input.MoveClick.bindings[0].effectivePath, Is.EqualTo("<Mouse>/rightButton"));
-                Assert.That(input.AttackMove.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/q"));
+                Assert.That(input.AttackMove.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/a"));
                 Assert.That(input.Confirm.bindings[0].effectivePath, Is.EqualTo("<Mouse>/leftButton"));
                 Assert.That(input.Stop.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/s"));
                 Assert.That(input.Skill1.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/w"));

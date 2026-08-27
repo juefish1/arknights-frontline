@@ -13,7 +13,7 @@ namespace ArknightsFrontline.Input
             Asset.AddActionMap(Gameplay);
 
             MoveClick = AddAction("MoveClick", InputActionType.Button, "<Mouse>/rightButton", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f01");
-            AttackMove = AddAction("AttackMove", InputActionType.Button, "<Keyboard>/q", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f02");
+            AttackMove = AddAction("AttackMove", InputActionType.Button, "<Keyboard>/a", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f02");
             Confirm = AddAction("Confirm", InputActionType.Button, "<Mouse>/leftButton", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f03");
             Stop = AddAction("Stop", InputActionType.Button, "<Keyboard>/s", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f04");
             Skill1 = AddAction("Skill1", InputActionType.Button, "<Keyboard>/w", "ffeb75c4-54fd-456f-a397-0b2f3b0a3f05");

@@ -24,7 +24,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             GameObject target = CreateTargetableCube(TeamId.Red);
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Assert.That(feedback.IsAttackRangeVisible, Is.True);
             Assert.That(feedback.IsHoveringLegalTarget, Is.True);
@@ -36,12 +36,12 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(feedback.IsHoveringLegalTarget, Is.False);
             Assert.That(GameObject.Find("AttackRangeRing").GetComponent<LineRenderer>().enabled, Is.False);
 
-            Release(keyboard.qKey);
+            Release(keyboard.aKey);
             feedback.enabled = true;
             yield return null;
             Assert.That(feedback.IsHoveringLegalTarget, Is.True);
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Assert.That(feedback.IsAttackRangeVisible, Is.True);
 
@@ -51,17 +51,17 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator HeldQShowsTheConfiguredAttackRangeAndReleaseHidesIt()
+        public IEnumerator HeldAShowsTheConfiguredAttackRangeAndReleaseHidesIt()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Assert.That(feedback.IsAttackRangeVisible, Is.True);
             Assert.That(feedback.RangeRingRadius, Is.EqualTo(6f));
 
-            Release(keyboard.qKey);
+            Release(keyboard.aKey);
             yield return null;
             Assert.That(feedback.IsAttackRangeVisible, Is.False);
             Object.Destroy(player);
@@ -126,17 +126,17 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ReleasingQClearsAttackMoveHoldState()
+        public IEnumerator ReleasingAClearsAttackMoveHoldState()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             PlayerCommandController controller = CreateControllerAt(Vector3.zero, out _, out GameObject player);
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Assert.That(controller.IsAttackMoveArmed, Is.True);
             Assert.That(controller.IsAttackMoveHeld, Is.True);
 
-            Release(keyboard.qKey);
+            Release(keyboard.aKey);
             yield return null;
             Assert.That(controller.IsAttackMoveArmed, Is.False);
             Assert.That(controller.IsAttackMoveHeld, Is.False);
@@ -144,7 +144,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ReleasingQPreventsLaterLeftClickFromIssuingAttackIntent()
+        public IEnumerator ReleasingAPreventsLaterLeftClickFromIssuingAttackIntent()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -154,9 +154,9 @@ namespace ArknightsFrontline.Tests.PlayMode
             target.layer = LayerMask.NameToLayer("Targetable");
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
-            Release(keyboard.qKey);
+            Release(keyboard.aKey);
             yield return null;
             Press(mouse.leftButton);
             yield return null;
@@ -168,7 +168,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ConfirmingAttackWhileQRemainsHeldPreservesHoldState()
+        public IEnumerator ConfirmingAttackWhileARemainsHeldPreservesHoldState()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -179,7 +179,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Press(mouse.leftButton);
             yield return null;
@@ -193,7 +193,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator EscapeAfterConfirmationCancelsHeldQFeedback()
+        public IEnumerator EscapeAfterConfirmationCancelsHeldAFeedback()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -203,7 +203,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             GameObject target = CreateTargetableCube(TeamId.Red);
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Press(mouse.leftButton);
             yield return null;
@@ -222,7 +222,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator SharedRightClickAfterConfirmationCancelsHeldQFeedbackWithoutMoving()
+        public IEnumerator SharedRightClickAfterConfirmationCancelsHeldAFeedbackWithoutMoving()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -234,7 +234,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             ground.layer = LayerMask.NameToLayer("Ground");
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             yield return null;
             Press(mouse.leftButton);
             yield return null;
@@ -277,7 +277,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusGroundClickIssuesNearestInRangeIntentWithoutMovement()
+        public IEnumerator APlusGroundClickIssuesNearestInRangeIntentWithoutMovement()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -288,7 +288,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -302,7 +302,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusSelectableClickIssuesAttackIntentForThatTarget()
+        public IEnumerator APlusSelectableClickIssuesAttackIntentForThatTarget()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -313,7 +313,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -328,7 +328,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusFriendlyTargetableClickIssuesNearestInRangeIntent()
+        public IEnumerator APlusFriendlyTargetableClickIssuesNearestInRangeIntent()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -338,7 +338,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             GameObject target = CreateTargetableCube(TeamId.Blue);
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -351,7 +351,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusDeadTargetableClickIssuesNearestInRangeIntent()
+        public IEnumerator APlusDeadTargetableClickIssuesNearestInRangeIntent()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -362,7 +362,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             target.GetComponent<CombatUnit>().TakePhysicalDamage(100f);
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -375,7 +375,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusTargetableTowerWithoutCombatUnitIssuesNearestInRangeIntent()
+        public IEnumerator APlusTargetableTowerWithoutCombatUnitIssuesNearestInRangeIntent()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -387,7 +387,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             tower.layer = LayerMask.NameToLayer("Targetable");
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -400,7 +400,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusWallOccludingTargetIssuesNearestInRangeIntent()
+        public IEnumerator APlusWallOccludingTargetIssuesNearestInRangeIntent()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -417,7 +417,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
             Physics.SyncTransforms();
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
@@ -432,7 +432,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator QPlusNoHitIssuesNearestInRangeIntentWithoutMovement()
+        public IEnumerator APlusNoHitIssuesNearestInRangeIntentWithoutMovement()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
@@ -441,7 +441,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
-            Press(keyboard.qKey);
+            Press(keyboard.aKey);
             Press(mouse.leftButton);
             yield return null;
 
