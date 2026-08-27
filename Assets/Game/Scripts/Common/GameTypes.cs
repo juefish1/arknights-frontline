@@ -28,8 +28,9 @@ namespace ArknightsFrontline.Common
 
     public enum MatchOutcome
     {
-        BlueVictory = 0,
-        RedVictory = 1,
-        Draw = 2
+        None = 0,
+        BlueVictory = 1,
+        RedVictory = 2,
+        Draw = 3
     }
 }

@@ -5,6 +5,7 @@ using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
 using NUnit.Framework;
 using UnityEngine;
+using MatchOutcome = ArknightsFrontline.Common.MatchOutcome;
 
 namespace ArknightsFrontline.Tests.EditMode
 {
@@ -58,6 +59,19 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(match.OutcomeController.IsMatchOver, Is.True);
             Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.Draw));
+        }
+
+        [Test]
+        public void ConfigureAfterSettlementPreservesResolvedOutcome()
+        {
+            MatchFixture match = CreateMatch();
+            match.RedTower.TakePhysicalDamage(1000f);
+            match.OutcomeController.Tick();
+
+            match.OutcomeController.Configure(match.BlueTower, match.RedTower, match.Spawner);
+
+            Assert.That(match.OutcomeController.IsMatchOver, Is.True);
+            Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.BlueVictory));
         }
 
         [Test]

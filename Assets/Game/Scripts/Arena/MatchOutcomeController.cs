@@ -1,5 +1,6 @@
 using System;
 using ArknightsFrontline.Combat;
+using ArknightsFrontline.Common;
 using UnityEngine;
 
 namespace ArknightsFrontline.Arena
@@ -28,6 +29,11 @@ namespace ArknightsFrontline.Arena
 
         public void Configure(CombatUnit blueTower, CombatUnit redTower, MinionWaveSpawner spawner)
         {
+            if (IsMatchOver)
+            {
+                return;
+            }
+
             if (blueTower == null)
             {
                 throw new ArgumentNullException(nameof(blueTower));
@@ -86,25 +92,26 @@ namespace ArknightsFrontline.Arena
             spawner.StopForMatch();
 
             foreach (LaneMinionController controller in
-                     Object.FindObjectsByType<LaneMinionController>(FindObjectsSortMode.None))
+                     UnityEngine.Object.FindObjectsByType<LaneMinionController>(FindObjectsSortMode.None))
             {
                 controller.StopForMatch();
             }
 
             foreach (TowerCombatController controller in
-                     Object.FindObjectsByType<TowerCombatController>(FindObjectsSortMode.None))
+                     UnityEngine.Object.FindObjectsByType<TowerCombatController>(FindObjectsSortMode.None))
             {
                 controller.StopForMatch();
             }
 
             foreach (BasicAttackController attack in
-                     Object.FindObjectsByType<BasicAttackController>(FindObjectsSortMode.None))
+                     UnityEngine.Object.FindObjectsByType<BasicAttackController>(FindObjectsSortMode.None))
             {
                 attack.ClearTarget();
                 attack.enabled = false;
             }
 
-            foreach (Projectile projectile in Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None))
+            foreach (Projectile projectile in
+                     UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None))
             {
                 projectile.Cancel();
             }
