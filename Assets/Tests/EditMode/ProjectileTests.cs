@@ -67,6 +67,21 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void CancelFinishesProjectileWithoutDamagingTarget()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(0.1f, 0f, 0f), 40f, 0f, 2f, false);
+            Projectile projectile = CreateProjectile();
+            projectile.Initialize(attacker, target, 12f, 16f);
+
+            projectile.Cancel();
+            projectile.Tick(10f);
+
+            Assert.That(projectile.IsFinished, Is.True);
+            Assert.That(target.CurrentHealth, Is.EqualTo(target.MaxHealth));
+        }
+
+        [Test]
         public void ProjectilesShareOneCachedYellowMaterial()
         {
             Projectile firstProjectile = CreateProjectile();

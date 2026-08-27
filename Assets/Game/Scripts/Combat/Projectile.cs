@@ -80,6 +80,15 @@ namespace ArknightsFrontline.Combat
             Finish();
         }
 
+        public void Cancel()
+        {
+            IsFinished = true;
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+        }
+
         private void EnsureVisibleRenderer()
         {
             MeshFilter meshFilter = GetComponent<MeshFilter>();
@@ -134,11 +143,7 @@ namespace ArknightsFrontline.Combat
 
         private void Finish()
         {
-            IsFinished = true;
-            if (Application.isPlaying)
-            {
-                Destroy(gameObject);
-            }
+            Cancel();
         }
     }
 }
