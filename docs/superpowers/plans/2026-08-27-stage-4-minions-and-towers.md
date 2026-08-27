@@ -14,7 +14,7 @@
 - 只实现兵线、塔与即时胜负；不实现角色完整数值重配、电脑角色、技能、撤退、重生、HUD、统计、重新开始或 15 分钟超时。
 - 复用现有战斗入口；不得修改玩家右键、`A`+左键、停止或镜头语义。
 - 新增运行时代码位于 `Assets/Game/Scripts`，测试位于 `Assets/Tests`，使用 C# 9 花括号命名空间。
-- 不修改或提交用户持有的 `Assets/Game/Scenes/PrototypeArena.unity`、Packages、ProjectSettings、构建日志或无关未提交文件。场景变化只提交 `Assets/Game/Editor/PrototypeSceneBuilder.cs`；用户在 Unity 中手动执行菜单并保存场景。
+- 本轮用户已授权直接覆盖并提交 `Assets/Game/Scenes/PrototypeArena.unity`，使其与场景构建器同步；仍不得修改或提交 Packages、ProjectSettings、构建日志或其他无关未提交文件。
 - Unity 自动测试只能在临时干净 checkout 中运行；若 Unity 在测试发现前仍因 LicenseClient `ResponseCode: 505 / Unsupported protocol version '1.18.1'` 失败，记录为环境阻塞，绝不宣称测试通过。
 
 ---
@@ -275,18 +275,18 @@ waveSpawner.Configure(arenaRoot.transform, layout, blueTowerUnit, redTowerUnit,
     blueMaterial, redMaterial, targetableLayer);
 ```
 
-更新相机构建默认值为用户认可的手动起点 `position = new Vector3(0f, 42f, -34f)`、`rotation = Quaternion.Euler(55f, 0f, 0f)`、`camera.fieldOfView = 55f`；保持透视投影。不要改动或暂存用户现有场景文件。
+更新相机构建默认值为用户认可的手动起点 `position = new Vector3(0f, 42f, -34f)`、`rotation = Quaternion.Euler(55f, 0f, 0f)`、`camera.fieldOfView = 55f`；保持透视投影，并在菜单重建后提交生成的场景文件。
 
 - [ ] **Step 4: 重建、运行 GREEN 并进行人工门禁**
 
-在 Unity 编辑器执行 **Arknights Frontline → Build Prototype Arena**，然后保存场景。运行完整 EditMode 与 PlayMode；若自动执行仍遇 LicenseClient 505，保存失败证据并改为人工门禁。
+在 Unity 编辑器执行 **Arknights Frontline → Build Prototype Arena**，然后保存场景，并把生成的 `Assets/Game/Scenes/PrototypeArena.unity` 纳入本任务提交。运行完整 EditMode 与 PlayMode；若自动执行仍遇 LicenseClient 505，保存失败证据并改为人工门禁。
 
-人工门禁：确认首波双方各四兵立即出现；确认双方小兵相遇、交战、清场后继续推进并攻击塔；手动消灭一座塔，确认控制器结果正确、新兵不再出现且现存兵/塔停止攻击；最后按 `⌘S` 保存。若需要第二训练目标或相机微调，只能在最后一次 Build 后手动完成。
+人工门禁：确认首波双方各四兵立即出现；确认双方小兵相遇、交战、清场后继续推进并攻击塔；手动消灭一座塔，确认控制器结果正确、新兵不再出现且现存兵/塔停止攻击；最后按 `⌘S` 保存。阶段 4 场景重建不保留原有手动第二训练目标或相机微调。
 
 - [ ] **Step 5: 提交 Task 4**
 
 ```bash
-git add Assets/Game/Editor/PrototypeSceneBuilder.cs Assets/Tests/PlayMode/ArenaSceneSmokeTests.cs Assets/Tests/PlayMode/MinionLanePlayModeTests.cs
+git add Assets/Game/Editor/PrototypeSceneBuilder.cs Assets/Game/Scenes/PrototypeArena.unity Assets/Tests/PlayMode/ArenaSceneSmokeTests.cs Assets/Tests/PlayMode/MinionLanePlayModeTests.cs
 git commit -m "feat: build minion and tower prototype arena"
 ```
 

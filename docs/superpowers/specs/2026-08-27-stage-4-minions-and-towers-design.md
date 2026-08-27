@@ -64,9 +64,9 @@
 
 ## 场景构建与手动编辑
 
-确定性场景构建器负责生成或配置防御塔、波次生成器、胜负控制器和所有运行时所需引用；不会提交用户正在手动编辑的 `Assets/Game/Scenes/PrototypeArena.unity`。
+确定性场景构建器负责生成或配置防御塔、波次生成器、胜负控制器和所有运行时所需引用。用户已授权阶段 4 直接覆盖并提交 `Assets/Game/Scenes/PrototypeArena.unity`，使生成器源代码与该场景保持一致。
 
-用户需要在 Unity 中执行 `Arknights Frontline → Build Prototype Arena` 以重建场景，然后保存。该菜单会新建整个场景，因此所有手动添加的第二训练目标或相机微调必须在最后一次构建后重新完成并保存。
+用户需要在 Unity 中执行 `Arknights Frontline → Build Prototype Arena` 以重建场景，然后保存。该菜单会新建整个场景；阶段 4 不保留旧场景内的手动第二训练目标或相机微调。
 
 ## 测试与人工验收
 
