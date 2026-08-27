@@ -33,7 +33,7 @@ namespace ArknightsFrontline.Tests.EditMode
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
             using (var first = new GameInputActions())
             {
-                first.AttackMove.ApplyBindingOverride(0, "<Keyboard>/a");
+                first.AttackMove.ApplyBindingOverride(0, "<Keyboard>/q");
                 InputBindingStore.Save(first.Asset);
             }
 
@@ -41,7 +41,7 @@ namespace ArknightsFrontline.Tests.EditMode
             {
                 InputBindingStore.Load(second.Asset);
 
-                Assert.That(second.AttackMove.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/a"));
+                Assert.That(second.AttackMove.bindings[0].effectivePath, Is.EqualTo("<Keyboard>/q"));
             }
 
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
