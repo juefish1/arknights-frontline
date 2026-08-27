@@ -127,7 +127,7 @@ namespace ArknightsFrontline.Editor
             dummy.layer = targetableLayer;
             dummy.GetComponent<Renderer>().sharedMaterial = material;
             CombatUnit combatUnit = dummy.AddComponent<CombatUnit>();
-            combatUnit.Configure(TeamId.Red, Altitude.Ground, 40f, 0f, 2f, 0f, 0f, false, false);
+            combatUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 2f, 0f, 0f, false, false);
         }
 
         private static void CreateDirectionalLight()

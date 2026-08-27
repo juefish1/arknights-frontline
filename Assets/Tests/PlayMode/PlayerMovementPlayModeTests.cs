@@ -69,8 +69,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(unit, Is.Not.Null);
             Assert.That(unit.Team, Is.EqualTo(TeamId.Red));
             Assert.That(unit.Altitude, Is.EqualTo(Altitude.Ground));
-            Assert.That(unit.MaxHealth, Is.EqualTo(40f));
-            Assert.That(unit.CurrentHealth, Is.EqualTo(40f));
+            Assert.That(unit.MaxHealth, Is.EqualTo(1000f));
+            Assert.That(unit.CurrentHealth, Is.EqualTo(1000f));
             Assert.That(unit.IsDead, Is.False);
             Assert.That(dummy.GetComponent<Collider>(), Is.Not.Null);
             Assert.That(dummy.layer, Is.EqualTo(LayerMask.NameToLayer("Targetable")));
