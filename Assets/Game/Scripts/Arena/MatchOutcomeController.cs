@@ -7,15 +7,23 @@ namespace ArknightsFrontline.Arena
 {
     public sealed class MatchOutcomeController : MonoBehaviour
     {
-        private CombatUnit blueTower;
-        private CombatUnit redTower;
-        private MinionWaveSpawner spawner;
+        [SerializeField] private CombatUnit blueTower;
+        [SerializeField] private CombatUnit redTower;
+        [SerializeField] private MinionWaveSpawner spawner;
         private bool blueTowerDestroyed;
         private bool redTowerDestroyed;
 
         public bool IsMatchOver { get; private set; }
 
         public MatchOutcome Outcome { get; private set; }
+
+        private void Awake()
+        {
+            if (blueTower != null && redTower != null && spawner != null)
+            {
+                Configure(blueTower, redTower, spawner);
+            }
+        }
 
         private void Update()
         {

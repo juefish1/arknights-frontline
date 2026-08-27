@@ -22,7 +22,8 @@ namespace ArknightsFrontline.Combat
             Vector3 attackerPosition = attacker.transform.position;
             Vector2 attackerHorizontalPosition = new Vector2(attackerPosition.x, attackerPosition.z);
 
-            foreach (CombatUnit candidate in Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.InstanceID))
+            foreach (CombatUnit candidate in
+                     UnityEngine.Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.InstanceID))
             {
                 if (!TargetRules.IsLegal(attacker, candidate))
                 {

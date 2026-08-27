@@ -39,9 +39,36 @@ namespace ArknightsFrontline.Editor
             ArenaBootstrap arena = arenaRoot.AddComponent<ArenaBootstrap>();
 
             CreateLane(arenaRoot.transform, laneMaterial, groundLayer);
-            Transform blueTower = CreateTower(arenaRoot.transform, "BlueTower", layout.BlueTower, blueMaterial, targetableLayer);
-            Transform redTower = CreateTower(arenaRoot.transform, "RedTower", layout.RedTower, redMaterial, targetableLayer);
+            Transform blueTower = CreateTower(
+                arenaRoot.transform,
+                "BlueTower",
+                layout.BlueTower,
+                blueMaterial,
+                targetableLayer,
+                TeamId.Blue);
+            Transform redTower = CreateTower(
+                arenaRoot.transform,
+                "RedTower",
+                layout.RedTower,
+                redMaterial,
+                targetableLayer,
+                TeamId.Red);
             arena.AssignTowers(blueTower, redTower);
+
+            CombatUnit blueTowerUnit = blueTower.GetComponent<CombatUnit>();
+            CombatUnit redTowerUnit = redTower.GetComponent<CombatUnit>();
+            MinionWaveSpawner waveSpawner = arenaRoot.AddComponent<MinionWaveSpawner>();
+            MatchOutcomeController outcome = arenaRoot.AddComponent<MatchOutcomeController>();
+            outcome.Configure(blueTowerUnit, redTowerUnit, waveSpawner);
+            waveSpawner.Configure(
+                arenaRoot.transform,
+                layout,
+                blueTowerUnit,
+                redTowerUnit,
+                blueMaterial,
+                redMaterial,
+                targetableLayer);
+
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
             GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial);
@@ -71,11 +98,24 @@ namespace ArknightsFrontline.Editor
             string towerName,
             Vector3 position,
             Material material,
-            int targetableLayer)
+            int targetableLayer,
+            TeamId team)
         {
             GameObject tower = new GameObject(towerName);
             tower.transform.SetParent(parent, false);
             tower.transform.position = position;
+            tower.layer = targetableLayer;
+
+            BoxCollider collider = tower.AddComponent<BoxCollider>();
+            collider.center = new Vector3(0f, 3f, 0f);
+            collider.size = new Vector3(3f, 6f, 3f);
+
+            CombatUnit combatUnit = tower.AddComponent<CombatUnit>();
+            combatUnit.Configure(team, Altitude.Ground, 6000f, 150f, 40f, 9f, 1f, true, true);
+            BasicAttackController attack = tower.AddComponent<BasicAttackController>();
+            attack.Configure(combatUnit);
+            TowerCombatController controller = tower.AddComponent<TowerCombatController>();
+            controller.Configure(combatUnit, attack);
 
             GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
             visual.name = towerName + "Visual";
@@ -84,6 +124,7 @@ namespace ArknightsFrontline.Editor
             visual.transform.localScale = new Vector3(3f, 6f, 3f);
             visual.layer = targetableLayer;
             visual.GetComponent<Renderer>().sharedMaterial = material;
+            Object.DestroyImmediate(visual.GetComponent<BoxCollider>());
 
             return tower.transform;
         }
@@ -144,10 +185,11 @@ namespace ArknightsFrontline.Editor
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
             cameraObject.transform.SetPositionAndRotation(
-                new Vector3(0f, 35f, -28f),
-                Quaternion.Euler(50f, 0f, 0f));
+                new Vector3(0f, 42f, -34f),
+                Quaternion.Euler(55f, 0f, 0f));
             UnityEngine.Camera camera = cameraObject.AddComponent<UnityEngine.Camera>();
             camera.orthographic = false;
+            camera.fieldOfView = 55f;
             return cameraObject.AddComponent<MobaCameraController>();
         }
 

@@ -6,9 +6,17 @@ namespace ArknightsFrontline.Arena
 {
     public sealed class TowerCombatController : MonoBehaviour
     {
-        private CombatUnit owner;
-        private BasicAttackController attack;
+        [SerializeField] private CombatUnit owner;
+        [SerializeField] private BasicAttackController attack;
         private bool stopped;
+
+        private void Awake()
+        {
+            if (owner != null && attack != null)
+            {
+                Configure(owner, attack);
+            }
+        }
 
         private void OnDestroy()
         {
