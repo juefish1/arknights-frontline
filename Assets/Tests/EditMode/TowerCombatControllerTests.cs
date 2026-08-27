@@ -3,6 +3,7 @@ using ArknightsFrontline.Arena;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace ArknightsFrontline.Tests.EditMode
@@ -84,6 +85,31 @@ namespace ArknightsFrontline.Tests.EditMode
             controller.Tick(0f);
 
             controller.StopForMatch();
+            controller.Tick(0f);
+
+            Assert.That(attack.CurrentTarget, Is.Null);
+        }
+
+        [Test]
+        public void AwakeRebindStopsRevivedTowerAfterOwnerDies()
+        {
+            GameObject towerObject = new GameObject("SerializedBlueTower");
+            gameObjects.Add(towerObject);
+            towerObject.SetActive(false);
+            CombatUnit tower = towerObject.AddComponent<CombatUnit>();
+            tower.Configure(TeamId.Blue, Altitude.Ground, 10f, 1f, 0f, 8f, 1f, true, false);
+            BasicAttackController attack = towerObject.AddComponent<BasicAttackController>();
+            TowerCombatController controller = towerObject.AddComponent<TowerCombatController>();
+            SerializedObject serializedController = new SerializedObject(controller);
+            serializedController.FindProperty("owner").objectReferenceValue = tower;
+            serializedController.FindProperty("attack").objectReferenceValue = attack;
+            serializedController.ApplyModifiedPropertiesWithoutUndo();
+            CreateUnit("Red", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 2f, true, false);
+
+            towerObject.SetActive(true);
+            controller.Tick(0f);
+            tower.TakePhysicalDamage(tower.MaxHealth);
+            tower.Configure(TeamId.Blue, Altitude.Ground, 10f, 1f, 0f, 8f, 1f, true, false);
             controller.Tick(0f);
 
             Assert.That(attack.CurrentTarget, Is.Null);

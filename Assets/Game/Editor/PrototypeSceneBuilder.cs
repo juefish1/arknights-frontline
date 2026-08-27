@@ -184,13 +184,16 @@ namespace ArknightsFrontline.Editor
         {
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
+            Vector3 initialPosition = new Vector3(0f, 42f, -34f);
             cameraObject.transform.SetPositionAndRotation(
-                new Vector3(0f, 42f, -34f),
+                initialPosition,
                 Quaternion.Euler(55f, 0f, 0f));
             UnityEngine.Camera camera = cameraObject.AddComponent<UnityEngine.Camera>();
             camera.orthographic = false;
             camera.fieldOfView = 55f;
-            return cameraObject.AddComponent<MobaCameraController>();
+            MobaCameraController controller = cameraObject.AddComponent<MobaCameraController>();
+            controller.ConfigureOffset(initialPosition);
+            return controller;
         }
 
         private static void CreateUiRoots()

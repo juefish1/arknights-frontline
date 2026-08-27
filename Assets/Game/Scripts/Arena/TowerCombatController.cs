@@ -43,17 +43,14 @@ namespace ArknightsFrontline.Arena
                 throw new ArgumentNullException(nameof(attackController));
             }
 
-            if (owner != combatOwner)
+            if (owner != null && owner != combatOwner)
             {
-                if (owner != null)
-                {
-                    owner.Died -= OnOwnerDied;
-                }
-
-                owner = combatOwner;
-                owner.Died += OnOwnerDied;
+                owner.Died -= OnOwnerDied;
             }
 
+            owner = combatOwner;
+            owner.Died -= OnOwnerDied;
+            owner.Died += OnOwnerDied;
             attack = attackController;
             stopped = false;
 

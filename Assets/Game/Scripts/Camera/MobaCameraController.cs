@@ -12,7 +12,7 @@ namespace ArknightsFrontline.Camera
         private const float DragWorldUnitsPerPixel = 0.03f;
 
         private readonly ArenaLayout layout = ArenaLayout.CreateDefault();
-        private readonly Vector3 cameraOffset = new Vector3(0f, 35f, -28f);
+        [SerializeField] private Vector3 cameraOffset = new Vector3(0f, 35f, -28f);
 
         [SerializeField] private Transform centeringTarget;
         private Vector3 focusPosition;
@@ -68,6 +68,13 @@ namespace ArknightsFrontline.Camera
             }
 
             centeringTarget = target;
+        }
+
+        public void ConfigureOffset(Vector3 offset)
+        {
+            cameraOffset = offset;
+            focusPosition = layout.Clamp(transform.position - cameraOffset);
+            ApplyFocus();
         }
 
         public static Vector3 CalculateEdgePanVelocity(Vector2 pointerPosition, Vector2 screenSize)
