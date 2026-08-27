@@ -172,10 +172,10 @@ namespace ArknightsFrontline.Tests.PlayMode
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
             Mouse mouse = InputSystem.AddDevice<Mouse>();
-            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenterAt(new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            PlayerCommandController controller = player.GetComponent<PlayerCommandController>();
             GameObject cameraObject = CreateMainCamera();
-            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            target.layer = LayerMask.NameToLayer("Targetable");
+            GameObject target = CreateTargetableCube(TeamId.Red);
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
@@ -186,9 +186,73 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Attack));
             Assert.That(controller.IsAttackMoveHeld, Is.True);
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
             Object.Destroy(player);
             Object.Destroy(cameraObject);
             Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator EscapeAfterConfirmationCancelsHeldQFeedback()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenterAt(new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            PlayerCommandController controller = player.GetComponent<PlayerCommandController>();
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.False);
+            Assert.That(controller.IsAttackMoveHeld, Is.True);
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+
+            Press(keyboard.escapeKey);
+            yield return null;
+
+            Assert.That(controller.IsAttackMoveHeld, Is.False);
+            Assert.That(feedback.IsAttackRangeVisible, Is.False);
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator SharedRightClickAfterConfirmationCancelsHeldQFeedbackWithoutMoving()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenterAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            PlayerCommandController controller = player.GetComponent<PlayerCommandController>();
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.False);
+            Assert.That(controller.IsAttackMoveHeld, Is.True);
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+
+            Press(mouse.rightButton);
+            yield return null;
+
+            Assert.That(controller.IsAttackMoveHeld, Is.False);
+            Assert.That(feedback.IsAttackRangeVisible, Is.False);
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Attack));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+            Object.Destroy(ground);
         }
 
         [UnityTest]
@@ -244,8 +308,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             Mouse mouse = InputSystem.AddDevice<Mouse>();
             PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
             GameObject cameraObject = CreateMainCamera();
-            GameObject target = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            target.layer = LayerMask.NameToLayer("Targetable");
+            ConfigurePlayerCombatUnit(player);
+            GameObject target = CreateTargetableCube(TeamId.Red);
             controller.Issue(UnitCommand.Move(Vector3.zero));
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 
@@ -261,6 +325,78 @@ namespace ArknightsFrontline.Tests.PlayMode
             Object.Destroy(player);
             Object.Destroy(cameraObject);
             Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator QPlusFriendlyTargetableClickIssuesNearestInRangeIntent()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            ConfigurePlayerCombatUnit(player);
+            GameObject target = CreateTargetableCube(TeamId.Blue);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator QPlusDeadTargetableClickIssuesNearestInRangeIntent()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            ConfigurePlayerCombatUnit(player);
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            target.GetComponent<CombatUnit>().TakePhysicalDamage(100f);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator QPlusTargetableTowerWithoutCombatUnitIssuesNearestInRangeIntent()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            ConfigurePlayerCombatUnit(player);
+            GameObject tower = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tower.name = "TargetableTower";
+            tower.layer = LayerMask.NameToLayer("Targetable");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            Press(mouse.leftButton);
+            yield return null;
+
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.AttackNearestInRange));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(tower);
         }
 
         [UnityTest]
@@ -357,10 +493,23 @@ namespace ArknightsFrontline.Tests.PlayMode
 
         private static CommandFeedbackPresenter CreateFeedbackPresenter(out GameObject player)
         {
-            CreateControllerAt(Vector3.zero, out _, out player);
+            return CreateFeedbackPresenterAt(Vector3.zero, out _, out player);
+        }
+
+        private static CommandFeedbackPresenter CreateFeedbackPresenterAt(
+            Vector3 position,
+            out UnitMotor motor,
+            out GameObject player)
+        {
+            CreateControllerAt(position, out motor, out player);
+            ConfigurePlayerCombatUnit(player);
+            return player.AddComponent<CommandFeedbackPresenter>();
+        }
+
+        private static void ConfigurePlayerCombatUnit(GameObject player)
+        {
             CombatUnit combatUnit = player.AddComponent<CombatUnit>();
             combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, false);
-            return player.AddComponent<CommandFeedbackPresenter>();
         }
 
         private static GameObject CreateTargetableCube(TeamId team)
