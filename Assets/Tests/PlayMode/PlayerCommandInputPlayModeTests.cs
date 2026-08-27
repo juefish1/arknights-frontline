@@ -15,6 +15,42 @@ namespace ArknightsFrontline.Tests.PlayMode
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
         [UnityTest]
+        public IEnumerator DisablingFeedbackClearsVisibleStateAndHidesRangeRingUntilReenabled()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            CommandFeedbackPresenter feedback = CreateFeedbackPresenter(out GameObject player);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.qKey);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+            Assert.That(feedback.IsHoveringLegalTarget, Is.True);
+            Assert.That(GameObject.Find("AttackRangeRing").GetComponent<LineRenderer>().enabled, Is.True);
+
+            feedback.enabled = false;
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.False);
+            Assert.That(feedback.IsHoveringLegalTarget, Is.False);
+            Assert.That(GameObject.Find("AttackRangeRing").GetComponent<LineRenderer>().enabled, Is.False);
+
+            Release(keyboard.qKey);
+            feedback.enabled = true;
+            yield return null;
+            Assert.That(feedback.IsHoveringLegalTarget, Is.True);
+
+            Press(keyboard.qKey);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
         public IEnumerator HeldQShowsTheConfiguredAttackRangeAndReleaseHidesIt()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();

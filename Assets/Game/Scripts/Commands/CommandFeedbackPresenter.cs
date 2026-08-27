@@ -35,6 +35,22 @@ namespace ArknightsFrontline.Commands
             UpdateHoverFeedback();
         }
 
+        private void OnDisable()
+        {
+            IsAttackRangeVisible = false;
+            IsHoveringLegalTarget = false;
+            if (rangeRing != null)
+            {
+                rangeRing.enabled = false;
+            }
+
+            if (isHoverCursorActive)
+            {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                isHoverCursorActive = false;
+            }
+        }
+
         private void OnDestroy()
         {
             Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
