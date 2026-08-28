@@ -91,6 +91,16 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void UnconfiguredTowerControllerTickIsIgnored()
+        {
+            TowerCombatController controller = new GameObject("UnconfiguredTowerController")
+                .AddComponent<TowerCombatController>();
+            gameObjects.Add(controller.gameObject);
+
+            Assert.DoesNotThrow(() => controller.Tick(0f));
+        }
+
+        [Test]
         public void AwakeRebindStopsRevivedTowerAfterOwnerDies()
         {
             GameObject towerObject = new GameObject("SerializedBlueTower");

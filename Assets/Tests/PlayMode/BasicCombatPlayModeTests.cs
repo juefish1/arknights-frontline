@@ -11,6 +11,75 @@ using UnityEngine.TestTools;
 
 namespace ArknightsFrontline.Tests.PlayMode
 {
+    [DefaultExecutionOrder(-1000)]
+    public sealed class EarlyProjectileTickDriver : MonoBehaviour
+    {
+        private Projectile projectile;
+        private bool hasTicked;
+
+        public void Configure(Projectile projectileToTick)
+        {
+            projectile = projectileToTick;
+        }
+
+        private void Update()
+        {
+            if (hasTicked)
+            {
+                return;
+            }
+
+            hasTicked = true;
+            projectile.Tick(1f);
+        }
+    }
+
+    [DefaultExecutionOrder(1000)]
+    public sealed class LateProjectileTickDriver : MonoBehaviour
+    {
+        private Projectile projectile;
+        private bool hasTicked;
+
+        public void Configure(Projectile projectileToTick)
+        {
+            projectile = projectileToTick;
+        }
+
+        private void Update()
+        {
+            if (hasTicked)
+            {
+                return;
+            }
+
+            hasTicked = true;
+            projectile.Tick(1f);
+        }
+    }
+
+    [DefaultExecutionOrder(-1000)]
+    public sealed class EarlyWaveBoundaryTickDriver : MonoBehaviour
+    {
+        private MinionWaveSpawner spawner;
+        private bool hasTicked;
+
+        public void Configure(MinionWaveSpawner waveSpawner)
+        {
+            spawner = waveSpawner;
+        }
+
+        private void Update()
+        {
+            if (hasTicked)
+            {
+                return;
+            }
+
+            hasTicked = true;
+            spawner.Tick(24.9f);
+        }
+    }
+
     public sealed class BasicCombatPlayModeTests
     {
         private readonly List<GameObject> gameObjects = new List<GameObject>();
@@ -24,6 +93,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             }
 
             gameObjects.Clear();
+            Time.timeScale = 1f;
             yield return null;
         }
 
@@ -78,6 +148,135 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(spawnedVisibleProjectile, Is.True);
             Assert.That(target.IsDead, Is.True);
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SameFrameLethalProjectilesResolveDrawAcrossOutcomeUpdateOrder()
+        {
+            MatchFixture match = CreateMatch();
+            CombatUnit blueAttacker = CreateUnit(
+                "BlueProjectileAttacker",
+                TeamId.Blue,
+                match.RedTower.transform.position,
+                100f,
+                20f);
+            CombatUnit redAttacker = CreateUnit(
+                "RedProjectileAttacker",
+                TeamId.Red,
+                match.BlueTower.transform.position,
+                100f,
+                20f);
+            Projectile redTowerProjectile = CreateLethalProjectile(blueAttacker, match.RedTower);
+            Projectile blueTowerProjectile = CreateLethalProjectile(redAttacker, match.BlueTower);
+
+            EarlyProjectileTickDriver earlyDriver = CreateGameObject("EarlyProjectileTickDriver")
+                .AddComponent<EarlyProjectileTickDriver>();
+            earlyDriver.Configure(redTowerProjectile);
+            LateProjectileTickDriver lateDriver = CreateGameObject("LateProjectileTickDriver")
+                .AddComponent<LateProjectileTickDriver>();
+            lateDriver.Configure(blueTowerProjectile);
+
+            yield return null;
+            yield return null;
+
+            Assert.That(match.BlueTower.IsDead, Is.True);
+            Assert.That(match.RedTower.IsDead, Is.True);
+            Assert.That(match.OutcomeController.IsMatchOver, Is.True);
+            Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.Draw));
+        }
+
+        [UnityTest]
+        public IEnumerator TowerDeathAtWaveBoundaryPreventsBoundaryWaveRegardlessOfUpdateOrder()
+        {
+            MatchFixture match = CreateMatch();
+
+            yield return null;
+            yield return null;
+
+            Assert.That(match.Spawner.SpawnedWaveCount, Is.EqualTo(1));
+            EarlyWaveBoundaryTickDriver boundaryDriver = CreateGameObject("EarlyWaveBoundaryTickDriver")
+                .AddComponent<EarlyWaveBoundaryTickDriver>();
+            boundaryDriver.Configure(match.Spawner);
+            CombatUnit blueAttacker = CreateUnit(
+                "BlueBoundaryAttacker",
+                TeamId.Blue,
+                match.RedTower.transform.position,
+                100f,
+                20f);
+            Projectile lethalProjectile = CreateLethalProjectile(blueAttacker, match.RedTower);
+            LateProjectileTickDriver lateDriver = CreateGameObject("LateBoundaryProjectileTickDriver")
+                .AddComponent<LateProjectileTickDriver>();
+            lateDriver.Configure(lethalProjectile);
+            Time.timeScale = 100f;
+
+            yield return null;
+            yield return null;
+            Time.timeScale = 1f;
+
+            Assert.That(match.RedTower.IsDead, Is.True);
+            Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.BlueVictory));
+            Assert.That(match.Spawner.SpawnedWaveCount, Is.EqualTo(1));
+        }
+
+        private MatchFixture CreateMatch()
+        {
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit blueTower = CreateUnit("BlueTower", TeamId.Blue, layout.BlueTower, 10f, 0f);
+            CombatUnit redTower = CreateUnit("RedTower", TeamId.Red, layout.RedTower, 10f, 0f);
+            GameObject minionParent = CreateGameObject("MinionParent");
+            MinionWaveSpawner spawner = CreateGameObject("MinionWaveSpawner").AddComponent<MinionWaveSpawner>();
+            spawner.Configure(minionParent.transform, layout, blueTower, redTower, null, null, 0);
+            MatchOutcomeController outcomeController = CreateGameObject("MatchOutcomeController")
+                .AddComponent<MatchOutcomeController>();
+            outcomeController.Configure(blueTower, redTower, spawner);
+            return new MatchFixture(blueTower, redTower, spawner, outcomeController);
+        }
+
+        private CombatUnit CreateUnit(string name, TeamId team, Vector3 position, float health, float attackPower)
+        {
+            GameObject gameObject = CreateGameObject(name);
+            gameObject.transform.position = position;
+            CombatUnit unit = gameObject.AddComponent<CombatUnit>();
+            unit.Configure(team, Altitude.Ground, health, attackPower, 0f, 10f, 1f, true, true);
+            return unit;
+        }
+
+        private Projectile CreateLethalProjectile(CombatUnit attacker, CombatUnit target)
+        {
+            Projectile projectile = CreateGameObject("LethalProjectile").AddComponent<Projectile>();
+            projectile.Initialize(attacker, target, target.MaxHealth, 16f);
+            projectile.enabled = false;
+            return projectile;
+        }
+
+        private GameObject CreateGameObject(string name)
+        {
+            GameObject gameObject = new GameObject(name);
+            gameObjects.Add(gameObject);
+            return gameObject;
+        }
+
+        private sealed class MatchFixture
+        {
+            public MatchFixture(
+                CombatUnit blueTower,
+                CombatUnit redTower,
+                MinionWaveSpawner spawner,
+                MatchOutcomeController outcomeController)
+            {
+                BlueTower = blueTower;
+                RedTower = redTower;
+                Spawner = spawner;
+                OutcomeController = outcomeController;
+            }
+
+            public CombatUnit BlueTower { get; }
+
+            public CombatUnit RedTower { get; }
+
+            public MinionWaveSpawner Spawner { get; }
+
+            public MatchOutcomeController OutcomeController { get; }
         }
     }
 }

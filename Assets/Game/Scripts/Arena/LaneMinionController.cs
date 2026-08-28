@@ -13,6 +13,7 @@ namespace ArknightsFrontline.Arena
         private CombatUnit enemyTower;
         private Vector3 forwardDestination;
         private bool stopped;
+        private bool isConfigured;
 
         private void OnDestroy()
         {
@@ -70,6 +71,7 @@ namespace ArknightsFrontline.Arena
             enemyTower = opposingTower;
             forwardDestination = destination;
             stopped = false;
+            isConfigured = true;
 
             if (owner.IsDead)
             {
@@ -79,9 +81,21 @@ namespace ArknightsFrontline.Arena
 
         public void Tick(float deltaTime)
         {
+            if (!isConfigured)
+            {
+                return;
+            }
+
             if (stopped || owner.IsDead)
             {
                 StopForMatch();
+                return;
+            }
+
+            CombatUnit currentTarget = attack.CurrentTarget;
+            if (IsLegalAndInRange(currentTarget))
+            {
+                motor.Stop();
                 return;
             }
 
@@ -116,17 +130,22 @@ namespace ArknightsFrontline.Arena
 
         private CombatUnit FindTowerIfInRange()
         {
-            if (!TargetRules.IsLegal(owner, enemyTower))
+            return IsLegalAndInRange(enemyTower) ? enemyTower : null;
+        }
+
+        private bool IsLegalAndInRange(CombatUnit target)
+        {
+            if (!TargetRules.IsLegal(owner, target))
             {
-                return null;
+                return false;
             }
 
             Vector3 ownerPosition = owner.transform.position;
-            Vector3 towerPosition = enemyTower.transform.position;
+            Vector3 targetPosition = target.transform.position;
             float horizontalDistance = Vector2.Distance(
                 new Vector2(ownerPosition.x, ownerPosition.z),
-                new Vector2(towerPosition.x, towerPosition.z));
-            return horizontalDistance <= owner.AttackRange ? enemyTower : null;
+                new Vector2(targetPosition.x, targetPosition.z));
+            return horizontalDistance <= owner.AttackRange;
         }
 
         private void OnOwnerDied(CombatUnit _)

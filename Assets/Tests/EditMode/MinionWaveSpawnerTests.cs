@@ -68,6 +68,17 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void TickAtSeventyFiveSecondsCatchesUpThreeAdditionalWaves()
+        {
+            MinionWaveSpawner spawner = CreateSpawner();
+            spawner.SpawnWaveNow();
+
+            spawner.Tick(75f);
+
+            Assert.That(spawner.SpawnedWaveCount, Is.EqualTo(4));
+        }
+
+        [Test]
         public void SpawnedMinionsUseFixedCombatProfilesAndMovementSpeeds()
         {
             MinionWaveSpawner spawner = CreateSpawner();

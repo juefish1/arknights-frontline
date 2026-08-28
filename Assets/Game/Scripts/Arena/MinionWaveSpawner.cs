@@ -51,7 +51,7 @@ namespace ArknightsFrontline.Arena
             elapsed = 0f;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             Tick(Time.deltaTime);
         }
@@ -94,7 +94,7 @@ namespace ArknightsFrontline.Arena
 
         public void Tick(float deltaTime)
         {
-            if (!isConfigured || stopped)
+            if (!CanSpawn())
             {
                 return;
             }
@@ -114,7 +114,7 @@ namespace ArknightsFrontline.Arena
 
         public void SpawnWaveNow()
         {
-            if (!isConfigured || stopped)
+            if (!CanSpawn())
             {
                 return;
             }
@@ -123,6 +123,14 @@ namespace ArknightsFrontline.Arena
             SpawnTeamWave(TeamId.Blue, waveNumber, blueTower, redTower, blueMaterial);
             SpawnTeamWave(TeamId.Red, waveNumber, redTower, blueTower, redMaterial);
             SpawnedWaveCount = waveNumber;
+        }
+
+        private bool CanSpawn()
+        {
+            return isConfigured &&
+                   !stopped &&
+                   !blueTower.IsDead &&
+                   !redTower.IsDead;
         }
 
         private void SpawnTeamWave(

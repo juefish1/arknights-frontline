@@ -9,6 +9,7 @@ namespace ArknightsFrontline.Arena
         [SerializeField] private CombatUnit owner;
         [SerializeField] private BasicAttackController attack;
         private bool stopped;
+        private bool isConfigured;
 
         private void Awake()
         {
@@ -53,6 +54,7 @@ namespace ArknightsFrontline.Arena
             owner.Died += OnOwnerDied;
             attack = attackController;
             stopped = false;
+            isConfigured = true;
 
             if (owner.IsDead)
             {
@@ -62,6 +64,11 @@ namespace ArknightsFrontline.Arena
 
         public void Tick(float deltaTime)
         {
+            if (!isConfigured)
+            {
+                return;
+            }
+
             if (stopped || owner.IsDead)
             {
                 StopForMatch();

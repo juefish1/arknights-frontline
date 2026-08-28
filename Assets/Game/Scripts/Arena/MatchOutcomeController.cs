@@ -12,6 +12,7 @@ namespace ArknightsFrontline.Arena
         [SerializeField] private MinionWaveSpawner spawner;
         private bool blueTowerDestroyed;
         private bool redTowerDestroyed;
+        private bool settlementPending;
 
         public bool IsMatchOver { get; private set; }
 
@@ -25,7 +26,7 @@ namespace ArknightsFrontline.Arena
             }
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             Tick();
         }
@@ -37,7 +38,7 @@ namespace ArknightsFrontline.Arena
 
         public void Configure(CombatUnit blueTower, CombatUnit redTower, MinionWaveSpawner spawner)
         {
-            if (IsMatchOver)
+            if (settlementPending || IsMatchOver)
             {
                 return;
             }
@@ -66,14 +67,20 @@ namespace ArknightsFrontline.Arena
             redTowerDestroyed = redTower.IsDead;
             Outcome = MatchOutcome.None;
             IsMatchOver = false;
+            settlementPending = false;
 
             this.blueTower.Died += OnBlueTowerDied;
             this.redTower.Died += OnRedTowerDied;
+
+            if (blueTowerDestroyed || redTowerDestroyed)
+            {
+                BeginSettlement();
+            }
         }
 
         public void Tick()
         {
-            if (IsMatchOver || (!blueTowerDestroyed && !redTowerDestroyed))
+            if (IsMatchOver || !settlementPending)
             {
                 return;
             }
@@ -91,11 +98,23 @@ namespace ArknightsFrontline.Arena
                 Outcome = MatchOutcome.BlueVictory;
             }
 
-            FreezeCombat();
             IsMatchOver = true;
+            settlementPending = false;
+            CancelInFlightProjectiles();
         }
 
-        private void FreezeCombat()
+        private void BeginSettlement()
+        {
+            if (settlementPending || IsMatchOver)
+            {
+                return;
+            }
+
+            settlementPending = true;
+            StopCombatProducers();
+        }
+
+        private void StopCombatProducers()
         {
             spawner.StopForMatch();
 
@@ -117,7 +136,10 @@ namespace ArknightsFrontline.Arena
                 attack.ClearTarget();
                 attack.enabled = false;
             }
+        }
 
+        private static void CancelInFlightProjectiles()
+        {
             foreach (Projectile projectile in
                      UnityEngine.Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None))
             {
@@ -141,11 +163,13 @@ namespace ArknightsFrontline.Arena
         private void OnBlueTowerDied(CombatUnit _)
         {
             blueTowerDestroyed = true;
+            BeginSettlement();
         }
 
         private void OnRedTowerDied(CombatUnit _)
         {
             redTowerDestroyed = true;
+            BeginSettlement();
         }
     }
 }

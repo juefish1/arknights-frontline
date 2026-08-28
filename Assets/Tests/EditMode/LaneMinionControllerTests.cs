@@ -62,6 +62,57 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void MinionKeepsCurrentTargetAndAttackCadenceWhenCloserEnemyEntersRange()
+        {
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit minion = CreateUnit("BlueMinion", TeamId.Blue, Altitude.Ground, Vector3.zero, 5f, true, false);
+            UnitMotor motor = minion.gameObject.AddComponent<UnitMotor>();
+            motor.Configure(3f, layout);
+            BasicAttackController attack = minion.gameObject.AddComponent<BasicAttackController>();
+            CombatUnit currentEnemy = CreateUnit(
+                "CurrentRedMinion",
+                TeamId.Red,
+                Altitude.Ground,
+                new Vector3(4f, 0f, 0f),
+                5f,
+                true,
+                false);
+            CombatUnit redTower = CreateUnit("RedTower", TeamId.Red, Altitude.Ground, layout.RedTower, 8f, true, true);
+            LaneMinionController controller = minion.gameObject.AddComponent<LaneMinionController>();
+            controller.Configure(minion, motor, attack, redTower, redTower.transform.position);
+            int attackRequestCount = 0;
+            CombatUnit lastRequestedTarget = null;
+            attack.AttackRequested += (_, target) =>
+            {
+                attackRequestCount++;
+                lastRequestedTarget = target;
+            };
+
+            controller.Tick(0f);
+            attack.Tick(0f);
+            attack.Tick(0.6f);
+            CreateUnit(
+                "CloserRedMinion",
+                TeamId.Red,
+                Altitude.Ground,
+                new Vector3(2f, 0f, 0f),
+                5f,
+                true,
+                false);
+
+            controller.Tick(0f);
+            attack.Tick(0f);
+
+            Assert.That(attack.CurrentTarget, Is.EqualTo(currentEnemy));
+            Assert.That(attackRequestCount, Is.EqualTo(1), "Retargeting must not grant an extra immediate attack.");
+
+            attack.Tick(0.4f);
+
+            Assert.That(attackRequestCount, Is.EqualTo(2));
+            Assert.That(lastRequestedTarget, Is.EqualTo(currentEnemy));
+        }
+
+        [Test]
         public void MinionResumesAdvancingAfterEnemyUnitDies()
         {
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -137,6 +188,16 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(motor.IsMoving, Is.True);
             Assert.That(attack.CurrentTarget, Is.Null);
+        }
+
+        [Test]
+        public void UnconfiguredMinionControllerTickIsIgnored()
+        {
+            LaneMinionController controller = new GameObject("UnconfiguredMinionController")
+                .AddComponent<LaneMinionController>();
+            gameObjects.Add(controller.gameObject);
+
+            Assert.DoesNotThrow(() => controller.Tick(0f));
         }
 
         private CombatUnit CreateUnit(string name, TeamId team, Altitude altitude, Vector3 position, float attackRange, bool canAttackGround, bool canAttackAir)
