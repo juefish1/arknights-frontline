@@ -149,6 +149,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();
             presenter.Configure(unit);
             Transform healthBar = unit.transform.Find("HealthBar");
+            Assert.That(healthBar, Is.Not.Null);
 
             unit.TakePhysicalDamage(unit.MaxHealth);
             yield return null;
