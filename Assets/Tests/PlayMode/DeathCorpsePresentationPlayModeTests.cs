@@ -139,6 +139,27 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(corpse.transform.position.z, Is.EqualTo(deathPosition.z));
         }
 
+        [UnityTest]
+        public IEnumerator UnitDeathDestroysItsHealthBarWithoutAddingOneToTheCorpse()
+        {
+            CreateGround();
+            Material material = CreateMaterial(Color.green);
+            CombatUnit unit = CreateUnit("HealthBarUnit", TeamId.Blue, Altitude.Ground, Vector3.zero, 100f);
+            unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(unit, material, GroundLayer);
+            HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();
+            presenter.Configure(unit);
+            Transform healthBar = unit.transform.Find("HealthBar");
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+            yield return null;
+
+            Assert.That(unit, Is.Null);
+            Assert.That(healthBar, Is.Null);
+            GameObject corpse = GameObject.Find("HealthBarUnit_Corpse");
+            Assert.That(corpse, Is.Not.Null);
+            Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
+        }
+
         private void CreateGround()
         {
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
