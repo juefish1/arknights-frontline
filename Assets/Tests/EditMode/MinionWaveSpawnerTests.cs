@@ -125,6 +125,34 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(redAirStartX - redAir.transform.position.x, Is.EqualTo(3.2f).Within(0.001f));
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public void ConfigureRejectsNullTeamMaterialBeforeSpawningAnyMinions(bool nullBlueMaterial)
+        {
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            GameObject parent = CreateGameObject("MinionParent");
+            CombatUnit blueTower = CreateTower("BlueTower", TeamId.Blue, layout.BlueTower);
+            CombatUnit redTower = CreateTower("RedTower", TeamId.Red, layout.RedTower);
+            MinionWaveSpawner spawner = CreateGameObject("Spawner").AddComponent<MinionWaveSpawner>();
+            Material blueMaterial = nullBlueMaterial ? null : CreateMaterial(Color.blue);
+            Material redMaterial = nullBlueMaterial ? CreateMaterial(Color.red) : null;
+
+            System.ArgumentNullException exception = Assert.Throws<System.ArgumentNullException>(() => spawner.Configure(
+                parent.transform,
+                layout,
+                blueTower,
+                redTower,
+                blueMaterial,
+                redMaterial,
+                9,
+                8));
+
+            Assert.That(exception.ParamName, Is.EqualTo(nullBlueMaterial ? "blueMaterial" : "redMaterial"));
+            spawner.SpawnWaveNow();
+            Assert.That(parent.transform.childCount, Is.Zero);
+            Assert.That(spawner.SpawnedWaveCount, Is.Zero);
+        }
+
         private MinionWaveSpawner CreateSpawner()
         {
             ArenaLayout layout = ArenaLayout.CreateDefault();

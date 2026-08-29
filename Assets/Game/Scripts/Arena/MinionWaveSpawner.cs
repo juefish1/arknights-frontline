@@ -83,6 +83,16 @@ namespace ArknightsFrontline.Arena
                 throw new ArgumentNullException(nameof(redTower));
             }
 
+            if (blueMaterial == null)
+            {
+                throw new ArgumentNullException(nameof(blueMaterial));
+            }
+
+            if (redMaterial == null)
+            {
+                throw new ArgumentNullException(nameof(redMaterial));
+            }
+
             this.minionParent = minionParent;
             layout = arenaLayout;
             this.blueTower = blueTower;

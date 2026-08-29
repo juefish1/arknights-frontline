@@ -79,8 +79,9 @@ namespace ArknightsFrontline.Tests.EditMode
             fall.Tick(0.29f);
             Assert.That(fall.transform.position.y, Is.GreaterThan(0.01f));
             Assert.That(fall.HasLanded, Is.False);
-            fall.Tick(0.01f);
+            fall.Tick(0.3f - 0.29f);
             Assert.That(fall.HasLanded, Is.True);
+            Assert.That(fall.enabled, Is.False);
             Assert.That(fall.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
         }
 

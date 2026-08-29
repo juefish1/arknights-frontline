@@ -24,6 +24,7 @@ namespace ArknightsFrontline.Combat
             this.duration = duration;
             elapsed = 0f;
             HasLanded = false;
+            enabled = true;
         }
 
         public void Tick(float deltaTime)
@@ -35,6 +36,7 @@ namespace ArknightsFrontline.Combat
             {
                 transform.position = landingPosition;
                 HasLanded = true;
+                enabled = false;
             }
         }
 

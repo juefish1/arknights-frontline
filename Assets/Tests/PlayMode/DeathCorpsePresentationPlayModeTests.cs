@@ -71,13 +71,15 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(
                 Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None),
                 Has.None.Matches<CombatUnit>(unit => unit.name == blueGroundMinionName));
-            TrackCorpse(blueGroundMinionName + "_Corpse");
+            GameObject groundCorpse = TrackCorpse(blueGroundMinionName + "_Corpse");
+            AssertCorpseInvariants(groundCorpse, blueMaterial);
 
             redAirMinion.TakePhysicalDamage(redAirMinion.MaxHealth);
 
             yield return null;
 
             GameObject airCorpse = TrackCorpse(redAirMinionName + "_Corpse");
+            AssertCorpseInvariants(airCorpse, redMaterial);
             float airCorpseStartY = airCorpse.transform.position.y;
             yield return new WaitForSeconds(0.15f);
             Assert.That(airCorpse.transform.position.y, Is.LessThan(airCorpseStartY));
@@ -111,6 +113,30 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
 
             Assert.That(FindCorpses().Length, Is.EqualTo(corpseCountBeforeExcludedDeaths));
+        }
+
+        [UnityTest]
+        public IEnumerator AirCorpseFallsToZeroHeightWhenGroundRaycastMisses()
+        {
+            Vector3 deathPosition = new Vector3(123f, 5f, 123f);
+            Material material = CreateMaterial(Color.red);
+            CombatUnit airUnit = CreateUnit("FallbackAir", TeamId.Red, Altitude.Air, deathPosition, 10f);
+            airUnit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(airUnit, material, GroundLayer);
+            Assert.That(
+                Physics.Raycast(deathPosition + Vector3.up, Vector3.down, 100f, 1 << GroundLayer),
+                Is.False);
+
+            airUnit.TakePhysicalDamage(airUnit.MaxHealth);
+
+            yield return null;
+
+            GameObject corpse = TrackCorpse("FallbackAir_Corpse");
+            CorpseFallController fall = corpse.GetComponent<CorpseFallController>();
+            fall.Tick(1f);
+            Assert.That(fall.HasLanded, Is.True);
+            Assert.That(corpse.transform.position.x, Is.EqualTo(deathPosition.x));
+            Assert.That(corpse.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
+            Assert.That(corpse.transform.position.z, Is.EqualTo(deathPosition.z));
         }
 
         private void CreateGround()
@@ -163,6 +189,15 @@ namespace ArknightsFrontline.Tests.PlayMode
             GameObject corpse = FindCorpses().Single(candidate => candidate.name == corpseName);
             gameObjects.Add(corpse);
             return corpse;
+        }
+
+        private static void AssertCorpseInvariants(GameObject corpse, Material expectedMaterial)
+        {
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(expectedMaterial));
+            Assert.That(corpse.layer, Is.EqualTo(LayerMask.NameToLayer("Default")));
+            Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
+            Collider collider = corpse.GetComponent<Collider>();
+            Assert.That(collider == null || !collider.enabled, Is.True);
         }
 
         private static GameObject[] FindCorpses()
