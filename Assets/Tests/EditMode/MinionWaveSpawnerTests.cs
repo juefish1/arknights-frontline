@@ -54,6 +54,7 @@ namespace ArknightsFrontline.Tests.EditMode
                 Assert.That(minion.GetComponent<BasicAttackController>(), Is.Not.Null);
                 Assert.That(minion.GetComponent<LaneMinionController>(), Is.Not.Null);
                 Assert.That(minion.GetComponent<DeathCorpsePresenter>(), Is.Not.Null);
+                Assert.That(minion.GetComponent<HealthBarPresenter>(), Is.Not.Null);
             }
         }
 

@@ -27,6 +27,9 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(outcome, Is.Not.Null);
             Assert.That(outcome.Outcome, Is.EqualTo(MatchOutcome.None));
             Assert.That(Object.FindFirstObjectByType<MinionWaveSpawner>(), Is.Not.Null);
+            GameObject player = GameObject.Find("Player_Exusiai");
+            Assert.That(player, Is.Not.Null);
+            Assert.That(player.GetComponent<HealthBarPresenter>(), Is.Not.Null);
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             Assert.That(mainCamera, Is.Not.Null);
             Assert.That(mainCamera.transform.position, Is.EqualTo(new Vector3(0f, 42f, -34f)));

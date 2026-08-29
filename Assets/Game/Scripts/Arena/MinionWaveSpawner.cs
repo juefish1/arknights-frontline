@@ -199,6 +199,7 @@ namespace ArknightsFrontline.Arena
 
             CombatUnit combatUnit = minionObject.AddComponent<CombatUnit>();
             ConfigureCombatUnit(combatUnit, team, altitude);
+            minionObject.AddComponent<HealthBarPresenter>();
             DeathCorpsePresenter presenter = minionObject.AddComponent<DeathCorpsePresenter>();
             presenter.Configure(combatUnit, material, groundLayer);
 
