@@ -1,33 +1,40 @@
+using System.Collections;
 using System.Collections.Generic;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace ArknightsFrontline.Tests.EditMode
 {
     public sealed class DeathCorpsePresenterTests
     {
         private const int GroundLayer = 8;
-        private const int TargetableLayer = 7;
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
         private readonly List<Material> materials = new List<Material>();
+        private readonly HashSet<int> initialCorpseIds = new HashSet<int>();
+
+        [SetUp]
+        public void SetUp()
+        {
+            initialCorpseIds.Clear();
+            foreach (GameObject corpse in FindCorpses())
+            {
+                initialCorpseIds.Add(corpse.GetInstanceID());
+            }
+        }
 
         [TearDown]
         public void TearDown()
         {
-            foreach (GameObject corpse in GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
-            {
-                if (corpse.name.EndsWith("_Corpse"))
-                {
-                    Object.DestroyImmediate(corpse);
-                }
-            }
-
             foreach (GameObject gameObject in gameObjects)
             {
-                Object.DestroyImmediate(gameObject);
+                if (gameObject != null)
+                {
+                    Object.DestroyImmediate(gameObject);
+                }
             }
 
             foreach (Material material in materials)
@@ -37,6 +44,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
             gameObjects.Clear();
             materials.Clear();
+            initialCorpseIds.Clear();
         }
 
         [Test]
@@ -49,11 +57,12 @@ namespace ArknightsFrontline.Tests.EditMode
 
             unit.TakePhysicalDamage(unit.MaxHealth);
 
-            GameObject corpse = FindCorpse("BlueGround_Corpse");
+            GameObject corpse = FindAndTrackNewCorpse("BlueGround_Corpse");
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.EqualTo(material));
             Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(3f, 0.01f, -2f)));
             Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
-            Assert.That(corpse.layer, Is.Not.EqualTo(TargetableLayer));
+            Assert.That(LayerMask.NameToLayer("Targetable"), Is.EqualTo(9));
+            Assert.That(corpse.layer, Is.EqualTo(LayerMask.NameToLayer("Default")));
             Collider collider = corpse.GetComponent<Collider>();
             Assert.That(collider == null || !collider.enabled, Is.True);
         }
@@ -66,12 +75,31 @@ namespace ArknightsFrontline.Tests.EditMode
             unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(unit, CreateMaterial(Color.red), GroundLayer);
 
             unit.TakePhysicalDamage(unit.MaxHealth);
-            CorpseFallController fall = FindCorpse("RedAir_Corpse").GetComponent<CorpseFallController>();
-            fall.Tick(0.15f);
+            CorpseFallController fall = FindAndTrackNewCorpse("RedAir_Corpse").GetComponent<CorpseFallController>();
+            fall.Tick(0.29f);
             Assert.That(fall.transform.position.y, Is.GreaterThan(0.01f));
-            fall.Tick(0.15f);
+            Assert.That(fall.HasLanded, Is.False);
+            fall.Tick(0.01f);
             Assert.That(fall.HasLanded, Is.True);
             Assert.That(fall.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
+        }
+
+        [UnityTest]
+        public IEnumerator UnitDeathHidesSourceImmediatelyAndDestroysItOnNextFrame()
+        {
+            CreateGround();
+            CombatUnit unit = CreateUnit("RenderedUnit", Altitude.Ground, Vector3.zero);
+            Renderer sourceRenderer = unit.gameObject.AddComponent<MeshRenderer>();
+            unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(unit, CreateMaterial(Color.white), GroundLayer);
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+
+            Assert.That(sourceRenderer.enabled, Is.False);
+            FindAndTrackNewCorpse("RenderedUnit_Corpse");
+
+            yield return null;
+
+            Assert.That(unit, Is.Null);
         }
 
         [Test]
@@ -82,8 +110,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
             unit.TakePhysicalDamage(unit.MaxHealth);
 
-            Assert.That(GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None),
-                Has.None.Matches<GameObject>(gameObject => gameObject.name.EndsWith("_Corpse")));
+            Assert.That(GetCorpseIds(), Is.EquivalentTo(initialCorpseIds));
         }
 
         private void CreateGround()
@@ -112,11 +139,39 @@ namespace ArknightsFrontline.Tests.EditMode
             return material;
         }
 
-        private static GameObject FindCorpse(string name)
+        private GameObject FindAndTrackNewCorpse(string name)
         {
-            GameObject corpse = GameObject.Find(name);
+            GameObject corpse = null;
+            foreach (GameObject candidate in FindCorpses())
+            {
+                if (candidate.name == name && !initialCorpseIds.Contains(candidate.GetInstanceID()))
+                {
+                    corpse = candidate;
+                    break;
+                }
+            }
+
             Assert.That(corpse, Is.Not.Null);
+            gameObjects.Add(corpse);
             return corpse;
+        }
+
+        private static GameObject[] FindCorpses()
+        {
+            return System.Array.FindAll(
+                GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None),
+                gameObject => gameObject.name.EndsWith("_Corpse"));
+        }
+
+        private static HashSet<int> GetCorpseIds()
+        {
+            HashSet<int> corpseIds = new HashSet<int>();
+            foreach (GameObject corpse in FindCorpses())
+            {
+                corpseIds.Add(corpse.GetInstanceID());
+            }
+
+            return corpseIds;
         }
     }
 }
