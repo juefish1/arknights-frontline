@@ -17,6 +17,7 @@ namespace ArknightsFrontline.Arena
         [SerializeField] private Material blueMaterial;
         [SerializeField] private Material redMaterial;
         [SerializeField] private int targetableLayer;
+        [SerializeField] private int groundLayer;
 
         private ArenaLayout layout;
         private float elapsed;
@@ -36,7 +37,8 @@ namespace ArknightsFrontline.Arena
                     redTower,
                     blueMaterial,
                     redMaterial,
-                    targetableLayer);
+                    targetableLayer,
+                    groundLayer);
             }
         }
 
@@ -63,7 +65,8 @@ namespace ArknightsFrontline.Arena
             CombatUnit redTower,
             Material blueMaterial,
             Material redMaterial,
-            int targetableLayer)
+            int targetableLayer,
+            int groundLayer)
         {
             if (minionParent == null)
             {
@@ -87,6 +90,7 @@ namespace ArknightsFrontline.Arena
             this.blueMaterial = blueMaterial;
             this.redMaterial = redMaterial;
             this.targetableLayer = targetableLayer;
+            this.groundLayer = groundLayer;
             elapsed = 0f;
             stopped = false;
             isConfigured = true;
@@ -181,10 +185,12 @@ namespace ArknightsFrontline.Arena
             minionObject.transform.position = GetSpawnPosition(team, zOffset);
             minionObject.layer = targetableLayer;
 
-            ApplyTeamAppearance(minionObject, team, material);
+            ApplyTeamAppearance(minionObject, material);
 
             CombatUnit combatUnit = minionObject.AddComponent<CombatUnit>();
             ConfigureCombatUnit(combatUnit, team, altitude);
+            DeathCorpsePresenter presenter = minionObject.AddComponent<DeathCorpsePresenter>();
+            presenter.Configure(combatUnit, material, groundLayer);
 
             UnitMotor motor = minionObject.AddComponent<UnitMotor>();
             motor.Configure(altitude == Altitude.Ground ? 3f : 3.2f, layout);
@@ -219,15 +225,13 @@ namespace ArknightsFrontline.Arena
             combatUnit.Configure(team, altitude, 280f, 28f, 5f, 4.5f, 1f, true, true);
         }
 
-        private static void ApplyTeamAppearance(GameObject minionObject, TeamId team, Material material)
+        private static void ApplyTeamAppearance(GameObject minionObject, Material material)
         {
             Renderer renderer = minionObject.GetComponent<Renderer>();
             if (material != null)
             {
-                renderer.material = material;
+                renderer.sharedMaterial = material;
             }
-
-            renderer.material.color = team == TeamId.Blue ? Color.blue : Color.red;
         }
     }
 }

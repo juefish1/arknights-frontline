@@ -12,6 +12,7 @@ namespace ArknightsFrontline.Tests.EditMode
     public sealed class MinionWaveSpawnerTests
     {
         private readonly List<GameObject> gameObjects = new List<GameObject>();
+        private readonly List<Material> materials = new List<Material>();
 
         [TearDown]
         public void TearDown()
@@ -21,7 +22,13 @@ namespace ArknightsFrontline.Tests.EditMode
                 Object.DestroyImmediate(gameObject);
             }
 
+            foreach (Material material in materials)
+            {
+                Object.DestroyImmediate(material);
+            }
+
             gameObjects.Clear();
+            materials.Clear();
         }
 
         [Test]
@@ -46,6 +53,7 @@ namespace ArknightsFrontline.Tests.EditMode
                 Assert.That(minion.GetComponent<UnitMotor>(), Is.Not.Null);
                 Assert.That(minion.GetComponent<BasicAttackController>(), Is.Not.Null);
                 Assert.That(minion.GetComponent<LaneMinionController>(), Is.Not.Null);
+                Assert.That(minion.GetComponent<DeathCorpsePresenter>(), Is.Not.Null);
             }
         }
 
@@ -124,7 +132,15 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit blueTower = CreateTower("BlueTower", TeamId.Blue, layout.BlueTower);
             CombatUnit redTower = CreateTower("RedTower", TeamId.Red, layout.RedTower);
             MinionWaveSpawner spawner = CreateGameObject("Spawner").AddComponent<MinionWaveSpawner>();
-            spawner.Configure(parent.transform, layout, blueTower, redTower, null, null, 8);
+            spawner.Configure(
+                parent.transform,
+                layout,
+                blueTower,
+                redTower,
+                CreateMaterial(Color.blue),
+                CreateMaterial(Color.red),
+                9,
+                8);
             return spawner;
         }
 
@@ -148,6 +164,14 @@ namespace ArknightsFrontline.Tests.EditMode
             GameObject gameObject = new GameObject(name);
             gameObjects.Add(gameObject);
             return gameObject;
+        }
+
+        private Material CreateMaterial(Color color)
+        {
+            Material material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.color = color;
+            materials.Add(material);
+            return material;
         }
     }
 }

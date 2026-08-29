@@ -67,11 +67,12 @@ namespace ArknightsFrontline.Editor
                 redTowerUnit,
                 blueMaterial,
                 redMaterial,
-                targetableLayer);
+                targetableLayer,
+                groundLayer);
 
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
-            GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial);
+            GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial, groundLayer);
             CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer);
             CreateDirectionalLight();
             MobaCameraController cameraController = CreateMainCamera();
@@ -139,7 +140,7 @@ namespace ArknightsFrontline.Editor
             marker.GetComponent<Renderer>().sharedMaterial = material;
         }
 
-        private static GameObject CreatePlayer(Transform parent, Vector3 deployment, Material material)
+        private static GameObject CreatePlayer(Transform parent, Vector3 deployment, Material material, int groundLayer)
         {
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Exusiai";
@@ -152,6 +153,8 @@ namespace ArknightsFrontline.Editor
             PlayerCommandController commands = player.AddComponent<PlayerCommandController>();
             CombatUnit combatUnit = player.AddComponent<CombatUnit>();
             combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, true);
+            DeathCorpsePresenter presenter = player.AddComponent<DeathCorpsePresenter>();
+            presenter.Configure(combatUnit, material, groundLayer);
             player.AddComponent<CommandFeedbackPresenter>();
             BasicAttackController attack = player.AddComponent<BasicAttackController>();
             CombatCommandResolver resolver = player.AddComponent<CombatCommandResolver>();

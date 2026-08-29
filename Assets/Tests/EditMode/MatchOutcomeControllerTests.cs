@@ -12,6 +12,7 @@ namespace ArknightsFrontline.Tests.EditMode
     public sealed class MatchOutcomeControllerTests
     {
         private readonly List<GameObject> gameObjects = new List<GameObject>();
+        private readonly List<Material> materials = new List<Material>();
 
         [TearDown]
         public void TearDown()
@@ -21,7 +22,13 @@ namespace ArknightsFrontline.Tests.EditMode
                 Object.DestroyImmediate(gameObject);
             }
 
+            foreach (Material material in materials)
+            {
+                Object.DestroyImmediate(material);
+            }
+
             gameObjects.Clear();
+            materials.Clear();
         }
 
         [Test]
@@ -136,7 +143,15 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit redTower = CreateUnit("RedTower", TeamId.Red, layout.RedTower, 8f);
             GameObject minionParent = CreateGameObject("MinionParent");
             MinionWaveSpawner spawner = CreateGameObject("Spawner").AddComponent<MinionWaveSpawner>();
-            spawner.Configure(minionParent.transform, layout, blueTower, redTower, null, null, 8);
+            spawner.Configure(
+                minionParent.transform,
+                layout,
+                blueTower,
+                redTower,
+                CreateMaterial(Color.blue),
+                CreateMaterial(Color.red),
+                8,
+                8);
             MatchOutcomeController outcomeController = CreateGameObject("MatchOutcomeController")
                 .AddComponent<MatchOutcomeController>();
             outcomeController.Configure(blueTower, redTower, spawner);
@@ -157,6 +172,14 @@ namespace ArknightsFrontline.Tests.EditMode
             GameObject gameObject = new GameObject(name);
             gameObjects.Add(gameObject);
             return gameObject;
+        }
+
+        private Material CreateMaterial(Color color)
+        {
+            Material material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.color = color;
+            materials.Add(material);
+            return material;
         }
 
         private sealed class MatchFixture
