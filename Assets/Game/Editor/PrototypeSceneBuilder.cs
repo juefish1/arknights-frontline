@@ -145,7 +145,8 @@ namespace ArknightsFrontline.Editor
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Exusiai";
             player.transform.SetParent(parent, false);
-            player.transform.position = deployment + Vector3.up;
+            player.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
+            player.transform.position = deployment + Vector3.up * 2f;
             player.GetComponent<Renderer>().sharedMaterial = material;
 
             UnitMotor motor = player.AddComponent<UnitMotor>();
