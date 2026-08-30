@@ -94,7 +94,7 @@ namespace ArknightsFrontline.Combat
 
         private void FaceMainCamera()
         {
-            Camera mainCamera = Camera.main;
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             if (mainCamera != null)
             {
                 barTransform.LookAt(mainCamera.transform);
