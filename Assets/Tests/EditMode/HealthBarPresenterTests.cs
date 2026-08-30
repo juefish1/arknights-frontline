@@ -3,6 +3,7 @@ using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ArknightsFrontline.Tests.EditMode
 {
@@ -52,11 +53,53 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void TickConfiguresFillSpriteAndChangesItsVisualFillAfterDamage()
+        {
+            CombatUnit unit = CreateUnit(100f);
+            HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();
+            presenter.Configure(unit);
+
+            presenter.Tick();
+            Image fill = unit.transform.Find("HealthBar/Fill").GetComponent<Image>();
+
+            Assert.That(fill.sprite, Is.Not.Null);
+            Assert.That(fill.fillAmount, Is.EqualTo(1f));
+
+            unit.TakePhysicalDamage(35f);
+            presenter.Tick();
+
+            Assert.That(fill.fillAmount, Is.EqualTo(0.65f).Within(0.0001f));
+        }
+
+        [Test]
         public void TickPlacesHealthBarAboveTheUnitRenderer()
         {
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             gameObjects.Add(player);
             player.transform.position = new Vector3(0f, 1f, 0f);
+            CombatUnit unit = player.AddComponent<CombatUnit>();
+            unit.Configure(TeamId.Blue, Altitude.Ground, 100f, 0f, 0f, 0f, 0f, false, false);
+            HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();
+            presenter.Configure(unit);
+
+            presenter.Tick();
+
+            Assert.That(
+                unit.transform.Find("HealthBar").position.y,
+                Is.GreaterThan(player.GetComponent<Renderer>().bounds.max.y));
+        }
+
+        [Test]
+        public void TickPlacesParentedUnitHealthBarAboveTheOwningRenderer()
+        {
+            GameObject arenaBootstrap = new GameObject("ArenaBootstrap");
+            gameObjects.Add(arenaBootstrap);
+
+            GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            gameObjects.Add(player);
+            player.transform.SetParent(arenaBootstrap.transform);
+            player.transform.localScale = new Vector3(1f, 3f, 1f);
+
             CombatUnit unit = player.AddComponent<CombatUnit>();
             unit.Configure(TeamId.Blue, Altitude.Ground, 100f, 0f, 0f, 0f, 0f, false, false);
             HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();

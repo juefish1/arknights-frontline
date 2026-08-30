@@ -14,6 +14,8 @@ namespace ArknightsFrontline.Combat
         private CombatUnit combatUnit;
         private Transform barTransform;
         private Image fillImage;
+        private Sprite fillSprite;
+        private Texture2D fillTexture;
 
         public float FillAmount => fillImage == null ? 0f : fillImage.fillAmount;
 
@@ -31,6 +33,19 @@ namespace ArknightsFrontline.Combat
         private void Update()
         {
             Tick();
+        }
+
+        private void OnDestroy()
+        {
+            if (fillSprite != null)
+            {
+                DestroyRuntimeObject(fillSprite);
+            }
+
+            if (fillTexture != null)
+            {
+                DestroyRuntimeObject(fillTexture);
+            }
         }
 
         public void Configure(CombatUnit unit)
@@ -72,6 +87,7 @@ namespace ArknightsFrontline.Combat
 
             CreateImage("Background", barTransform, new Color(0.1f, 0.1f, 0.1f, 1f));
             fillImage = CreateImage("Fill", barTransform, Color.green);
+            fillImage.sprite = CreateWhiteSprite();
             fillImage.type = Image.Type.Filled;
             fillImage.fillMethod = Image.FillMethod.Horizontal;
             fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -79,7 +95,7 @@ namespace ArknightsFrontline.Combat
 
         private void PositionAboveUnit()
         {
-            Renderer renderer = combatUnit.transform.root.GetComponent<Renderer>();
+            Renderer renderer = combatUnit.GetComponent<Renderer>();
             if (renderer != null)
             {
                 barTransform.position = new Vector3(
@@ -114,6 +130,26 @@ namespace ArknightsFrontline.Combat
             Image image = imageObject.GetComponent<Image>();
             image.color = color;
             return image;
+        }
+
+        private Sprite CreateWhiteSprite()
+        {
+            fillTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            fillTexture.SetPixel(0, 0, Color.white);
+            fillTexture.Apply();
+            fillSprite = Sprite.Create(fillTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
+            return fillSprite;
+        }
+
+        private static void DestroyRuntimeObject(UnityEngine.Object runtimeObject)
+        {
+            if (Application.isPlaying)
+            {
+                Destroy(runtimeObject);
+                return;
+            }
+
+            DestroyImmediate(runtimeObject);
         }
     }
 }
