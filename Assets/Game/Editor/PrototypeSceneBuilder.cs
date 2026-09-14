@@ -153,7 +153,7 @@ namespace ArknightsFrontline.Editor
             motor.Configure(5f, ArenaLayout.CreateDefault());
             PlayerCommandController commands = player.AddComponent<PlayerCommandController>();
             CombatUnit combatUnit = player.AddComponent<CombatUnit>();
-            combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, true);
+            combatUnit.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 2f, 6f, 0.5f, true, true);
             player.AddComponent<HealthBarPresenter>();
             DeathCorpsePresenter presenter = player.AddComponent<DeathCorpsePresenter>();
             presenter.Configure(combatUnit, material, groundLayer);

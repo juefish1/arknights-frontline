@@ -47,6 +47,10 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(Object.FindFirstObjectByType<MinionWaveSpawner>(), Is.Not.Null);
             GameObject player = GameObject.Find("Player_Exusiai");
             Assert.That(player, Is.Not.Null);
+            CombatUnit playerUnit = player.GetComponent<CombatUnit>();
+            Assert.That(playerUnit, Is.Not.Null);
+            Assert.That(playerUnit.MaxHealth, Is.EqualTo(1000f));
+            Assert.That(playerUnit.AttackPower, Is.EqualTo(50f));
             Assert.That(player.transform.localScale, Is.EqualTo(new Vector3(1.6f, 2f, 1.6f)));
             Assert.That(player.transform.position.y, Is.EqualTo(2f));
             Assert.That(player.GetComponent<HealthBarPresenter>(), Is.Not.Null);
