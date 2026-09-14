@@ -359,3 +359,20 @@ git commit -m "feat: distinguish player size from minions"
 - Scope: 不涉及塔、训练目标、尸体碰撞、数值文字或用户项目设置。
 - Type consistency: 所有场景接入均使用 `HealthBarPresenter`，组件读取既有 `CombatUnit`，不存在额外生命数据源。
 - Placeholder scan: 已检查，不含待定实现或未定义接口。
+
+## 验收缺陷跟进：保存场景中的干员死亡表现（2026-09-10）
+
+人工验收发现干员血量归零后，原胶囊和空血条仍留在场景中。根因是 `DeathCorpsePresenter.Configure` 在编辑器构建场景时绑定事件，但配置字段未序列化，运行时也没有恢复绑定。此前直接在运行时调用 `Configure` 的测试未覆盖此路径。
+
+- [x] 将死亡表现配置持久化，并在组件加载时恢复死亡事件订阅；重复配置不得产生重复尸体。
+- [x] 兼容已保存、缺少这些配置字段的旧场景：从单位组件、模型材质和 Ground 层恢复默认配置，无需重建场景。
+- [x] 加入真实 `PrototypeArena` 场景加载后击杀玩家的回归测试，检查原模型隐藏、原对象与血条销毁、同色平面落地且没有碰撞。
+- [x] 验证序列化配置恢复以及既有地面、空中小兵死亡表现，并记录自动测试结果。
+
+验证记录（Unity 6000.3.15f1）：
+
+- 修复前：两个新增回归测试均失败，分别表现为源 Renderer 未隐藏、恢复配置的组件没有生成尸体。结果：`TestResults/corpse-red-20260910.xml`。
+- 修复后：`ArenaSceneSmokeTests` 与 `DeathCorpsePresentationPlayModeTests` 共 8 项全部通过，Unity 退出码为 0。结果：`TestResults/corpse-final-playmode-20260910.xml`。
+- 测试维护：场景测试结束后卸载原型场景；小兵死亡测试限定本次创建的单位；销毁断言使用 Unity 的对象判空语义；及时清理测试尸体。
+- 验证限制：补跑死亡组件和血条 EditMode 测试共 9 项，6 项通过、3 项失败；失败均来自旧死亡测试在 EditMode 中调用运行时 `Destroy`。本次未改变运行时销毁语义，这些测试仍需迁移或调整。结果：`TestResults/corpse-editmode-20260910.xml`。
+- 本次未重建或写入 `PrototypeArena.unity`，也未修改 Packages、ProjectSettings；保留工作区原有修改。

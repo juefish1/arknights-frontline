@@ -11,6 +11,24 @@ namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class ArenaSceneSmokeTests
     {
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            Scene prototypeArena = SceneManager.GetSceneByName("PrototypeArena");
+            if (!prototypeArena.isLoaded)
+            {
+                yield break;
+            }
+
+            Scene cleanupScene = SceneManager.CreateScene("ArenaSceneSmokeCleanup");
+            SceneManager.SetActiveScene(cleanupScene);
+            AsyncOperation unload = SceneManager.UnloadSceneAsync(prototypeArena);
+            while (!unload.isDone)
+            {
+                yield return null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator PrototypeArenaContainsRequiredRoots()
         {
@@ -71,6 +89,36 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             Assert.That(outcome.IsMatchOver, Is.True);
             Assert.That(outcome.Outcome, Is.EqualTo(MatchOutcome.BlueVictory));
+        }
+
+        [UnityTest]
+        public IEnumerator SavedPlayerDeathCreatesGroundedCorpseWithoutRuntimeConfigure()
+        {
+            SceneManager.LoadScene("PrototypeArena");
+            yield return null;
+
+            GameObject player = GameObject.Find("Player_Exusiai");
+            CombatUnit playerUnit = player.GetComponent<CombatUnit>();
+            Renderer playerRenderer = player.GetComponent<Renderer>();
+            Vector3 playerPosition = player.transform.position;
+            Material playerMaterial = playerRenderer.sharedMaterial;
+            Assert.That(player.transform.Find("HealthBar"), Is.Not.Null);
+
+            playerUnit.TakePhysicalDamage(playerUnit.MaxHealth);
+
+            Assert.That(playerRenderer.enabled, Is.False);
+            yield return null;
+
+            Assert.That(player == null, Is.True);
+            GameObject corpse = GameObject.Find("Player_Exusiai_Corpse");
+            Assert.That(corpse, Is.Not.Null);
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(playerMaterial));
+            Assert.That(corpse.transform.position.x, Is.EqualTo(playerPosition.x));
+            Assert.That(corpse.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
+            Assert.That(corpse.transform.position.z, Is.EqualTo(playerPosition.z));
+            Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
+            Collider collider = corpse.GetComponent<Collider>();
+            Assert.That(collider == null || !collider.enabled, Is.True);
         }
 
         private static void AssertTowerIsCombatReady(Transform tower)

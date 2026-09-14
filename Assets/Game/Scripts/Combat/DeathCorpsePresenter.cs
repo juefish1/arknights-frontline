@@ -6,10 +6,26 @@ namespace ArknightsFrontline.Combat
 {
     public sealed class DeathCorpsePresenter : MonoBehaviour
     {
-        private CombatUnit combatUnit;
-        private Material corpseMaterial;
-        private int groundLayer;
+        [SerializeField] private CombatUnit combatUnit;
+        [SerializeField] private Material corpseMaterial;
+        [SerializeField] private int groundLayer = -1;
         private bool hasSpawnedCorpse;
+
+        private void Awake()
+        {
+            RestoreConfiguration();
+        }
+
+        private void OnEnable()
+        {
+            RestoreConfiguration();
+            SubscribeToDeath();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromDeath();
+        }
 
         public void Configure(CombatUnit combatUnit, Material corpseMaterial, int groundLayer)
         {
@@ -23,15 +39,11 @@ namespace ArknightsFrontline.Combat
                 throw new ArgumentNullException(nameof(corpseMaterial));
             }
 
-            if (this.combatUnit != null)
-            {
-                this.combatUnit.Died -= OnUnitDied;
-            }
-
+            UnsubscribeFromDeath();
             this.combatUnit = combatUnit;
             this.corpseMaterial = corpseMaterial;
             this.groundLayer = groundLayer;
-            this.combatUnit.Died += OnUnitDied;
+            SubscribeToDeath();
         }
 
         private void OnUnitDied(CombatUnit _)
@@ -96,12 +108,51 @@ namespace ArknightsFrontline.Combat
             return landingPosition;
         }
 
-        private void OnDestroy()
+        private void RestoreConfiguration()
+        {
+            if (combatUnit == null)
+            {
+                combatUnit = GetComponent<CombatUnit>();
+            }
+
+            if (corpseMaterial == null)
+            {
+                Renderer renderer = GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    corpseMaterial = renderer.sharedMaterial;
+                }
+            }
+
+            if (groundLayer < 0)
+            {
+                int configuredGroundLayer = LayerMask.NameToLayer("Ground");
+                groundLayer = configuredGroundLayer >= 0 ? configuredGroundLayer : 0;
+            }
+        }
+
+        private void SubscribeToDeath()
+        {
+            if (!isActiveAndEnabled || combatUnit == null || corpseMaterial == null)
+            {
+                return;
+            }
+
+            combatUnit.Died -= OnUnitDied;
+            combatUnit.Died += OnUnitDied;
+        }
+
+        private void UnsubscribeFromDeath()
         {
             if (combatUnit != null)
             {
                 combatUnit.Died -= OnUnitDied;
             }
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeFromDeath();
         }
     }
 }

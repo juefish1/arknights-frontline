@@ -5,6 +5,9 @@ using ArknightsFrontline.Arena;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -13,6 +16,7 @@ namespace ArknightsFrontline.Tests.PlayMode
     public sealed class DeathCorpsePresentationPlayModeTests
     {
         private const int GroundLayer = 8;
+        private const int SerializedGroundLayer = 10;
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
         private readonly List<Material> materials = new List<Material>();
@@ -58,19 +62,18 @@ namespace ArknightsFrontline.Tests.PlayMode
                 redMaterial,
                 9,
                 GroundLayer);
+            spawner.enabled = false;
             spawner.SpawnWaveNow();
 
-            CombatUnit blueGroundMinion = FindMinion(TeamId.Blue, Altitude.Ground);
-            CombatUnit redAirMinion = FindMinion(TeamId.Red, Altitude.Air);
+            CombatUnit blueGroundMinion = FindMinion(minionParent.transform, TeamId.Blue, Altitude.Ground);
+            CombatUnit redAirMinion = FindMinion(minionParent.transform, TeamId.Red, Altitude.Air);
             string blueGroundMinionName = blueGroundMinion.name;
             string redAirMinionName = redAirMinion.name;
             blueGroundMinion.TakePhysicalDamage(blueGroundMinion.MaxHealth);
 
             yield return null;
 
-            Assert.That(
-                Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None),
-                Has.None.Matches<CombatUnit>(unit => unit.name == blueGroundMinionName));
+            Assert.That(blueGroundMinion == null, Is.True);
             GameObject groundCorpse = TrackCorpse(blueGroundMinionName + "_Corpse");
             AssertCorpseInvariants(groundCorpse, blueMaterial);
 
@@ -85,9 +88,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(airCorpse.transform.position.y, Is.LessThan(airCorpseStartY));
             yield return new WaitForSeconds(0.2f);
             Assert.That(airCorpse.GetComponent<CorpseFallController>().HasLanded, Is.True);
-            Assert.That(
-                Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None),
-                Has.None.Matches<CombatUnit>(unit => unit.name == redAirMinionName));
+            Assert.That(redAirMinion == null, Is.True);
 
             CombatUnit player = CreateConfiguredPlayer(blueMaterial);
             player.TakePhysicalDamage(player.MaxHealth);
@@ -154,25 +155,65 @@ namespace ArknightsFrontline.Tests.PlayMode
             unit.TakePhysicalDamage(unit.MaxHealth);
             yield return null;
 
-            Assert.That(unit, Is.Null);
-            Assert.That(healthBar, Is.Null);
-            GameObject corpse = GameObject.Find("HealthBarUnit_Corpse");
-            Assert.That(corpse, Is.Not.Null);
+            Assert.That(unit == null, Is.True);
+            Assert.That(healthBar == null, Is.True);
+            GameObject corpse = TrackCorpse("HealthBarUnit_Corpse");
             Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
         }
 
+#if UNITY_EDITOR
+        [UnityTest]
+        public IEnumerator DeserializedInactivePresenterKeepsConfiguredMaterialAndSubscribesWhenEnabled()
+        {
+            CreateGround();
+            CreateGround(SerializedGroundLayer, new Vector3(4f, 3f, 0f));
+            Material configuredMaterial = CreateMaterial(Color.blue);
+            CombatUnit source = CreateUnit("SerializedSource", TeamId.Blue, Altitude.Ground, new Vector3(4f, 1f, 0f), 100f);
+            DeathCorpsePresenter configuredPresenter = source.gameObject.AddComponent<DeathCorpsePresenter>();
+            configuredPresenter.Configure(source, configuredMaterial, SerializedGroundLayer);
+
+            GameObject rehydratedObject = CreateGameObject("RehydratedPresenter");
+            rehydratedObject.transform.position = new Vector3(4f, 5f, 0f);
+            rehydratedObject.SetActive(false);
+            CombatUnit rehydratedUnit = rehydratedObject.AddComponent<CombatUnit>();
+            rehydratedUnit.Configure(TeamId.Red, Altitude.Air, 100f, 0f, 0f, 0f, 0f, false, false);
+            DeathCorpsePresenter rehydratedPresenter = rehydratedObject.AddComponent<DeathCorpsePresenter>();
+            EditorUtility.CopySerialized(configuredPresenter, rehydratedPresenter);
+            rehydratedObject.SetActive(true);
+
+            Physics.SyncTransforms();
+            source.TakePhysicalDamage(source.MaxHealth);
+            yield return null;
+
+            TrackCorpse("SerializedSource_Corpse");
+            GameObject corpse = TrackCorpse("RehydratedPresenter_Corpse");
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(configuredMaterial));
+            Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(4f, 3.01f, 0f)));
+            Assert.That(corpse.GetComponent<CorpseFallController>(), Is.Null);
+        }
+#endif
+
         private void CreateGround()
+        {
+            CreateGround(GroundLayer, Vector3.zero);
+        }
+
+        private void CreateGround(int layer, Vector3 position)
         {
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Ground";
-            ground.layer = GroundLayer;
+            ground.layer = layer;
+            ground.transform.position = position;
             gameObjects.Add(ground);
         }
 
-        private CombatUnit FindMinion(TeamId team, Altitude altitude)
+        private CombatUnit FindMinion(Transform minionParent, TeamId team, Altitude altitude)
         {
             return Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None)
-                .Single(unit => unit.Team == team && unit.Altitude == altitude && unit.name.Contains("Minion"));
+                .First(unit => unit.transform.parent == minionParent
+                    && unit.Team == team
+                    && unit.Altitude == altitude
+                    && unit.name.Contains("Minion"));
         }
 
         private CombatUnit CreateConfiguredPlayer(Material material)
@@ -208,7 +249,8 @@ namespace ArknightsFrontline.Tests.PlayMode
 
         private GameObject TrackCorpse(string corpseName)
         {
-            GameObject corpse = FindCorpses().Single(candidate => candidate.name == corpseName);
+            GameObject corpse = FindCorpses().SingleOrDefault(candidate => candidate.name == corpseName);
+            Assert.That(corpse, Is.Not.Null, $"Expected a corpse named {corpseName}.");
             gameObjects.Add(corpse);
             return corpse;
         }
