@@ -134,6 +134,18 @@ namespace ArknightsFrontline.Tests.PlayMode
                 $"{tower.name} needs a TowerCombatController.");
             Assert.That(tower.GetComponent<BoxCollider>(), Is.Not.Null,
                 $"{tower.name} needs a root BoxCollider.");
+            CombatUnit combatUnit = tower.GetComponent<CombatUnit>();
+            Assert.That(combatUnit.MaxHealth, Is.EqualTo(500f),
+                $"{tower.name} should have 500 max health.");
+            Assert.That(combatUnit.AttackPower, Is.EqualTo(20f),
+                $"{tower.name} should have 20 attack power.");
+            HealthBarPresenter healthBar = tower.GetComponent<HealthBarPresenter>();
+            Assert.That(healthBar, Is.Not.Null,
+                $"{tower.name} needs a HealthBarPresenter.");
+            Assert.That(healthBar.IsVisible, Is.True,
+                $"{tower.name} health bar should be visible.");
+            Assert.That(tower.Find("HealthBar"), Is.Not.Null,
+                $"{tower.name} should contain a HealthBar child.");
         }
     }
 }

@@ -95,13 +95,19 @@ namespace ArknightsFrontline.Combat
 
         private void PositionAboveUnit()
         {
-            Renderer renderer = combatUnit.GetComponent<Renderer>();
-            if (renderer != null)
+            Renderer[] renderers = combatUnit.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length > 0)
             {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+
                 barTransform.position = new Vector3(
-                    renderer.bounds.center.x,
-                    renderer.bounds.max.y + HeadOffset,
-                    renderer.bounds.center.z);
+                    bounds.center.x,
+                    bounds.max.y + HeadOffset,
+                    bounds.center.z);
                 return;
             }
 

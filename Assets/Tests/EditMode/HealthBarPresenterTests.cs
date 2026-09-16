@@ -112,6 +112,29 @@ namespace ArknightsFrontline.Tests.EditMode
                 Is.GreaterThan(player.GetComponent<Renderer>().bounds.max.y));
         }
 
+        [Test]
+        public void TickPlacesHealthBarAboveChildRendererWhenRootHasNoRenderer()
+        {
+            GameObject tower = new GameObject("Tower");
+            gameObjects.Add(tower);
+            CombatUnit unit = tower.AddComponent<CombatUnit>();
+            unit.Configure(TeamId.Blue, Altitude.Ground, 500f, 0f, 0f, 0f, 0f, false, false);
+
+            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visual.name = "TowerVisual";
+            visual.transform.SetParent(tower.transform, false);
+            visual.transform.localPosition = new Vector3(0f, 3f, 0f);
+            visual.transform.localScale = new Vector3(3f, 6f, 3f);
+
+            HealthBarPresenter presenter = tower.AddComponent<HealthBarPresenter>();
+            presenter.Configure(unit);
+            presenter.Tick();
+
+            Assert.That(
+                tower.transform.Find("HealthBar").position.y,
+                Is.GreaterThan(visual.GetComponent<Renderer>().bounds.max.y));
+        }
+
         private CombatUnit CreateUnit(float health)
         {
             GameObject gameObject = new GameObject("HealthBarTarget");

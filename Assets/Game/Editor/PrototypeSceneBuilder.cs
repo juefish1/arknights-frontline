@@ -112,7 +112,8 @@ namespace ArknightsFrontline.Editor
             collider.size = new Vector3(3f, 6f, 3f);
 
             CombatUnit combatUnit = tower.AddComponent<CombatUnit>();
-            combatUnit.Configure(team, Altitude.Ground, 6000f, 150f, 40f, 9f, 1f, true, true);
+            combatUnit.Configure(team, Altitude.Ground, 500f, 20f, 40f, 9f, 1f, true, true);
+            tower.AddComponent<HealthBarPresenter>();
             BasicAttackController attack = tower.AddComponent<BasicAttackController>();
             attack.Configure(combatUnit);
             TowerCombatController controller = tower.AddComponent<TowerCombatController>();
