@@ -40,7 +40,7 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void AttackTimerEmitsEveryPositiveIntervalCrossedByOneTick()
+        public void LongTickEmitsAtMostOneRequestAndRestartsFullInterval()
         {
             CombatUnit player = CreateUnit("Player", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
             CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, 1f, false);
@@ -53,6 +53,11 @@ namespace ArknightsFrontline.Tests.EditMode
             attack.Tick(0f);
             attack.Tick(1.2f);
 
+            Assert.That(requestCount, Is.EqualTo(2));
+
+            attack.Tick(0.49f);
+            Assert.That(requestCount, Is.EqualTo(2));
+            attack.Tick(0.01f);
             Assert.That(requestCount, Is.EqualTo(3));
         }
 

@@ -104,14 +104,13 @@ namespace ArknightsFrontline.Combat
             }
 
             elapsedSinceAttack += Mathf.Max(0f, deltaTime);
-            while (elapsedSinceAttack >= interval)
+            if (elapsedSinceAttack < interval)
             {
-                elapsedSinceAttack -= interval;
-                if (!RequestAttack())
-                {
-                    break;
-                }
+                return;
             }
+
+            elapsedSinceAttack = 0f;
+            RequestAttack();
         }
 
         private bool RequestAttack()
