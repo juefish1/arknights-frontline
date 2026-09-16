@@ -11,6 +11,8 @@ namespace ArknightsFrontline.Combat
         private UnitMotor motor;
         private PlayerCommandController commandSource;
         private BasicAttackController attackController;
+        private int observedCommandRevision = -1;
+        private bool hasEngagedCurrentCommand;
 
         public CombatUnit CurrentTarget { get; private set; }
 
@@ -100,6 +102,7 @@ namespace ArknightsFrontline.Combat
             {
                 motor.Stop();
                 ClearCombatTarget();
+                hasEngagedCurrentCommand = false;
                 return;
             }
 
@@ -107,7 +110,15 @@ namespace ArknightsFrontline.Combat
             if (!command.HasValue)
             {
                 ClearCombatTarget();
+                hasEngagedCurrentCommand = false;
                 return;
+            }
+
+            if (observedCommandRevision != commandSource.CommandRevision)
+            {
+                observedCommandRevision = commandSource.CommandRevision;
+                hasEngagedCurrentCommand = false;
+                ClearCombatTarget();
             }
 
             switch (command.Value.Kind)
@@ -121,6 +132,7 @@ namespace ArknightsFrontline.Combat
                 case UnitCommandKind.Move:
                 case UnitCommandKind.Stop:
                     ClearCombatTarget();
+                    hasEngagedCurrentCommand = false;
                     break;
             }
         }
@@ -130,34 +142,65 @@ namespace ArknightsFrontline.Combat
             CombatUnit target = targetObject == null ? null : targetObject.GetComponent<CombatUnit>();
             if (!TargetRules.IsLegal(owner, target))
             {
-                ClearCombatTarget();
+                CancelCurrentCommand();
                 return;
             }
 
             if (!IsInAttackRange(target))
             {
+                if (hasEngagedCurrentCommand)
+                {
+                    CancelCurrentCommand();
+                    return;
+                }
+
                 ClearCombatTarget();
                 motor.SetDestination(target.transform.position);
                 return;
             }
 
-            motor.Stop();
-            CurrentTarget = target;
-            attackController.SetTarget(target);
+            EngageTarget(target);
         }
 
         private void ResolveNearestTarget()
         {
-            CombatUnit target = TargetSelector.FindNearestInRange(owner);
-            if (target == null)
+            if (hasEngagedCurrentCommand)
             {
-                ClearCombatTarget();
+                if (!TargetRules.IsLegal(owner, CurrentTarget) || !IsInAttackRange(CurrentTarget))
+                {
+                    CancelCurrentCommand();
+                    return;
+                }
+
+                EngageTarget(CurrentTarget);
                 return;
             }
 
+            CombatUnit target = TargetSelector.FindNearestInRange(owner);
+            if (target == null)
+            {
+                CancelCurrentCommand();
+                return;
+            }
+
+            EngageTarget(target);
+        }
+
+        private void EngageTarget(CombatUnit target)
+        {
             motor.Stop();
             CurrentTarget = target;
             attackController.SetTarget(target);
+            hasEngagedCurrentCommand = true;
+        }
+
+        private void CancelCurrentCommand()
+        {
+            motor.Stop();
+            ClearCombatTarget();
+            commandSource.CancelCurrentCommand();
+            observedCommandRevision = commandSource.CommandRevision;
+            hasEngagedCurrentCommand = false;
         }
 
         private void ClearCombatTarget()
@@ -180,6 +223,7 @@ namespace ArknightsFrontline.Combat
         {
             motor?.Stop();
             ClearCombatTarget();
+            hasEngagedCurrentCommand = false;
         }
     }
 }

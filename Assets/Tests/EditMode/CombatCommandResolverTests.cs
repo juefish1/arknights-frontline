@@ -60,6 +60,60 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(resolver.CurrentTarget, Is.Null);
             Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand, Is.Null);
+        }
+
+        [Test]
+        public void EngagedSpecifiedTargetLeavingRangeCancelsCommandAndDoesNotReacquire()
+        {
+            CreatePlayer(out _, out UnitMotor motor, out PlayerCommandController controller,
+                out CombatCommandResolver resolver, out BasicAttackController attack);
+            CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, false);
+            int requestCount = 0;
+            attack.AttackRequested += (_, _) => requestCount++;
+            controller.Issue(UnitCommand.Attack(target.gameObject));
+            resolver.Tick(0f);
+            attack.Tick(0f);
+            Assert.That(requestCount, Is.EqualTo(1));
+
+            target.transform.position = new Vector3(8f, 0f, 0f);
+            resolver.Tick(0f);
+
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(resolver.CurrentTarget, Is.Null);
+            Assert.That(attack.CurrentTarget, Is.Null);
+            Assert.That(motor.IsMoving, Is.False);
+
+            target.transform.position = new Vector3(2f, 0f, 0f);
+            resolver.Tick(10f);
+            attack.Tick(10f);
+            Assert.That(requestCount, Is.EqualTo(1));
+
+            controller.Issue(UnitCommand.Attack(target.gameObject));
+            resolver.Tick(0f);
+            attack.Tick(0f);
+            Assert.That(requestCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void NearestIntentDoesNotRetargetAfterEngagedTargetLeavesRange()
+        {
+            CreatePlayer(out _, out UnitMotor motor, out PlayerCommandController controller,
+                out CombatCommandResolver resolver, out BasicAttackController attack);
+            CombatUnit first = CreateUnit("First", TeamId.Red, new Vector3(2f, 0f, 0f), 1f, false);
+            controller.Issue(UnitCommand.AttackNearestInRange());
+            resolver.Tick(0f);
+            Assert.That(resolver.CurrentTarget, Is.EqualTo(first));
+
+            first.transform.position = new Vector3(8f, 0f, 0f);
+            CreateUnit("Replacement", TeamId.Red, new Vector3(1f, 0f, 0f), 1f, false);
+            resolver.Tick(0f);
+
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Assert.That(resolver.CurrentTarget, Is.Null);
+            Assert.That(attack.CurrentTarget, Is.Null);
+            Assert.That(motor.IsMoving, Is.False);
         }
 
         [Test]
