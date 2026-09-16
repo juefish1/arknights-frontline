@@ -28,6 +28,8 @@ namespace ArknightsFrontline.Commands
 
         public UnitCommand? CurrentCommand { get; private set; }
 
+        public int CommandRevision { get; private set; }
+
         public bool IsAttackMoveArmed => attackMoveState.IsArmed;
 
         public bool IsAttackMoveHeld => isAttackMoveHeld;
@@ -86,6 +88,7 @@ namespace ArknightsFrontline.Commands
             }
 
             CurrentCommand = command;
+            CommandRevision++;
             switch (command.Kind)
             {
                 case UnitCommandKind.Move:
@@ -105,6 +108,14 @@ namespace ArknightsFrontline.Commands
                     motor.Stop();
                     break;
             }
+        }
+
+        public void CancelCurrentCommand()
+        {
+            CurrentCommand = null;
+            currentTarget = null;
+            motor.Stop();
+            CommandRevision++;
         }
 
         public void ArmAttackMove()

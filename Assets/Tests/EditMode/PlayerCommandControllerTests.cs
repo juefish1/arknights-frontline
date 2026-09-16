@@ -104,6 +104,40 @@ namespace ArknightsFrontline.Tests.EditMode
             Object.DestroyImmediate(player);
         }
 
+        [Test]
+        public void CancelCurrentCommandClearsCommandTargetAndMovement()
+        {
+            PlayerCommandController controller = CreateController(out UnitMotor motor, out GameObject player);
+            GameObject target = new GameObject("Target");
+            controller.Issue(UnitCommand.Attack(target));
+            int revisionAfterIssue = controller.CommandRevision;
+            motor.SetDestination(new Vector3(10f, 0f, 0f));
+
+            controller.CancelCurrentCommand();
+
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Assert.That(controller.CurrentTarget, Is.Null);
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CommandRevision, Is.GreaterThan(revisionAfterIssue));
+            Object.DestroyImmediate(target);
+            Object.DestroyImmediate(player);
+        }
+
+        [Test]
+        public void IssuingSameCommandAgainAdvancesCommandRevision()
+        {
+            PlayerCommandController controller = CreateController(out _, out GameObject player);
+            GameObject target = new GameObject("Target");
+            controller.Issue(UnitCommand.Attack(target));
+            int firstRevision = controller.CommandRevision;
+
+            controller.Issue(UnitCommand.Attack(target));
+
+            Assert.That(controller.CommandRevision, Is.GreaterThan(firstRevision));
+            Object.DestroyImmediate(target);
+            Object.DestroyImmediate(player);
+        }
+
         private static PlayerCommandController CreateController(out UnitMotor motor, out GameObject player)
         {
             player = new GameObject("Player");
