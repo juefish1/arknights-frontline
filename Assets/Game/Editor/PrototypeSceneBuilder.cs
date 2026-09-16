@@ -73,7 +73,7 @@ namespace ArknightsFrontline.Editor
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
             GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial, groundLayer);
-            CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer);
+            CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer, groundLayer);
             CreateDirectionalLight();
             MobaCameraController cameraController = CreateMainCamera();
             cameraController.SetCenteringTarget(player.transform);
@@ -165,16 +165,24 @@ namespace ArknightsFrontline.Editor
             return player;
         }
 
-        private static void CreateTrainingDummy(Transform parent, Material material, int targetableLayer)
+        private static void CreateTrainingDummy(
+            Transform parent,
+            Material material,
+            int targetableLayer,
+            int groundLayer)
         {
-            GameObject dummy = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject dummy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             dummy.name = "TrainingDummy_Red";
             dummy.transform.SetParent(parent, false);
-            dummy.transform.position = new Vector3(20f, 1f, 0f);
+            dummy.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
+            dummy.transform.position = new Vector3(20f, 2f, 0f);
             dummy.layer = targetableLayer;
             dummy.GetComponent<Renderer>().sharedMaterial = material;
             CombatUnit combatUnit = dummy.AddComponent<CombatUnit>();
             combatUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 2f, 0f, 0f, false, false);
+            dummy.AddComponent<HealthBarPresenter>();
+            DeathCorpsePresenter presenter = dummy.AddComponent<DeathCorpsePresenter>();
+            presenter.Configure(combatUnit, material, groundLayer);
         }
 
         private static void CreateDirectionalLight()

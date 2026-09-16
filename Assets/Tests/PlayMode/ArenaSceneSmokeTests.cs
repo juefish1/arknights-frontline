@@ -54,6 +54,14 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(player.transform.localScale, Is.EqualTo(new Vector3(1.6f, 2f, 1.6f)));
             Assert.That(player.transform.position.y, Is.EqualTo(2f));
             Assert.That(player.GetComponent<HealthBarPresenter>(), Is.Not.Null);
+            GameObject enemyOperator = GameObject.Find("TrainingDummy_Red");
+            Assert.That(enemyOperator, Is.Not.Null);
+            Assert.That(enemyOperator.transform.localScale, Is.EqualTo(player.transform.localScale));
+            Assert.That(enemyOperator.transform.position.y, Is.EqualTo(player.transform.position.y));
+            Assert.That(enemyOperator.GetComponent<CapsuleCollider>(), Is.Not.Null);
+            Assert.That(enemyOperator.GetComponent<HealthBarPresenter>(), Is.Not.Null);
+            Assert.That(enemyOperator.GetComponent<DeathCorpsePresenter>(), Is.Not.Null);
+            Assert.That(enemyOperator.transform.Find("HealthBar"), Is.Not.Null);
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             Assert.That(mainCamera, Is.Not.Null);
             Assert.That(mainCamera.transform.position, Is.EqualTo(new Vector3(0f, 42f, -34f)));
@@ -120,6 +128,31 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(corpse.transform.position.x, Is.EqualTo(playerPosition.x));
             Assert.That(corpse.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
             Assert.That(corpse.transform.position.z, Is.EqualTo(playerPosition.z));
+            Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
+            Collider collider = corpse.GetComponent<Collider>();
+            Assert.That(collider == null || !collider.enabled, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator SavedEnemyOperatorDeathCreatesGroundedCorpse()
+        {
+            SceneManager.LoadScene("PrototypeArena");
+            yield return null;
+
+            GameObject enemyOperator = GameObject.Find("TrainingDummy_Red");
+            CombatUnit unit = enemyOperator.GetComponent<CombatUnit>();
+            Material material = enemyOperator.GetComponent<Renderer>().sharedMaterial;
+            Vector3 position = enemyOperator.transform.position;
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+            yield return null;
+
+            Assert.That(enemyOperator == null, Is.True);
+            GameObject corpse = GameObject.Find("TrainingDummy_Red_Corpse");
+            Assert.That(corpse, Is.Not.Null);
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(material));
+            Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(position.x, 0.01f, position.z)));
+            Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
             Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
             Collider collider = corpse.GetComponent<Collider>();
             Assert.That(collider == null || !collider.enabled, Is.True);

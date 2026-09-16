@@ -43,7 +43,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ConfiguredPlayerAndMinionsCreateCorpsesWhileTowerAndTrainingTargetDoNot()
+        public IEnumerator ConfiguredPlayerAndMinionsCreateCorpsesWhileTowersDoNot()
         {
             CreateGround();
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -97,19 +97,11 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             TrackCorpse("Player_Exusiai_Corpse");
 
-            CombatUnit trainingTarget = CreateUnit(
-                "TrainingDummy_Red",
-                TeamId.Red,
-                Altitude.Ground,
-                new Vector3(20f, 1f, 0f),
-                1000f);
             Assert.That(blueTower.GetComponent<DeathCorpsePresenter>(), Is.Null);
             Assert.That(redTower.GetComponent<DeathCorpsePresenter>(), Is.Null);
-            Assert.That(trainingTarget.GetComponent<DeathCorpsePresenter>(), Is.Null);
             int corpseCountBeforeExcludedDeaths = FindCorpses().Length;
             blueTower.TakePhysicalDamage(blueTower.MaxHealth);
             redTower.TakePhysicalDamage(redTower.MaxHealth);
-            trainingTarget.TakePhysicalDamage(trainingTarget.MaxHealth);
 
             yield return null;
 
