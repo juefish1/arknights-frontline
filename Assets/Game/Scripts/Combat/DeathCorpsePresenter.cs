@@ -6,9 +6,12 @@ namespace ArknightsFrontline.Combat
 {
     public sealed class DeathCorpsePresenter : MonoBehaviour
     {
+        private static readonly Vector3 DefaultCorpseScale = new Vector3(0.15f, 1f, 0.15f);
+
         [SerializeField] private CombatUnit combatUnit;
         [SerializeField] private Material corpseMaterial;
         [SerializeField] private int groundLayer = -1;
+        [SerializeField] private Vector3 corpseScale = new Vector3(0.15f, 1f, 0.15f);
         private bool hasSpawnedCorpse;
 
         private void Awake()
@@ -29,6 +32,15 @@ namespace ArknightsFrontline.Combat
 
         public void Configure(CombatUnit combatUnit, Material corpseMaterial, int groundLayer)
         {
+            Configure(combatUnit, corpseMaterial, groundLayer, DefaultCorpseScale);
+        }
+
+        public void Configure(
+            CombatUnit combatUnit,
+            Material corpseMaterial,
+            int groundLayer,
+            Vector3 corpseScale)
+        {
             if (combatUnit == null)
             {
                 throw new ArgumentNullException(nameof(combatUnit));
@@ -43,6 +55,7 @@ namespace ArknightsFrontline.Combat
             this.combatUnit = combatUnit;
             this.corpseMaterial = corpseMaterial;
             this.groundLayer = groundLayer;
+            this.corpseScale = corpseScale;
             SubscribeToDeath();
         }
 
@@ -69,7 +82,7 @@ namespace ArknightsFrontline.Combat
                 renderer.enabled = false;
             }
 
-            Destroy(gameObject);
+            DestroyUnityObject(gameObject);
         }
 
         private GameObject CreateCorpse()
@@ -78,17 +91,33 @@ namespace ArknightsFrontline.Combat
             corpse.name = gameObject.name + "_Corpse";
             corpse.layer = 0;
             corpse.transform.position = transform.position;
-            corpse.transform.localScale = new Vector3(0.15f, 1f, 0.15f);
+            corpse.transform.localScale = corpseScale;
             corpse.GetComponent<Renderer>().sharedMaterial = corpseMaterial;
 
             Collider collider = corpse.GetComponent<Collider>();
             if (collider != null)
             {
                 collider.enabled = false;
-                Destroy(collider);
+                DestroyUnityObject(collider);
             }
 
             return corpse;
+        }
+
+        private static void DestroyUnityObject(UnityEngine.Object target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                Destroy(target);
+                return;
+            }
+
+            DestroyImmediate(target);
         }
 
         private Vector3 ResolveLandingPosition()

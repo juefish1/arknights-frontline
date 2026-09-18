@@ -1,10 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace ArknightsFrontline.Tests.EditMode
 {
@@ -58,6 +56,7 @@ namespace ArknightsFrontline.Tests.EditMode
             unit.TakePhysicalDamage(unit.MaxHealth);
 
             GameObject corpse = FindAndTrackNewCorpse("BlueGround_Corpse");
+            Assert.That(corpse.transform.localScale, Is.EqualTo(new Vector3(0.15f, 1f, 0.15f)));
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.EqualTo(material));
             Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(3f, 0.01f, -2f)));
             Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
@@ -65,6 +64,27 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(corpse.layer, Is.EqualTo(LayerMask.NameToLayer("Default")));
             Collider collider = corpse.GetComponent<Collider>();
             Assert.That(collider == null || !collider.enabled, Is.True);
+        }
+
+        [Test]
+        public void ConfiguredCorpseScaleControlsPlaneFootprint()
+        {
+            CreateGround();
+            CombatUnit unit = CreateUnit("BlueTower", Altitude.Ground, new Vector3(-40f, 3f, 0f));
+            Material material = CreateMaterial(Color.blue);
+            unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(
+                unit,
+                material,
+                GroundLayer,
+                new Vector3(0.3f, 1f, 0.3f));
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+
+            GameObject corpse = FindAndTrackNewCorpse("BlueTower_Corpse");
+            Assert.That(corpse.transform.localScale, Is.EqualTo(new Vector3(0.3f, 1f, 0.3f)));
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(material));
+            Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
+            Assert.That(corpse.GetComponent<Collider>(), Is.Null);
         }
 
         [Test]
@@ -85,22 +105,18 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(fall.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
         }
 
-        [UnityTest]
-        public IEnumerator UnitDeathHidesSourceImmediatelyAndDestroysItOnNextFrame()
+        [Test]
+        public void UnitDeathDestroysSourceImmediatelyInEditMode()
         {
             CreateGround();
             CombatUnit unit = CreateUnit("RenderedUnit", Altitude.Ground, Vector3.zero);
-            Renderer sourceRenderer = unit.gameObject.AddComponent<MeshRenderer>();
+            unit.gameObject.AddComponent<MeshRenderer>();
             unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(unit, CreateMaterial(Color.white), GroundLayer);
 
             unit.TakePhysicalDamage(unit.MaxHealth);
 
-            Assert.That(sourceRenderer.enabled, Is.False);
+            Assert.That(unit == null, Is.True);
             FindAndTrackNewCorpse("RenderedUnit_Corpse");
-
-            yield return null;
-
-            Assert.That(unit, Is.Null);
         }
 
         [Test]

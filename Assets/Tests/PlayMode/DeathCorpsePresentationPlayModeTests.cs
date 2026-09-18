@@ -43,7 +43,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ConfiguredPlayerAndMinionsCreateCorpsesWhileTowersDoNot()
+        public IEnumerator ConfiguredPresentersCreateCorpsesWhileUnconfiguredUnitsDoNot()
         {
             CreateGround();
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -97,15 +97,18 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             TrackCorpse("Player_Exusiai_Corpse");
 
-            Assert.That(blueTower.GetComponent<DeathCorpsePresenter>(), Is.Null);
-            Assert.That(redTower.GetComponent<DeathCorpsePresenter>(), Is.Null);
-            int corpseCountBeforeExcludedDeaths = FindCorpses().Length;
-            blueTower.TakePhysicalDamage(blueTower.MaxHealth);
-            redTower.TakePhysicalDamage(redTower.MaxHealth);
+            CombatUnit unconfiguredUnit = CreateUnit(
+                "UnconfiguredUnit",
+                TeamId.Red,
+                Altitude.Ground,
+                Vector3.zero,
+                10f);
+            int corpseCountBeforeUnconfiguredDeath = FindCorpses().Length;
+            unconfiguredUnit.TakePhysicalDamage(unconfiguredUnit.MaxHealth);
 
             yield return null;
 
-            Assert.That(FindCorpses().Length, Is.EqualTo(corpseCountBeforeExcludedDeaths));
+            Assert.That(FindCorpses().Length, Is.EqualTo(corpseCountBeforeUnconfiguredDeath));
         }
 
         [UnityTest]
