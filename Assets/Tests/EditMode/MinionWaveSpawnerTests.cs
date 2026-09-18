@@ -104,10 +104,11 @@ namespace ArknightsFrontline.Tests.EditMode
 
             UnitMotor blueGroundMotor = blueGround.GetComponent<UnitMotor>();
             LaneMinionController blueGroundController = blueGround.GetComponent<LaneMinionController>();
-            float blueGroundStartX = blueGround.transform.position.x;
+            Vector2 blueGroundStart = new Vector2(blueGround.transform.position.x, blueGround.transform.position.z);
             blueGroundController.Tick(0f);
             blueGroundMotor.Tick(1f);
-            Assert.That(blueGround.transform.position.x - blueGroundStartX, Is.EqualTo(3f).Within(0.001f));
+            Vector2 blueGroundEnd = new Vector2(blueGround.transform.position.x, blueGround.transform.position.z);
+            Assert.That(Vector2.Distance(blueGroundStart, blueGroundEnd), Is.EqualTo(3f).Within(0.001f));
 
             CombatUnit redAir = GetSpawnedMinions().Single(unit => unit.name.StartsWith("RedAirMinion"));
             Assert.That(redAir.MaxHealth, Is.EqualTo(280f));
@@ -120,10 +121,11 @@ namespace ArknightsFrontline.Tests.EditMode
 
             UnitMotor redAirMotor = redAir.GetComponent<UnitMotor>();
             LaneMinionController redAirController = redAir.GetComponent<LaneMinionController>();
-            float redAirStartX = redAir.transform.position.x;
+            Vector2 redAirStart = new Vector2(redAir.transform.position.x, redAir.transform.position.z);
             redAirController.Tick(0f);
             redAirMotor.Tick(1f);
-            Assert.That(redAirStartX - redAir.transform.position.x, Is.EqualTo(3.2f).Within(0.001f));
+            Vector2 redAirEnd = new Vector2(redAir.transform.position.x, redAir.transform.position.z);
+            Assert.That(Vector2.Distance(redAirStart, redAirEnd), Is.EqualTo(3.2f).Within(0.001f));
         }
 
         [TestCase(true)]
