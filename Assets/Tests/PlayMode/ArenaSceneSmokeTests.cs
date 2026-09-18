@@ -94,13 +94,30 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             ArenaBootstrap arena = Object.FindFirstObjectByType<ArenaBootstrap>();
             MatchOutcomeController outcome = Object.FindFirstObjectByType<MatchOutcomeController>();
-            CombatUnit redTower = arena.RedTower.GetComponent<CombatUnit>();
+            GameObject redTowerObject = arena.RedTower.gameObject;
+            CombatUnit redTower = redTowerObject.GetComponent<CombatUnit>();
+            Renderer redTowerRenderer = redTowerObject.transform.Find("RedTowerVisual").GetComponent<Renderer>();
+            Material redMaterial = redTowerRenderer.sharedMaterial;
+            Transform healthBar = redTowerObject.transform.Find("HealthBar");
+            Assert.That(healthBar, Is.Not.Null);
 
             redTower.TakePhysicalDamage(redTower.MaxHealth);
             yield return null;
 
             Assert.That(outcome.IsMatchOver, Is.True);
             Assert.That(outcome.Outcome, Is.EqualTo(MatchOutcome.BlueVictory));
+            Assert.That(redTowerObject == null, Is.True);
+            Assert.That(healthBar == null, Is.True);
+            GameObject corpse = GameObject.Find("RedTower_Corpse");
+            Assert.That(corpse, Is.Not.Null);
+            Assert.That(corpse.transform.localScale, Is.EqualTo(new Vector3(0.3f, 1f, 0.3f)));
+            Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(redMaterial));
+            Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
+            Assert.That(corpse.GetComponent<HealthBarPresenter>(), Is.Null);
+            Assert.That(corpse.GetComponent<BasicAttackController>(), Is.Null);
+            Assert.That(corpse.GetComponent<TowerCombatController>(), Is.Null);
+            Assert.That(corpse.layer, Is.EqualTo(LayerMask.NameToLayer("Default")));
+            Assert.That(corpse.GetComponent<Collider>(), Is.Null);
         }
 
         [UnityTest]
@@ -165,6 +182,8 @@ namespace ArknightsFrontline.Tests.PlayMode
                 $"{tower.name} needs a BasicAttackController.");
             Assert.That(tower.GetComponent<TowerCombatController>(), Is.Not.Null,
                 $"{tower.name} needs a TowerCombatController.");
+            Assert.That(tower.GetComponent<DeathCorpsePresenter>(), Is.Not.Null,
+                $"{tower.name} needs a DeathCorpsePresenter.");
             Assert.That(tower.GetComponent<BoxCollider>(), Is.Not.Null,
                 $"{tower.name} needs a root BoxCollider.");
             CombatUnit combatUnit = tower.GetComponent<CombatUnit>();

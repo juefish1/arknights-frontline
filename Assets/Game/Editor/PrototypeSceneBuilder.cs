@@ -45,6 +45,7 @@ namespace ArknightsFrontline.Editor
                 layout.BlueTower,
                 blueMaterial,
                 targetableLayer,
+                groundLayer,
                 TeamId.Blue);
             Transform redTower = CreateTower(
                 arenaRoot.transform,
@@ -52,6 +53,7 @@ namespace ArknightsFrontline.Editor
                 layout.RedTower,
                 redMaterial,
                 targetableLayer,
+                groundLayer,
                 TeamId.Red);
             arena.AssignTowers(blueTower, redTower);
 
@@ -100,6 +102,7 @@ namespace ArknightsFrontline.Editor
             Vector3 position,
             Material material,
             int targetableLayer,
+            int groundLayer,
             TeamId team)
         {
             GameObject tower = new GameObject(towerName);
@@ -114,6 +117,12 @@ namespace ArknightsFrontline.Editor
             CombatUnit combatUnit = tower.AddComponent<CombatUnit>();
             combatUnit.Configure(team, Altitude.Ground, 500f, 20f, 40f, 9f, 1f, true, true);
             tower.AddComponent<HealthBarPresenter>();
+            DeathCorpsePresenter corpsePresenter = tower.AddComponent<DeathCorpsePresenter>();
+            corpsePresenter.Configure(
+                combatUnit,
+                material,
+                groundLayer,
+                new Vector3(0.3f, 1f, 0.3f));
             BasicAttackController attack = tower.AddComponent<BasicAttackController>();
             attack.Configure(combatUnit);
             TowerCombatController controller = tower.AddComponent<TowerCombatController>();
