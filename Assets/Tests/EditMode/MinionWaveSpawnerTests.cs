@@ -93,7 +93,7 @@ namespace ArknightsFrontline.Tests.EditMode
             MinionWaveSpawner spawner = CreateSpawner();
             spawner.SpawnWaveNow();
 
-            CombatUnit blueGround = GetSpawnedMinions().Single(unit => unit.name.StartsWith("BlueGroundMinion"));
+            CombatUnit blueGround = GetSpawnedMinions().Single(unit => unit.name == "BlueGroundMinion_1_1");
             Assert.That(blueGround.MaxHealth, Is.EqualTo(400f));
             Assert.That(blueGround.AttackPower, Is.EqualTo(35f));
             Assert.That(blueGround.Defense, Is.EqualTo(10f));

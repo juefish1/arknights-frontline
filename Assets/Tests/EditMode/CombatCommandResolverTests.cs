@@ -225,6 +225,9 @@ namespace ArknightsFrontline.Tests.EditMode
             motor = player.AddComponent<UnitMotor>();
             motor.Configure(5f, ArenaLayout.CreateDefault());
             controller = player.AddComponent<PlayerCommandController>();
+            typeof(PlayerCommandController)
+                .GetMethod("Awake", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(controller, null);
             CombatUnit unit = player.AddComponent<CombatUnit>();
             unit.Configure(TeamId.Blue, Altitude.Ground, 10f, 1f, 0f, 5f, 0.5f, true, false);
             resolver = player.AddComponent<CombatCommandResolver>();

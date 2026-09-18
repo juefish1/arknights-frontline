@@ -69,6 +69,7 @@ namespace ArknightsFrontline.Tests.EditMode
             UnitMotor motor = minion.gameObject.AddComponent<UnitMotor>();
             motor.Configure(3f, layout);
             BasicAttackController attack = minion.gameObject.AddComponent<BasicAttackController>();
+            attack.Configure(minion);
             CombatUnit currentEnemy = CreateUnit(
                 "CurrentRedMinion",
                 TeamId.Red,

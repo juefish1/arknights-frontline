@@ -115,7 +115,11 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             GameObject gameObject = new GameObject("Projectile");
             gameObjects.Add(gameObject);
-            return gameObject.AddComponent<Projectile>();
+            Projectile projectile = gameObject.AddComponent<Projectile>();
+            typeof(Projectile)
+                .GetMethod("Awake", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(projectile, null);
+            return projectile;
         }
     }
 }
