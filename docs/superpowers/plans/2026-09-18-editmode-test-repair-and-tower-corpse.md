@@ -366,7 +366,8 @@ Expand `SavedOutcomeControllerResolvesDestroyedTower` so it captures the visible
 ```csharp
 GameObject redTowerObject = arena.RedTower.gameObject;
 CombatUnit redTower = redTowerObject.GetComponent<CombatUnit>();
-Material redMaterial = redTowerObject.GetComponentInChildren<Renderer>().sharedMaterial;
+Renderer redTowerRenderer = redTowerObject.transform.Find("RedTowerVisual").GetComponent<Renderer>();
+Material redMaterial = redTowerRenderer.sharedMaterial;
 Transform healthBar = redTowerObject.transform.Find("HealthBar");
 Assert.That(healthBar, Is.Not.Null);
 
@@ -555,4 +556,3 @@ Ask the user to open `PrototypeArena`, enter Play Mode, and verify both teams se
 ```
 
 Do not claim manual acceptance until the user reports the result.
-
