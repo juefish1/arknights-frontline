@@ -9,6 +9,10 @@ namespace ArknightsFrontline.Combat
         private CombatUnit target;
         private float elapsedSinceAttack;
         private bool hasRequestedFirstAttack;
+        private AttackSequenceExecutor executor;
+        private AttackSequencePlan activePlan;
+        private Func<AttackSequencePlan> planProvider;
+        private bool requestingSequence;
 
         public CombatUnit CurrentTarget => target;
 
@@ -26,6 +30,8 @@ namespace ArknightsFrontline.Combat
 
         private void OnDestroy()
         {
+            ClearTarget();
+            DetachExecutor();
             AttackRequested -= SpawnProjectile;
             if (owner != null)
             {
@@ -62,6 +68,24 @@ namespace ArknightsFrontline.Combat
             }
         }
 
+        public void Configure(CombatUnit combatOwner, AttackSequenceExecutor sequenceExecutor)
+        {
+            ClearTarget();
+            DetachExecutor();
+            Configure(combatOwner);
+            executor = sequenceExecutor;
+            if (executor != null)
+            {
+                executor.SequenceFinished += OnSequenceFinished;
+                executor.ShotRequested += OnSequenceShot;
+            }
+        }
+
+        public void SetPlanProvider(Func<AttackSequencePlan> provider)
+        {
+            planProvider = provider;
+        }
+
         public void SetTarget(CombatUnit combatTarget)
         {
             if (target == combatTarget)
@@ -69,6 +93,7 @@ namespace ArknightsFrontline.Combat
                 return;
             }
 
+            ClearTarget();
             target = combatTarget;
             elapsedSinceAttack = 0f;
             hasRequestedFirstAttack = false;
@@ -76,13 +101,22 @@ namespace ArknightsFrontline.Combat
 
         public void ClearTarget()
         {
+            bool cancelOwnedSequence = activePlan != null;
+            activePlan = null;
             target = null;
             elapsedSinceAttack = 0f;
             hasRequestedFirstAttack = false;
+            if (cancelOwnedSequence && executor != null) executor.Cancel();
         }
 
         public void Tick(float deltaTime)
         {
+            if (executor != null)
+            {
+                TickSequence(deltaTime);
+                return;
+            }
+
             if (!HasLegalTargetInRange())
             {
                 ClearTarget();
@@ -111,6 +145,62 @@ namespace ArknightsFrontline.Combat
 
             elapsedSinceAttack = 0f;
             RequestAttack();
+        }
+
+        private void TickSequence(float deltaTime)
+        {
+            if (requestingSequence) return;
+            if (hasRequestedFirstAttack) elapsedSinceAttack += Mathf.Max(0f, deltaTime);
+            if (executor.IsRunning) return;
+            if (!HasLegalTargetInRange())
+            {
+                ClearTarget();
+                return;
+            }
+
+            if (hasRequestedFirstAttack && elapsedSinceAttack + 0.0000001d < owner.AttackInterval) return;
+            requestingSequence = true;
+            try
+            {
+                AttackSequencePlan nextPlan = planProvider?.Invoke() ?? new AttackSequencePlan(
+                    AttackSequenceKind.Basic, 1, 0.05f, owner.AttackPower, 1f, 0f, 1f, 0f, true, false);
+                CombatUnit initialTarget = target;
+                activePlan = nextPlan;
+                elapsedSinceAttack = 0f;
+                hasRequestedFirstAttack = true;
+                if (!executor.TryStart(nextPlan, initialTarget))
+                {
+                    ClearTarget();
+                    return;
+                }
+
+                AttackRequested?.Invoke(owner, initialTarget);
+                if (!executor.IsRunning && !HasLegalTargetInRange()) ClearTarget();
+            }
+            finally
+            {
+                requestingSequence = false;
+            }
+        }
+
+        private void OnSequenceFinished(AttackSequencePlan finished, bool completed)
+        {
+            if (activePlan != finished) return;
+            activePlan = null;
+            if (!completed) ClearTarget();
+        }
+
+        private void OnSequenceShot(CombatUnit shotTarget, PhysicalDamagePayload _)
+        {
+            if (activePlan != null) target = shotTarget;
+        }
+
+        private void DetachExecutor()
+        {
+            if (executor == null) return;
+            executor.SequenceFinished -= OnSequenceFinished;
+            executor.ShotRequested -= OnSequenceShot;
+            executor = null;
         }
 
         private bool RequestAttack()
@@ -147,7 +237,7 @@ namespace ArknightsFrontline.Combat
 
         private void SpawnProjectile(CombatUnit attacker, CombatUnit attackTarget)
         {
-            if (!Application.isPlaying)
+            if (!Application.isPlaying || executor != null)
             {
                 return;
             }
