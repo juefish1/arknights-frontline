@@ -60,6 +60,29 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(TargetSelector.FindNearestInRange(attacker, candidate => candidate != rejected), Is.EqualTo(accepted));
         }
 
+        [Test]
+        public void SelectorChoosesLegalInRangeCandidateNearestToClickedPoint()
+        {
+            CombatUnit attacker = CreateUnitAt("Blue", TeamId.Blue, Altitude.Ground, Vector3.zero, 6f, true, false);
+            CreateUnitAt("NearOwner", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 1f, false, false);
+            CombatUnit nearClick = CreateUnitAt("NearClick", TeamId.Red, Altitude.Ground, new Vector3(4f, 0f, 0f), 1f, false, false);
+
+            Assert.That(
+                TargetSelector.FindNearestInRangeFromPoint(attacker, new Vector3(5f, 9f, 0f)),
+                Is.EqualTo(nearClick));
+        }
+
+        [Test]
+        public void PointSelectorKeepsLowestInstanceIdWhenCandidatesTieOnClickDistance()
+        {
+            CombatUnit attacker = CreateUnitAt("Blue", TeamId.Blue, Altitude.Ground, Vector3.zero, 6f, true, false);
+            CombatUnit firstCreated = CreateUnitAt("First", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 1f, false, false);
+            CombatUnit secondCreated = CreateUnitAt("Second", TeamId.Red, Altitude.Ground, new Vector3(4f, 0f, 0f), 1f, false, false);
+            CombatUnit expected = firstCreated.GetInstanceID() < secondCreated.GetInstanceID() ? firstCreated : secondCreated;
+
+            Assert.That(TargetSelector.FindNearestInRangeFromPoint(attacker, new Vector3(3f, 0f, 0f)), Is.EqualTo(expected));
+        }
+
         private CombatUnit CreateUnitAt(
             string name,
             TeamId team,

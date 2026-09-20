@@ -11,7 +11,7 @@ namespace ArknightsFrontline.Combat
 
         private CombatUnit attacker;
         private CombatUnit target;
-        private float damage;
+        private PhysicalDamagePayload payload;
         private float speed;
 
         public bool IsFinished { get; private set; }
@@ -28,6 +28,19 @@ namespace ArknightsFrontline.Combat
 
         public void Initialize(CombatUnit combatAttacker, CombatUnit combatTarget, float projectileDamage, float projectileSpeed)
         {
+            Initialize(
+                combatAttacker,
+                combatTarget,
+                new PhysicalDamagePayload(projectileDamage, 1f, 0f, 1f, 0f),
+                projectileSpeed);
+        }
+
+        public void Initialize(
+            CombatUnit combatAttacker,
+            CombatUnit combatTarget,
+            PhysicalDamagePayload projectilePayload,
+            float projectileSpeed)
+        {
             if (combatAttacker == null)
             {
                 throw new ArgumentNullException(nameof(combatAttacker));
@@ -40,7 +53,7 @@ namespace ArknightsFrontline.Combat
 
             attacker = combatAttacker;
             target = combatTarget;
-            damage = Mathf.Max(0f, projectileDamage);
+            payload = projectilePayload;
             speed = Mathf.Max(MinimumSpeed, projectileSpeed);
             transform.position = attacker.transform.position;
             IsFinished = false;
@@ -74,7 +87,22 @@ namespace ArknightsFrontline.Combat
 
             if (TargetRules.IsLegal(attacker, target))
             {
-                target.TakePhysicalDamage(Mathf.Max(1f, damage - target.Defense));
+                float missingHealth = Mathf.Max(0f, target.MaxHealth - target.CurrentHealth);
+                float rawDamage = payload.AttackPower * payload.DamageMultiplier
+                    + missingHealth * payload.MissingHealthRatio;
+                float resolvedDamage = Mathf.Round(Mathf.Max(1f, rawDamage - target.Defense) * 100f) / 100f;
+                target.TakePhysicalDamage(resolvedDamage);
+
+                if (!target.IsDead && payload.SlowDuration > 0f && payload.MovementSlowMultiplier < 1f)
+                {
+                    TimedStatModifierController effects = target.GetComponent<TimedStatModifierController>();
+                    if (effects == null)
+                    {
+                        effects = target.gameObject.AddComponent<TimedStatModifierController>();
+                    }
+
+                    effects.ApplyMovementSlow("Exusiai.E.Slow", payload.MovementSlowMultiplier, payload.SlowDuration);
+                }
             }
 
             Finish();
