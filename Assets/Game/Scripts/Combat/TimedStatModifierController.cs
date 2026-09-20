@@ -10,11 +10,18 @@ namespace ArknightsFrontline.Combat
         private readonly List<KeyValuePair<string, float>> updatedDurations = new List<KeyValuePair<string, float>>();
 
         private UnitStatModifiers modifiers;
+        private CombatUnit owner;
         private bool isStopped;
 
         private void Awake()
         {
             EnsureModifiers();
+            SubscribeToOwnerDeath();
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeFromOwnerDeath();
         }
 
         private void Update()
@@ -95,6 +102,7 @@ namespace ArknightsFrontline.Combat
             expiredSources.Clear();
             updatedDurations.Clear();
             isStopped = true;
+            UnsubscribeFromOwnerDeath();
         }
 
         private void EnsureModifiers()
@@ -107,6 +115,31 @@ namespace ArknightsFrontline.Combat
                     modifiers = gameObject.AddComponent<UnitStatModifiers>();
                 }
             }
+        }
+
+        private void SubscribeToOwnerDeath()
+        {
+            owner = GetComponent<CombatUnit>();
+            if (owner == null)
+            {
+                return;
+            }
+
+            owner.Died -= OnOwnerDied;
+            owner.Died += OnOwnerDied;
+        }
+
+        private void UnsubscribeFromOwnerDeath()
+        {
+            if (owner != null)
+            {
+                owner.Died -= OnOwnerDied;
+            }
+        }
+
+        private void OnOwnerDied(CombatUnit _)
+        {
+            StopForMatch();
         }
     }
 }

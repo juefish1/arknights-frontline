@@ -114,10 +114,10 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
             CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(4f, 0f, 0f), 1000f, 0f, 2f, false);
             Projectile projectile = CreateProjectile();
-            target.TakePhysicalDamage(200f);
             PhysicalDamagePayload payload = new PhysicalDamagePayload(50f, 1.45f, 0.08f, 1f, 0f);
 
             projectile.Initialize(attacker, target, payload, 16f);
+            target.TakePhysicalDamage(200f);
             projectile.Tick(10f);
 
             // Corrected from the brief's arithmetic typo: 800 - (72.5 + 16 - 2) = 713.5.
