@@ -52,6 +52,20 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(deathCount, Is.EqualTo(1));
         }
 
+        [Test]
+        public void StatModifiersPreserveBaseAttackValuesAndApplyEffectiveValues()
+        {
+            CombatUnit unit = CreateUnit("Exusiai", TeamId.Blue, Altitude.Ground, true, true, 10f, 0f, 50f, 1f, 0.5f);
+            UnitStatModifiers modifiers = unit.gameObject.AddComponent<UnitStatModifiers>();
+            modifiers.SetAttackPowerMultiplier("Exusiai.R", 1.10f);
+            modifiers.SetAttackIntervalOffset("Exusiai.R", -0.22f);
+
+            Assert.That(unit.BaseAttackPower, Is.EqualTo(50f));
+            Assert.That(unit.AttackPower, Is.EqualTo(55f));
+            Assert.That(unit.BaseAttackInterval, Is.EqualTo(0.5f));
+            Assert.That(unit.AttackInterval, Is.EqualTo(0.28f).Within(0.001f));
+        }
+
         private CombatUnit CreateUnit(
             string name,
             TeamId team,

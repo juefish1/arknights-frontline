@@ -1,4 +1,5 @@
 using ArknightsFrontline.Arena;
+using ArknightsFrontline.Combat;
 using UnityEngine;
 
 namespace ArknightsFrontline.Movement
@@ -10,8 +11,15 @@ namespace ArknightsFrontline.Movement
         private ArenaLayout layout;
         private Vector3 destination;
         [SerializeField] private float movementSpeed = 5f;
+        private UnitStatModifiers modifiers;
 
         public bool IsMoving { get; private set; }
+
+        public float BaseMovementSpeed => movementSpeed;
+
+        public float MovementSpeed => Modifiers == null ? movementSpeed : Modifiers.ApplyMovementSpeed(movementSpeed);
+
+        private UnitStatModifiers Modifiers => modifiers == null ? modifiers = GetComponent<UnitStatModifiers>() : modifiers;
 
         private void Awake()
         {
@@ -46,7 +54,7 @@ namespace ArknightsFrontline.Movement
 
             Vector3 currentPosition = transform.position;
             Vector3 targetPosition = new Vector3(destination.x, currentPosition.y, destination.z);
-            transform.position = Vector3.MoveTowards(currentPosition, targetPosition, movementSpeed * deltaTime);
+            transform.position = Vector3.MoveTowards(currentPosition, targetPosition, MovementSpeed * deltaTime);
             IsMoving = HorizontalDistance(transform.position, destination) > DestinationTolerance;
         }
 

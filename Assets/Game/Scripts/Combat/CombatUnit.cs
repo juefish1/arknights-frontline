@@ -17,6 +17,8 @@ namespace ArknightsFrontline.Combat
         [SerializeField] private bool canAttackGround;
         [SerializeField] private bool canAttackAir;
 
+        private UnitStatModifiers modifiers;
+
         public TeamId Team => team;
 
         public Altitude Altitude => altitude;
@@ -25,13 +27,17 @@ namespace ArknightsFrontline.Combat
 
         public float CurrentHealth => currentHealth;
 
-        public float AttackPower => attackPower;
+        public float BaseAttackPower => attackPower;
+
+        public float AttackPower => Modifiers == null ? attackPower : Modifiers.ApplyAttackPower(attackPower);
 
         public float Defense => defense;
 
         public float AttackRange => attackRange;
 
-        public float AttackInterval => attackInterval;
+        public float BaseAttackInterval => attackInterval;
+
+        public float AttackInterval => Modifiers == null ? attackInterval : Modifiers.ApplyAttackInterval(attackInterval);
 
         public bool CanAttackGround => canAttackGround;
 
@@ -40,6 +46,8 @@ namespace ArknightsFrontline.Combat
         public bool IsDead => currentHealth <= 0f;
 
         public event Action<CombatUnit> Died;
+
+        private UnitStatModifiers Modifiers => modifiers == null ? modifiers = GetComponent<UnitStatModifiers>() : modifiers;
 
         private void Awake()
         {
