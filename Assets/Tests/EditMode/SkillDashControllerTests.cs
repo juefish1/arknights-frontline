@@ -124,6 +124,27 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void LosingMotorDuringDashClearsStateWithoutCompletingAndRemainsIdempotent()
+        {
+            int completions = 0;
+            dash.DashCompleted += () => completions++;
+            Assert.That(dash.TryStart(new Vector3(7f, 0f, 0f)), Is.True);
+            Object.DestroyImmediate(motor);
+
+            dash.Tick(0.25f);
+
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(completions, Is.Zero);
+
+            dash.Tick(0.25f);
+            dash.Cancel();
+            dash.Cancel();
+
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(completions, Is.Zero);
+        }
+
+        [Test]
         public void CancelIsIdempotentStopsDashAndLeavesOrdinaryMotorStopped()
         {
             int completions = 0;

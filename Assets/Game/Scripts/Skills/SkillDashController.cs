@@ -74,8 +74,14 @@ namespace ArknightsFrontline.Skills
 
         public void Tick(float deltaTime)
         {
-            if (!IsDashing || motor == null)
+            if (!IsDashing)
             {
+                return;
+            }
+
+            if (motor == null)
+            {
+                IsDashing = false;
                 return;
             }
 
