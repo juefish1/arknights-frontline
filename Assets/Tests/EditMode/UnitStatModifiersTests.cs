@@ -57,6 +57,30 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(modifiers.ApplyAttackInterval(0.5f), Is.EqualTo(0.5f));
         }
 
+        [Test]
+        public void ClearRemovesModifiersFromEveryStat()
+        {
+            UnitStatModifiers modifiers = CreateModifiers();
+            modifiers.SetAttackPowerMultiplier("Exusiai.R", 1.10f);
+            modifiers.SetMovementSpeedMultiplier("Exusiai.E.Slow", 0.70f);
+            modifiers.SetAttackIntervalOffset("Exusiai.R", -0.22f);
+
+            modifiers.Clear();
+
+            Assert.That(modifiers.ApplyAttackPower(50f), Is.EqualTo(50f));
+            Assert.That(modifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f));
+            Assert.That(modifiers.ApplyAttackInterval(0.5f), Is.EqualTo(0.5f));
+        }
+
+        [Test]
+        public void AttackIntervalDoesNotDropBelowItsMinimum()
+        {
+            UnitStatModifiers modifiers = CreateModifiers();
+            modifiers.SetAttackIntervalOffset("Exusiai.R", -1f);
+
+            Assert.That(modifiers.ApplyAttackInterval(0.5f), Is.EqualTo(0.05f));
+        }
+
         private UnitStatModifiers CreateModifiers()
         {
             GameObject gameObject = new GameObject("Modifiers");
