@@ -12,6 +12,7 @@ namespace ArknightsFrontline.Combat
         private PlayerCommandController commandSource;
         private BasicAttackController attackController;
         private int observedCommandRevision = -1;
+        private int observedSequenceInterruptionVersion;
         private bool hasEngagedCurrentCommand;
 
         public CombatUnit CurrentTarget { get; private set; }
@@ -84,6 +85,7 @@ namespace ArknightsFrontline.Combat
             motor = unitMotor;
             commandSource = playerCommandSource;
             attackController = basicAttackController;
+            observedSequenceInterruptionVersion = attackController.SequenceInterruptionVersion;
             if (owner.IsDead)
             {
                 motor.Stop();
@@ -110,6 +112,7 @@ namespace ArknightsFrontline.Combat
             if (!command.HasValue)
             {
                 ClearCombatTarget();
+                observedSequenceInterruptionVersion = attackController.SequenceInterruptionVersion;
                 hasEngagedCurrentCommand = false;
                 return;
             }
@@ -119,7 +122,25 @@ namespace ArknightsFrontline.Combat
                 observedCommandRevision = commandSource.CommandRevision;
                 hasEngagedCurrentCommand = false;
                 ClearCombatTarget();
+                observedSequenceInterruptionVersion = attackController.SequenceInterruptionVersion;
             }
+
+            if (observedSequenceInterruptionVersion != attackController.SequenceInterruptionVersion)
+            {
+                CancelCurrentCommand();
+                return;
+            }
+
+            if ((command.Value.Kind == UnitCommandKind.Attack
+                    || command.Value.Kind == UnitCommandKind.AttackNearestInRange)
+                && attackController.IsOwnedSequenceRunning)
+            {
+                SynchronizeSequenceTarget();
+                motor.Stop();
+                return;
+            }
+
+            SynchronizeSequenceTarget();
 
             switch (command.Value.Kind)
             {
@@ -139,7 +160,9 @@ namespace ArknightsFrontline.Combat
 
         private void ResolveSpecifiedTarget(GameObject targetObject)
         {
-            CombatUnit target = targetObject == null ? null : targetObject.GetComponent<CombatUnit>();
+            CombatUnit target = hasEngagedCurrentCommand && CurrentTarget != null
+                ? CurrentTarget
+                : targetObject == null ? null : targetObject.GetComponent<CombatUnit>();
             if (!TargetRules.IsLegal(owner, target))
             {
                 CancelCurrentCommand();
@@ -200,7 +223,15 @@ namespace ArknightsFrontline.Combat
             ClearCombatTarget();
             commandSource.CancelCurrentCommand();
             observedCommandRevision = commandSource.CommandRevision;
+            observedSequenceInterruptionVersion = attackController.SequenceInterruptionVersion;
             hasEngagedCurrentCommand = false;
+        }
+
+        private void SynchronizeSequenceTarget()
+        {
+            if (!hasEngagedCurrentCommand) return;
+            CombatUnit sequenceTarget = attackController.CurrentTarget;
+            if (TargetRules.IsLegal(owner, sequenceTarget)) CurrentTarget = sequenceTarget;
         }
 
         private void ClearCombatTarget()
@@ -223,6 +254,10 @@ namespace ArknightsFrontline.Combat
         {
             motor?.Stop();
             ClearCombatTarget();
+            if (attackController != null)
+            {
+                observedSequenceInterruptionVersion = attackController.SequenceInterruptionVersion;
+            }
             hasEngagedCurrentCommand = false;
         }
     }

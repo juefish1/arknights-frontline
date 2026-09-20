@@ -13,8 +13,11 @@ namespace ArknightsFrontline.Combat
         private AttackSequencePlan activePlan;
         private Func<AttackSequencePlan> planProvider;
         private bool requestingSequence;
+        private int sequenceInterruptionVersion;
 
         public CombatUnit CurrentTarget => target;
+        public bool IsOwnedSequenceRunning => activePlan != null && executor != null && executor.IsRunning;
+        public int SequenceInterruptionVersion => sequenceInterruptionVersion;
 
         public event Action<CombatUnit, CombatUnit> AttackRequested;
 
@@ -187,7 +190,11 @@ namespace ArknightsFrontline.Combat
         {
             if (activePlan != finished) return;
             activePlan = null;
-            if (!completed) ClearTarget();
+            if (!completed)
+            {
+                sequenceInterruptionVersion++;
+                ClearTarget();
+            }
         }
 
         private void OnSequenceShot(CombatUnit shotTarget, PhysicalDamagePayload _)
