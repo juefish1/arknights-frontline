@@ -1,6 +1,8 @@
 using System;
+using ArknightsFrontline.Arena;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Combat;
+using ArknightsFrontline.Movement;
 using UnityEngine;
 
 namespace ArknightsFrontline.Skills
@@ -93,8 +95,10 @@ namespace ArknightsFrontline.Skills
 
         public CombatUnit SelectedChargeTarget { get; private set; }
 
-        public bool BlocksNormalCommands => configured && !stopped
-            && (selectingChargeTarget || IsDashWindowOpen || (dash != null && dash.IsDashing));
+        public bool BlocksAttackMove => CanRun()
+            && (selectingChargeTarget || IsDashWindowOpen || dash.IsDashing);
+
+        public bool BlocksNormalCommands => CanRun() && dash.IsDashing;
 
         public ExusiaiSkillSnapshot Snapshot => new ExusiaiSkillSnapshot(
             sweepProgress,
@@ -109,12 +113,14 @@ namespace ArknightsFrontline.Skills
         private void Awake()
         {
             CombatUnit combatOwner = GetComponent<CombatUnit>();
+            UnitMotor unitMotor = GetComponent<UnitMotor>();
             PlayerCommandController commandController = GetComponent<PlayerCommandController>();
             BasicAttackController basicAttackController = GetComponent<BasicAttackController>();
             AttackSequenceExecutor attackSequenceExecutor = GetComponent<AttackSequenceExecutor>();
             UnitStatModifiers statModifiers = GetComponent<UnitStatModifiers>();
             SkillDashController dashController = GetComponent<SkillDashController>();
             string missing = combatOwner == null ? nameof(CombatUnit)
+                : unitMotor == null ? nameof(UnitMotor)
                 : commandController == null ? nameof(PlayerCommandController)
                 : basicAttackController == null ? nameof(BasicAttackController)
                 : attackSequenceExecutor == null ? nameof(AttackSequenceExecutor)
@@ -128,6 +134,10 @@ namespace ArknightsFrontline.Skills
                 return;
             }
 
+            attackSequenceExecutor.Configure(combatOwner);
+            basicAttackController.Configure(combatOwner, attackSequenceExecutor);
+            dashController.Configure(
+                unitMotor, ArenaLayout.CreateDefault(), LayerMask.GetMask("Obstacle"));
             Configure(combatOwner, commandController, basicAttackController,
                 attackSequenceExecutor, statModifiers, dashController);
         }
@@ -140,12 +150,15 @@ namespace ArknightsFrontline.Skills
         private void OnDisable()
         {
             if (configured) StopForMatch();
+            DetachSubscriptions();
+            configured = false;
         }
 
         private void OnDestroy()
         {
             if (configured) StopForMatch();
             DetachSubscriptions();
+            configured = false;
         }
 
         public void Configure(
@@ -273,7 +286,7 @@ namespace ArknightsFrontline.Skills
 
         public void ResetForDeployment()
         {
-            if (!configured) return;
+            if (!configured || !isActiveAndEnabled) return;
             stopped = false;
             ClearRuntimeState(true);
             sweepProgress = 0;
@@ -317,9 +330,10 @@ namespace ArknightsFrontline.Skills
 
         private void OnSequenceFinished(AttackSequencePlan plan, bool completed)
         {
-            if (!configured || stopped || !completed || !plan.CountsAsBasicAttack) return;
-            sweepProgress = Mathf.Min(SweepRequiredAttacks, sweepProgress + 1);
+            if (!configured || stopped) return;
             if (plan.Kind == AttackSequenceKind.Charge) SelectedChargeTarget = null;
+            if (!completed || !plan.CountsAsBasicAttack) return;
+            sweepProgress = Mathf.Min(SweepRequiredAttacks, sweepProgress + 1);
         }
 
         private void OnOwnerDied(CombatUnit _)
@@ -329,7 +343,7 @@ namespace ArknightsFrontline.Skills
 
         private bool CanRun()
         {
-            return configured && !stopped && owner != null && !owner.IsDead;
+            return configured && isActiveAndEnabled && !stopped && owner != null && !owner.IsDead;
         }
 
         private bool IsChargeReady()
@@ -339,7 +353,10 @@ namespace ArknightsFrontline.Skills
 
         private ExusiaiChargePhase GetChargePhase()
         {
-            if (!configured || stopped || owner == null || owner.IsDead) return ExusiaiChargePhase.Inactive;
+            if (!configured || !isActiveAndEnabled || stopped || owner == null || owner.IsDead)
+            {
+                return ExusiaiChargePhase.Inactive;
+            }
             if (selectingChargeTarget) return ExusiaiChargePhase.Targeting;
             if (IsDashWindowOpen) return ExusiaiChargePhase.DashWindow;
             return chargeCooldown.IsReady ? ExusiaiChargePhase.Ready : ExusiaiChargePhase.Cooldown;

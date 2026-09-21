@@ -70,6 +70,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.Snapshot.IsOverloadActive, Is.False);
             Assert.That(controller.Snapshot.OverloadDuration, Is.Zero);
             Assert.That(controller.Snapshot.OverloadCooldown, Is.EqualTo(10f));
+            Assert.That(controller.BlocksAttackMove, Is.False);
             Assert.That(controller.BlocksNormalCommands, Is.False);
         }
 
@@ -203,6 +204,7 @@ namespace ArknightsFrontline.Tests.EditMode
             AttackSequencePlan plan = CancelRunningAndCapturePlan();
 
             AssertPlan(plan, AttackSequenceKind.Charge, 4, 50f, 1.25f);
+            AssertChargePlan(plan);
         }
 
         [Test]
@@ -216,16 +218,19 @@ namespace ArknightsFrontline.Tests.EditMode
             AttackSequencePlan plan = CancelRunningAndCapturePlan();
 
             AssertPlan(plan, AttackSequenceKind.Charge, 5, 55f, 1.25f);
+            AssertChargePlan(plan);
         }
 
         [Test]
-        public void BeginChargeTargetingRequiresReadyLivingOwnerAndBlocksNormalCommands()
+        public void BeginChargeTargetingRequiresReadyLivingOwnerAndBlocksAttackMoveOnly()
         {
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.IsSelectingChargeTarget, Is.True);
-            Assert.That(controller.BlocksNormalCommands, Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.True);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
             Assert.That(controller.BeginChargeTargeting(), Is.False);
             Assert.That(controller.CancelChargeTargeting(), Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.False);
             Assert.That(controller.BlocksNormalCommands, Is.False);
 
             owner.TakePhysicalDamage(owner.MaxHealth);
@@ -273,6 +278,30 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void CompletedChargeSequenceClearsSelectedChargeTarget()
+        {
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.SameAs(target));
+
+            executor.Tick(1f);
+
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+        }
+
+        [Test]
+        public void InterruptedChargeSequenceClearsSelectedChargeTarget()
+        {
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.SameAs(target));
+
+            executor.Cancel();
+
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+        }
+
+        [Test]
         public void NoTargetStillConsumesChargeAndOpensWindowWithoutSequence()
         {
             target.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
@@ -283,9 +312,33 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.SelectedChargeTarget, Is.Null);
             Assert.That(executor.IsRunning, Is.False);
             Assert.That(controller.IsDashWindowOpen, Is.True);
-            Assert.That(controller.BlocksNormalCommands, Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.True);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
             Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
             Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.DashWindow));
+        }
+
+        [Test]
+        public void CommandBlockingMatchesTargetingWindowDashAndIdlePhases()
+        {
+            Assert.That(controller.BlocksAttackMove, Is.False);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
+
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.True);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
+
+            Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.True);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
+
+            Assert.That(controller.TryConsumeDashMove(Vector3.right * 4f), Is.True);
+            Assert.That(controller.BlocksAttackMove, Is.True);
+            Assert.That(controller.BlocksNormalCommands, Is.True);
+
+            dash.Tick(1f);
+            Assert.That(controller.BlocksAttackMove, Is.False);
+            Assert.That(controller.BlocksNormalCommands, Is.False);
         }
 
         [Test]
@@ -446,6 +499,40 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void DisableClosesStateDetachesOwnershipAndRequiresExplicitConfigureToRestore()
+        {
+            controller.Tick(10f);
+            Assert.That(controller.TryActivateOverload(), Is.True);
+            OpenDashWindow();
+            Assert.That(controller.TryConsumeDashMove(Vector3.right * 4f), Is.True);
+            Assert.That(executor.IsRunning, Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+
+            controller.enabled = false;
+            InvokePrivate(controller, "OnDisable");
+
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(owner.AttackPower, Is.EqualTo(50f));
+            Assert.That(ReadPrivateField<Func<AttackSequencePlan>>(attacks, "planProvider"), Is.Null);
+
+            controller.enabled = true;
+            controller.ResetForDeployment();
+            controller.Tick(100f);
+            Assert.That(controller.BeginChargeTargeting(), Is.False);
+            Assert.That(controller.TryActivateOverload(), Is.False);
+            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Inactive));
+
+            Assert.That(executor.TryStart(new AttackSequencePlan(
+                AttackSequenceKind.Basic, 1, 0.05f, 50f, 1f, 0f, 1f, 0f, true, false), target), Is.True);
+            Assert.That(controller.Snapshot.SweepProgress, Is.Zero);
+
+            controller.Configure(owner, commands, attacks, executor, modifiers, dash);
+            Assert.That(controller.Snapshot.IsChargeReady, Is.True);
+            Assert.That(ReadPrivateField<Func<AttackSequencePlan>>(attacks, "planProvider"), Is.Not.Null);
+        }
+
+        [Test]
         public void ResetForDeploymentClearsCommandsSequenceDashAndModifiersThenRestoresInitialState()
         {
             controller.Tick(10f);
@@ -526,6 +613,40 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.Snapshot.SweepProgress, Is.EqualTo(1));
         }
 
+        [Test]
+        public void AwakeConfiguresUninitializedSiblingPipelineInDependencyOrder()
+        {
+            GameObject automatic = new GameObject("Automatic Exusiai");
+            gameObjects.Add(automatic);
+            UnitMotor automaticMotor = automatic.AddComponent<UnitMotor>();
+            automaticMotor.Configure(5f, ArenaLayout.CreateDefault());
+            PlayerCommandController automaticCommands = automatic.AddComponent<PlayerCommandController>();
+            InvokePrivate(automaticCommands, "Awake");
+            automatic.AddComponent<UnitStatModifiers>();
+            CombatUnit automaticOwner = automatic.AddComponent<CombatUnit>();
+            automaticOwner.Configure(
+                TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
+            AttackSequenceExecutor automaticExecutor = automatic.AddComponent<AttackSequenceExecutor>();
+            BasicAttackController automaticAttacks = automatic.AddComponent<BasicAttackController>();
+            SkillDashController automaticDash = automatic.AddComponent<SkillDashController>();
+
+            ExusiaiSkillController automaticController = automatic.AddComponent<ExusiaiSkillController>();
+            InvokePrivate(automaticController, "Awake");
+            CombatUnit automaticTarget = CreateUnit("Automatic Target", TeamId.Red, Vector3.right * 2f);
+
+            automaticAttacks.SetTarget(automaticTarget);
+            automaticAttacks.Tick(0f);
+            Assert.That(automaticController.Snapshot.SweepProgress, Is.EqualTo(1));
+
+            Assert.That(automaticController.BeginChargeTargeting(), Is.True);
+            Assert.That(automaticController.TryConfirmCharge(
+                automaticTarget.transform.position, automaticTarget), Is.True);
+            Assert.That(automaticExecutor.IsRunning, Is.True);
+            Assert.That(automaticController.TryConsumeDashMove(Vector3.right * 4f), Is.True);
+            Assert.That(automaticDash.IsDashing, Is.True);
+        }
+
+        [TestCase(typeof(UnitMotor))]
         [TestCase(typeof(CombatUnit))]
         [TestCase(typeof(PlayerCommandController))]
         [TestCase(typeof(BasicAttackController))]
@@ -536,9 +657,9 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             GameObject incomplete = new GameObject("Incomplete Exusiai");
             gameObjects.Add(incomplete);
-            incomplete.AddComponent<UnitMotor>();
             Type[] requiredTypes =
             {
+                typeof(UnitMotor),
                 typeof(CombatUnit),
                 typeof(PlayerCommandController),
                 typeof(BasicAttackController),
@@ -548,7 +669,9 @@ namespace ArknightsFrontline.Tests.EditMode
             };
             foreach (Type requiredType in requiredTypes)
             {
-                if (requiredType != missingType) incomplete.AddComponent(requiredType);
+                if (requiredType == missingType) continue;
+                if (missingType == typeof(UnitMotor) && requiredType == typeof(PlayerCommandController)) continue;
+                incomplete.AddComponent(requiredType);
             }
 
             ExusiaiSkillController incompleteController = incomplete.AddComponent<ExusiaiSkillController>();
@@ -679,7 +802,17 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.Snapshot.OverloadCooldown, Is.Zero);
             Assert.That(controller.Snapshot.OverloadDuration, Is.Zero);
             Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Inactive));
+            Assert.That(controller.BlocksAttackMove, Is.False);
             Assert.That(controller.BlocksNormalCommands, Is.False);
+        }
+
+        private static void AssertChargePlan(AttackSequencePlan plan)
+        {
+            Assert.That(plan.LastShotMissingHealthRatio, Is.Zero);
+            Assert.That(plan.MovementSlowMultiplier, Is.EqualTo(0.70f).Within(0.001f));
+            Assert.That(plan.SlowDuration, Is.EqualTo(2f).Within(0.001f));
+            Assert.That(plan.CountsAsBasicAttack, Is.False);
+            Assert.That(plan.IgnoreRangeAfterStart, Is.True);
         }
 
         private static void AssertPlan(
@@ -694,6 +827,13 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(plan.ShotInterval, Is.EqualTo(0.05f));
             Assert.That(plan.AttackPower, Is.EqualTo(attackPower).Within(0.001f));
             Assert.That(plan.DamageMultiplier, Is.EqualTo(multiplier).Within(0.001f));
+        }
+
+        private static T ReadPrivateField<T>(object instance, string name)
+        {
+            FieldInfo field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null, name);
+            return (T)field.GetValue(instance);
         }
 
         private static void InvokePrivate(MonoBehaviour behaviour, string method)
