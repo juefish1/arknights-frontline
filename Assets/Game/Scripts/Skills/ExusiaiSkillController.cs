@@ -359,6 +359,8 @@ namespace ArknightsFrontline.Skills
                 return true;
             }
 
+            bool wasSelectingChargeTarget = selectingChargeTarget;
+
             CombatUnit directTarget = null;
             if (hitObject != null
                 && hitObject.layer == LayerMask.NameToLayer("Targetable")
@@ -368,7 +370,8 @@ namespace ArknightsFrontline.Skills
                 directTarget = hitUnit;
             }
 
-            return TryConfirmCharge(worldPoint, directTarget);
+            bool confirmed = TryConfirmCharge(worldPoint, directTarget);
+            return wasSelectingChargeTarget || confirmed;
         }
 
         public bool TryHandleMoveClick(Vector3 worldPoint)

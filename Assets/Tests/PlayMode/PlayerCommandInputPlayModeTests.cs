@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
@@ -9,12 +10,32 @@ using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
+        private readonly HashSet<int> baselineRootIds = new HashSet<int>();
+        private Scene cleanupScene;
+
+        public override void Setup()
+        {
+            base.Setup();
+            cleanupScene = SceneManager.GetActiveScene();
+            baselineRootIds.Clear();
+            if (!cleanupScene.IsValid() || !cleanupScene.isLoaded)
+            {
+                return;
+            }
+
+            foreach (GameObject root in cleanupScene.GetRootGameObjects())
+            {
+                baselineRootIds.Add(root.GetInstanceID());
+            }
+        }
+
         [UnityTest]
         public IEnumerator DisablingFeedbackClearsVisibleStateAndHidesRangeRingUntilReenabled()
         {
@@ -191,6 +212,60 @@ namespace ArknightsFrontline.Tests.PlayMode
             Object.Destroy(player);
             Object.Destroy(cameraObject);
             Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator ExusiaiSelectingChargeConsumesOutOfRangeTargetAndGroundConfirmsBeforeAttackMove()
+        {
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(
+                new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            controller.Issue(UnitCommand.Move(Vector3.zero));
+            int originalRevision = controller.CommandRevision;
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.aKey);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.True);
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+
+            Object.Destroy(target);
+            yield return null;
+
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            Release(keyboard.aKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
         }
 
         [UnityTest]
@@ -667,8 +742,36 @@ namespace ArknightsFrontline.Tests.PlayMode
 
         public override void TearDown()
         {
-            PlayerPrefs.DeleteKey("af.input.bindings.v1");
-            base.TearDown();
+        }
+
+        [UnityTearDown]
+        public IEnumerator TearDownAfterRuntimeObjectsAreDestroyed()
+        {
+            try
+            {
+                foreach (InputDevice device in InputSystem.devices)
+                {
+                    InputSystem.ResetDevice(device, true);
+                }
+
+                if (cleanupScene.IsValid() && cleanupScene.isLoaded)
+                {
+                    foreach (GameObject root in cleanupScene.GetRootGameObjects())
+                    {
+                        if (!baselineRootIds.Contains(root.GetInstanceID()))
+                        {
+                            Object.Destroy(root);
+                        }
+                    }
+                }
+
+                yield return null;
+            }
+            finally
+            {
+                PlayerPrefs.DeleteKey("af.input.bindings.v1");
+                base.TearDown();
+            }
         }
 
         private static PlayerCommandController CreateControllerAt(Vector3 position, out UnitMotor motor, out GameObject player)
@@ -699,6 +802,26 @@ namespace ArknightsFrontline.Tests.PlayMode
         {
             CombatUnit combatUnit = player.AddComponent<CombatUnit>();
             combatUnit.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, false);
+        }
+
+        private static ExusiaiSkillController ConfigureExusiaiSkillPipeline(
+            GameObject player,
+            PlayerCommandController commands)
+        {
+            UnitMotor motor = player.GetComponent<UnitMotor>();
+            CombatUnit owner = player.AddComponent<CombatUnit>();
+            owner.Configure(TeamId.Blue, Altitude.Ground, 100f, 12f, 2f, 6f, 0.5f, true, false);
+            UnitStatModifiers modifiers = player.AddComponent<UnitStatModifiers>();
+            AttackSequenceExecutor executor = player.AddComponent<AttackSequenceExecutor>();
+            executor.Configure(owner);
+            BasicAttackController attacks = player.AddComponent<BasicAttackController>();
+            attacks.Configure(owner, executor);
+            SkillDashController dash = player.AddComponent<SkillDashController>();
+            dash.Configure(motor, ArenaLayout.CreateDefault(), 0);
+            ExusiaiSkillController skills = player.AddComponent<ExusiaiSkillController>();
+            skills.Configure(owner, commands, attacks, executor, modifiers, dash);
+            commands.SetSkillInputHandler(skills);
+            return skills;
         }
 
         private static GameObject CreateTargetableCube(TeamId team)

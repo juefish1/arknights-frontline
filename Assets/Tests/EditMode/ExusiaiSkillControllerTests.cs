@@ -271,6 +271,31 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void SkillInputOutOfRangeConfirmIsConsumedAndLeavesChargeTargetingUntouched()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            CombatUnit outOfRangeTarget = CreateUnit("Out Of Range Hit", TeamId.Red, Vector3.right * 6.001f);
+            outOfRangeTarget.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            commands.Issue(UnitCommand.Move(Vector3.right));
+            int originalRevision = commands.CommandRevision;
+
+            handler.HandleSkill2();
+
+            Assert.That(handler.TryHandleConfirm(
+                outOfRangeTarget.transform.position, outOfRangeTarget.gameObject), Is.True);
+            Assert.That(controller.IsSelectingChargeTarget, Is.True);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(commands.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(commands.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+
+            Assert.That(handler.TryHandleConfirm(Vector3.right * 6.002f, null), Is.True);
+            Assert.That(controller.IsSelectingChargeTarget, Is.True);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(commands.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(commands.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+        }
+
+        [Test]
         public void SkillInputConsumesFirstDashWindowMoveEvenWhenDashCannotStart()
         {
             IPlayerSkillInputHandler handler = controller;
