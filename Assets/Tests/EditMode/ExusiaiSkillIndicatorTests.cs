@@ -112,12 +112,17 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(skills.CancelChargeTargeting(), Is.True);
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(Vector3.zero, null), Is.True);
+            GameObject targetObject = Track(new GameObject("Locked Target"));
+            CombatUnit target = targetObject.AddComponent<CombatUnit>();
+            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
+            targetObject.transform.position = new Vector3(2f, 0f, 0f);
+            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
             SetCachedPointer(new Vector3(20f, 0f, 0f));
             indicator.Refresh();
             LineRenderer arrow = GetRenderer("arrowRenderer");
             Assert.That(Vector3.Distance(owner.transform.position, indicator.DisplayedEndpoint), Is.EqualTo(7f).Within(0.001f));
             Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(7f, 0.05f, 0f)));
+            Assert.That(Vector3.Distance(MarkerCenter(marker), new Vector3(2f, 0.05f, 0f)), Is.LessThan(0.001f));
 
             SetCachedPointer(Vector3.zero);
             indicator.Refresh();
@@ -126,6 +131,22 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(range.enabled, Is.False);
             Assert.That(arrow.enabled, Is.False);
             Assert.That(marker.enabled, Is.False);
+        }
+
+        [Test]
+        public void DashFadeHidesArrowNoLaterThanPointOneFiveSecondsAfterWindowCloses()
+        {
+            SetCachedPointer(new Vector3(7f, 0f, 0f));
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            Assert.That(skills.TryConfirmCharge(Vector3.zero, null), Is.True);
+            indicator.Refresh();
+            LineRenderer arrow = GetRenderer("arrowRenderer");
+            Assert.That(arrow.enabled, Is.True);
+
+            skills.Tick(0.25f);
+            InvokePrivate(indicator, "RefreshWithDelta", 0.151f);
+
+            Assert.That(arrow.enabled, Is.False);
         }
 
         [Test]
@@ -156,6 +177,11 @@ namespace ArknightsFrontline.Tests.EditMode
                 .GetValue(indicator);
         }
 
+        private static Vector3 MarkerCenter(LineRenderer marker)
+        {
+            return (marker.GetPosition(0) + marker.GetPosition(16)) * 0.5f;
+        }
+
         private void SetCachedPointer(Vector3 point)
         {
             GameObject hitObject = Track(GameObject.CreatePrimitive(PrimitiveType.Cube));
@@ -175,6 +201,13 @@ namespace ArknightsFrontline.Tests.EditMode
             instance.GetType()
                 .GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
                 .Invoke(instance, null);
+        }
+
+        private static void InvokePrivate(object instance, string methodName, float argument)
+        {
+            instance.GetType()
+                .GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(instance, new object[] { argument });
         }
     }
 }

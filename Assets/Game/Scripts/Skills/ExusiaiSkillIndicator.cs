@@ -43,12 +43,12 @@ namespace ArknightsFrontline.Skills
 
         private void OnEnable()
         {
-            Refresh();
+            RefreshWithDelta(Time.deltaTime);
         }
 
         private void Update()
         {
-            Refresh();
+            RefreshWithDelta(Time.deltaTime);
         }
 
         private void OnDisable()
@@ -80,6 +80,11 @@ namespace ArknightsFrontline.Skills
         }
 
         public void Refresh()
+        {
+            RefreshWithDelta(Time.deltaTime);
+        }
+
+        private void RefreshWithDelta(float deltaTime)
         {
             if (!isActiveAndEnabled || owner == null || skills == null || dash == null)
             {
@@ -114,7 +119,7 @@ namespace ArknightsFrontline.Skills
             wasDashWindow = false;
             if (fadeRemaining > 0f)
             {
-                fadeRemaining = Mathf.Max(0f, fadeRemaining - Time.deltaTime);
+                fadeRemaining = Mathf.Max(0f, fadeRemaining - Mathf.Max(0f, deltaTime));
                 SetFade(fadeRemaining / FadeDuration);
                 if (fadeRemaining > 0f) return;
             }
@@ -171,7 +176,9 @@ namespace ArknightsFrontline.Skills
             rangeRenderer.enabled = true;
             DrawArrow(center, endpoint, color);
             arrowRenderer.enabled = true;
-            DrawLoop(markerRenderer, endpoint, 0.35f, MarkerPoints, color);
+            CombatUnit selectedTarget = skills.SelectedChargeTarget;
+            Vector3 markerCenter = selectedTarget != null ? selectedTarget.transform.position : endpoint;
+            DrawLoop(markerRenderer, markerCenter, 0.35f, MarkerPoints, color);
             markerRenderer.enabled = true;
         }
 
