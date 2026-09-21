@@ -674,6 +674,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
             ExusiaiSkillController automaticController = automatic.AddComponent<ExusiaiSkillController>();
             InvokePrivate(automaticController, "Awake");
+            InvokePrivate(automaticController, "Awake");
 
             Assert.That(automaticExecutor.IsRunning, Is.True);
             Assert.That(automaticAttacks.CurrentTarget, Is.SameAs(automaticTarget));
@@ -715,6 +716,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(beforeEndpoint.x, Is.EqualTo(-2.75f).Within(0.001f));
 
             ExusiaiSkillController automaticController = automatic.AddComponent<ExusiaiSkillController>();
+            InvokePrivate(automaticController, "Awake");
             InvokePrivate(automaticController, "Awake");
 
             Assert.That(automaticExecutor.IsRunning, Is.False);
