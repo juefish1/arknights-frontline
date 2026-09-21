@@ -23,6 +23,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         public override void Setup()
         {
             base.Setup();
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
             cleanupScene = SceneManager.GetActiveScene();
             baselineRootIds.Clear();
             if (!cleanupScene.IsValid() || !cleanupScene.isLoaded)

@@ -18,26 +18,33 @@ namespace ArknightsFrontline.Skills
         private ExusiaiSkillController controller;
         private GameObject hudRoot;
         private GameObject ownedCanvas;
+        private bool ownsHudRoot;
 
         public string WLabel { get; private set; } = "W  0/3";
         public string ELabel { get; private set; } = "E  READY";
         public string RLabel { get; private set; } = "R  0.0";
         public int SlotCount => hudRoot == null ? 0 : slots.Length;
-        public bool IsVisible => hudRoot != null && hudRoot.activeSelf;
+        public bool IsVisible => isActiveAndEnabled && hudRoot != null
+            && (ownsHudRoot ? hudRoot.activeSelf : slots[0] != null && slots[0].activeSelf);
 
         private void OnEnable()
         {
             if (controller != null) Refresh();
         }
 
+        private void Update()
+        {
+            if (controller != null) Refresh();
+        }
+
         private void OnDisable()
         {
-            if (hudRoot != null) hudRoot.SetActive(false);
+            SetVisible(false);
         }
 
         private void OnDestroy()
         {
-            if (hudRoot != null) Destroy(hudRoot);
+            if (ownsHudRoot && hudRoot != null) Destroy(hudRoot);
             if (ownedCanvas != null) Destroy(ownedCanvas);
         }
 
@@ -46,7 +53,7 @@ namespace ArknightsFrontline.Skills
             controller = skillController;
             if (controller == null)
             {
-                if (hudRoot != null) hudRoot.SetActive(false);
+                SetVisible(false);
                 return;
             }
 
@@ -58,7 +65,7 @@ namespace ArknightsFrontline.Skills
         {
             if (controller == null || !isActiveAndEnabled)
             {
-                if (hudRoot != null) hudRoot.SetActive(false);
+                SetVisible(false);
                 return;
             }
 
@@ -72,7 +79,7 @@ namespace ArknightsFrontline.Skills
             SetSlot(0, WLabel, snapshot.IsSweepReady, !snapshot.IsSweepReady);
             SetSlot(1, ELabel, snapshot.ChargePhase == ExusiaiChargePhase.Ready, snapshot.ChargePhase == ExusiaiChargePhase.Cooldown);
             SetSlot(2, RLabel, snapshot.IsOverloadActive || (!snapshot.IsOverloadActive && snapshot.OverloadCooldown <= 0f), !snapshot.IsOverloadActive && snapshot.OverloadCooldown > 0f);
-            hudRoot.SetActive(true);
+            SetVisible(true);
         }
 
         private static string FormatCharge(ExusiaiSkillSnapshot snapshot)
@@ -94,6 +101,16 @@ namespace ArknightsFrontline.Skills
         private void EnsureHud()
         {
             if (hudRoot != null) return;
+            RectTransform suppliedRoot = transform as RectTransform;
+            if (suppliedRoot != null)
+            {
+                hudRoot = gameObject;
+                ownsHudRoot = false;
+                ConfigureRoot(suppliedRoot);
+                for (int index = 0; index < slots.Length; index++) CreateSlot(index, suppliedRoot);
+                return;
+            }
+
             Canvas canvas = GetComponentInParent<Canvas>();
             if (canvas == null) canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
@@ -104,14 +121,20 @@ namespace ArknightsFrontline.Skills
             }
 
             hudRoot = new GameObject("SkillHud", typeof(RectTransform));
+            ownsHudRoot = true;
             RectTransform root = hudRoot.GetComponent<RectTransform>();
             root.SetParent(canvas.transform, false);
+            ConfigureRoot(root);
+            for (int index = 0; index < slots.Length; index++) CreateSlot(index, root);
+        }
+
+        private static void ConfigureRoot(RectTransform root)
+        {
             root.anchorMin = new Vector2(0.5f, 0f);
             root.anchorMax = new Vector2(0.5f, 0f);
             root.pivot = new Vector2(0.5f, 0f);
             root.anchoredPosition = new Vector2(0f, 24f);
             root.sizeDelta = new Vector2(SlotWidth * 3f + SlotSpacing * 2f, SlotHeight);
-            for (int index = 0; index < slots.Length; index++) CreateSlot(index, root);
         }
 
         private void CreateSlot(int index, RectTransform root)
@@ -163,6 +186,21 @@ namespace ArknightsFrontline.Skills
             labels[index].text = text;
             outlines[index].enabled = ready;
             overlays[index].enabled = cooldown;
+        }
+
+        private void SetVisible(bool visible)
+        {
+            if (hudRoot == null) return;
+            if (ownsHudRoot)
+            {
+                hudRoot.SetActive(visible);
+                return;
+            }
+
+            foreach (GameObject slot in slots)
+            {
+                if (slot != null) slot.SetActive(visible);
+            }
         }
     }
 }

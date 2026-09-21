@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 
 namespace ArknightsFrontline.Commands
 {
+    [DefaultExecutionOrder(-100)]
     [RequireComponent(typeof(UnitMotor))]
     public sealed class PlayerCommandController : MonoBehaviour
     {

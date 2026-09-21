@@ -22,7 +22,7 @@ namespace ArknightsFrontline.Tests.EditMode
         public void SetUp()
         {
             GameObject canvasObject = Track(new GameObject("Test Canvas", typeof(Canvas)));
-            GameObject rootObject = Track(new GameObject("Hud Root", typeof(RectTransform)));
+            GameObject rootObject = Track(new GameObject("SkillHud", typeof(RectTransform)));
             rootObject.transform.SetParent(canvasObject.transform, false);
             hud = rootObject.AddComponent<SkillHudPresenter>();
             skills = CreateSkills();
@@ -40,7 +40,7 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void RefreshFormatsInitialAndReadyStatesUsingInvariantDecimals()
+        public void UpdateFormatsInitialAndReadyStatesUsingInvariantDecimals()
         {
             hud.Refresh();
             Assert.That(hud.WLabel, Is.EqualTo("W  0/3"));
@@ -50,7 +50,7 @@ namespace ArknightsFrontline.Tests.EditMode
             CompleteBasicAttack();
             CompleteBasicAttack();
             CompleteBasicAttack();
-            hud.Refresh();
+            InvokePrivate(hud, "Update");
 
             Assert.That(hud.WLabel, Is.EqualTo("W  READY"));
         }
@@ -81,17 +81,23 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void ConfigureAndRefreshReuseThreeNonInteractiveSlotsAndDisableHidesThem()
+        public void ConfigureUsesItsExistingRectTransformForThreeNonInteractiveSlots()
         {
             hud.Configure(skills);
             hud.Refresh();
 
             Assert.That(hud.SlotCount, Is.EqualTo(3));
+            Assert.That(hud.transform.parent.childCount, Is.EqualTo(1));
+            Assert.That(hud.GetComponentsInChildren<Graphic>(true), Is.Not.Empty);
             foreach (Graphic graphic in hud.GetComponentsInChildren<Graphic>(true))
             {
                 Assert.That(graphic.raycastTarget, Is.False);
             }
             Assert.That(hud.GetComponentsInChildren<Selectable>(true), Is.Empty);
+            AssertSlotGeometry();
+            int childCount = hud.transform.childCount;
+            hud.Configure(skills);
+            Assert.That(hud.transform.childCount, Is.EqualTo(childCount));
 
             hud.enabled = false;
             InvokePrivate(hud, "OnDisable");
@@ -99,6 +105,20 @@ namespace ArknightsFrontline.Tests.EditMode
             hud.enabled = true;
             hud.Refresh();
             Assert.That(hud.IsVisible, Is.True);
+        }
+
+        private void AssertSlotGeometry()
+        {
+            RectTransform first = hud.transform.GetChild(0).GetComponent<RectTransform>();
+            RectTransform second = hud.transform.GetChild(1).GetComponent<RectTransform>();
+            RectTransform third = hud.transform.GetChild(2).GetComponent<RectTransform>();
+            Assert.That(first.sizeDelta, Is.EqualTo(new Vector2(120f, 64f)));
+            Assert.That(second.sizeDelta, Is.EqualTo(new Vector2(120f, 64f)));
+            Assert.That(third.sizeDelta, Is.EqualTo(new Vector2(120f, 64f)));
+            Assert.That(second.anchoredPosition.x - first.anchoredPosition.x, Is.EqualTo(128f));
+            Assert.That(third.anchoredPosition.x - second.anchoredPosition.x, Is.EqualTo(128f));
+            Assert.That(hud.GetComponent<RectTransform>().anchorMin, Is.EqualTo(new Vector2(0.5f, 0f)));
+            Assert.That(hud.GetComponent<RectTransform>().anchorMax, Is.EqualTo(new Vector2(0.5f, 0f)));
         }
 
         private ExusiaiSkillController CreateSkills()

@@ -11,6 +11,7 @@ namespace ArknightsFrontline.Skills
         DashWindow
     }
 
+    [DefaultExecutionOrder(100)]
     [DisallowMultipleComponent]
     public sealed class ExusiaiSkillIndicator : MonoBehaviour
     {
@@ -126,6 +127,12 @@ namespace ArknightsFrontline.Skills
             Vector3 point = GetPointerPoint(out bool hasPoint);
             Vector3 center = GetOwnerPosition();
             RangeRadius = owner.AttackRange;
+            if (!hasPoint)
+            {
+                DisplayedEndpoint = center;
+                SetAllVisible(false);
+                return;
+            }
             bool inRange = hasPoint && HorizontalDistance(center, point) <= RangeRadius;
             Color color = inRange ? Color.blue : Color.red;
             DrawLoop(rangeRenderer, center, RangeRadius, RangePoints, color);
@@ -145,6 +152,12 @@ namespace ArknightsFrontline.Skills
             Vector3 point = GetPointerPoint(out bool hasPoint);
             Vector3 center = GetOwnerPosition();
             RangeRadius = DashRadius;
+            if (!hasPoint)
+            {
+                DisplayedEndpoint = center;
+                SetAllVisible(false);
+                return;
+            }
             Color color = Color.blue;
             Vector3 endpoint = center;
             bool valid = hasPoint && dash.Preview(point, out endpoint);
