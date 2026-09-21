@@ -90,6 +90,31 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ChargeTargetingSuppressesHeldAAttackRingAndRestoresItAfterCancellation()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            PlayerCommandController controller = CreateControllerAt(Vector3.zero, out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            CommandFeedbackPresenter feedback = player.AddComponent<CommandFeedbackPresenter>();
+            feedback.ConfigureSkillController(skills);
+
+            Press(keyboard.aKey);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.False);
+
+            Assert.That(skills.CancelChargeTargeting(), Is.True);
+            yield return null;
+            Assert.That(feedback.IsAttackRangeVisible, Is.True);
+
+            Release(keyboard.aKey);
+            Object.Destroy(player);
+        }
+
+        [UnityTest]
         public IEnumerator HoveringHostileLegalTargetSetsLegalHoverFeedback()
         {
             Mouse mouse = InputSystem.AddDevice<Mouse>();

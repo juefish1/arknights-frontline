@@ -1,4 +1,5 @@
 using ArknightsFrontline.Combat;
+using ArknightsFrontline.Skills;
 using UnityEngine;
 
 namespace ArknightsFrontline.Commands
@@ -14,6 +15,7 @@ namespace ArknightsFrontline.Commands
         private LineRenderer rangeRing;
         private Texture2D circleTexture;
         private bool isHoverCursorActive;
+        private ExusiaiSkillController skillController;
 
         public bool IsAttackRangeVisible { get; private set; }
 
@@ -27,6 +29,11 @@ namespace ArknightsFrontline.Commands
             commandController = GetComponent<PlayerCommandController>();
             CreateRangeRing();
             circleTexture = CreateCircleTexture();
+        }
+
+        public void ConfigureSkillController(ExusiaiSkillController controller)
+        {
+            skillController = controller;
         }
 
         private void Update()
@@ -81,7 +88,13 @@ namespace ArknightsFrontline.Commands
 
         private void UpdateRangeRing()
         {
-            IsAttackRangeVisible = commandController != null && commandController.IsAttackMoveHeld;
+            bool blockedBySkill = skillController != null
+                && (skillController.IsSelectingChargeTarget
+                    || skillController.IsDashWindowOpen
+                    || skillController.BlocksNormalCommands);
+            IsAttackRangeVisible = commandController != null
+                && commandController.IsAttackMoveHeld
+                && !blockedBySkill;
             rangeRing.enabled = IsAttackRangeVisible;
             if (!IsAttackRangeVisible)
             {

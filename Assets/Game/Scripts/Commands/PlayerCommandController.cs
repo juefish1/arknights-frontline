@@ -25,6 +25,9 @@ namespace ArknightsFrontline.Commands
         private InputControl pendingMoveControl;
         private bool isAttackMoveHeld;
         private IPlayerSkillInputHandler skillInputHandler;
+        private RaycastHit cachedPointerHit;
+        private bool hasCachedPointerHit;
+        private int cachedPointerFrame = -1;
 
         public GameObject CurrentTarget => currentTarget;
 
@@ -71,6 +74,7 @@ namespace ArknightsFrontline.Commands
             hasPendingMoveClick = false;
             pendingMoveClickWasArmed = false;
             pendingMoveControl = null;
+            ClearPointerHitCache();
             input?.Gameplay.Disable();
         }
 
@@ -254,6 +258,7 @@ namespace ArknightsFrontline.Commands
 
         private void Update()
         {
+            RefreshPointerHitCache();
             if (!hasPendingMoveClick)
             {
                 return;
@@ -318,15 +323,46 @@ namespace ArknightsFrontline.Commands
 
         public bool TryGetPointerHit(out RaycastHit hit)
         {
-            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
-            if (mainCamera == null)
+            RefreshPointerHitCache();
+            hit = cachedPointerHit;
+            return hasCachedPointerHit;
+        }
+
+        /// <summary>
+        /// Gets the most recently sampled pointer hit without issuing a new physics query.
+        /// </summary>
+        public bool TryGetCachedPointerHit(out RaycastHit hit)
+        {
+            hit = cachedPointerHit;
+            return hasCachedPointerHit;
+        }
+
+        private void RefreshPointerHitCache()
+        {
+            if (cachedPointerFrame == Time.frameCount)
             {
-                hit = default;
-                return false;
+                return;
+            }
+
+            cachedPointerFrame = Time.frameCount;
+            cachedPointerHit = default;
+            hasCachedPointerHit = false;
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            if (mainCamera == null || input == null)
+            {
+                return;
             }
 
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
-            return Physics.Raycast(ray, out hit, Mathf.Infinity, Physics.DefaultRaycastLayers);
+            hasCachedPointerHit = Physics.Raycast(
+                ray, out cachedPointerHit, Mathf.Infinity, Physics.DefaultRaycastLayers);
+        }
+
+        private void ClearPointerHitCache()
+        {
+            cachedPointerHit = default;
+            hasCachedPointerHit = false;
+            cachedPointerFrame = -1;
         }
 
         private void CancelAttackMove()
