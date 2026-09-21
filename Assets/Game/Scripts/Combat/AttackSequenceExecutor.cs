@@ -21,6 +21,11 @@ namespace ArknightsFrontline.Combat
         public event Action<CombatUnit, PhysicalDamagePayload> ShotRequested;
         public event Action<AttackSequencePlan, bool> SequenceFinished;
 
+        public bool IsConfiguredFor(CombatUnit combatOwner)
+        {
+            return combatOwner != null && owner == combatOwner;
+        }
+
         public void Configure(CombatUnit combatOwner)
         {
             if (combatOwner == null) throw new ArgumentNullException(nameof(combatOwner));

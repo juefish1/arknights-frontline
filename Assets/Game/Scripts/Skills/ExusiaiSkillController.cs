@@ -134,12 +134,22 @@ namespace ArknightsFrontline.Skills
                 return;
             }
 
-            attackSequenceExecutor.Configure(combatOwner);
-            basicAttackController.Configure(combatOwner, attackSequenceExecutor);
-            dashController.Configure(
-                unitMotor, ArenaLayout.CreateDefault(), LayerMask.GetMask("Obstacle"));
-            Configure(combatOwner, commandController, basicAttackController,
-                attackSequenceExecutor, statModifiers, dashController);
+            if (!attackSequenceExecutor.IsConfiguredFor(combatOwner))
+            {
+                attackSequenceExecutor.Configure(combatOwner);
+            }
+            if (!basicAttackController.IsConfiguredFor(combatOwner, attackSequenceExecutor))
+            {
+                basicAttackController.Configure(combatOwner, attackSequenceExecutor);
+            }
+            if (!dashController.IsConfiguredFor(unitMotor))
+            {
+                dashController.Configure(
+                    unitMotor, ArenaLayout.CreateDefault(), LayerMask.GetMask("Obstacle"));
+            }
+
+            ConfigureCore(combatOwner, commandController, basicAttackController,
+                attackSequenceExecutor, statModifiers, dashController, false);
         }
 
         private void Update()
@@ -169,6 +179,19 @@ namespace ArknightsFrontline.Skills
             UnitStatModifiers statModifiers,
             SkillDashController dashController)
         {
+            ConfigureCore(combatOwner, commandController, basicAttackController,
+                sequenceExecutor, statModifiers, dashController, true);
+        }
+
+        private void ConfigureCore(
+            CombatUnit combatOwner,
+            PlayerCommandController commandController,
+            BasicAttackController basicAttackController,
+            AttackSequenceExecutor sequenceExecutor,
+            UnitStatModifiers statModifiers,
+            SkillDashController dashController,
+            bool resetPipeline)
+        {
             if (combatOwner == null) throw new ArgumentNullException(nameof(combatOwner));
             if (commandController == null) throw new ArgumentNullException(nameof(commandController));
             if (basicAttackController == null) throw new ArgumentNullException(nameof(basicAttackController));
@@ -176,7 +199,19 @@ namespace ArknightsFrontline.Skills
             if (statModifiers == null) throw new ArgumentNullException(nameof(statModifiers));
             if (dashController == null) throw new ArgumentNullException(nameof(dashController));
 
-            if (configured) ClearRuntimeState(true);
+            if (!resetPipeline
+                && configured
+                && owner == combatOwner
+                && commands == commandController
+                && basicAttacks == basicAttackController
+                && this.sequenceExecutor == sequenceExecutor
+                && modifiers == statModifiers
+                && dash == dashController)
+            {
+                return;
+            }
+
+            if (configured && resetPipeline) ClearRuntimeState(true);
             DetachSubscriptions();
 
             owner = combatOwner;
@@ -191,7 +226,14 @@ namespace ArknightsFrontline.Skills
             configured = true;
             stopped = false;
             enabled = true;
-            ResetForDeployment();
+            if (resetPipeline)
+            {
+                ResetForDeployment();
+            }
+            else
+            {
+                InitializeSkillState();
+            }
         }
 
         public void Tick(float deltaTime)
@@ -289,6 +331,16 @@ namespace ArknightsFrontline.Skills
             if (!configured || !isActiveAndEnabled) return;
             stopped = false;
             ClearRuntimeState(true);
+            InitializeSkillState();
+        }
+
+        private void InitializeSkillState()
+        {
+            selectingChargeTarget = false;
+            dashWindowOpen = false;
+            SelectedChargeTarget = null;
+            dashWindow.Reset(0f);
+            EndOverload();
             sweepProgress = 0;
             chargeCooldown.Reset(0f);
             overloadCooldown.Reset(OverloadInitialWait);

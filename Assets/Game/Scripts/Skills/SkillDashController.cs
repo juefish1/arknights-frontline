@@ -22,6 +22,11 @@ namespace ArknightsFrontline.Skills
 
         public event Action DashCompleted;
 
+        public bool IsConfiguredFor(UnitMotor unitMotor)
+        {
+            return unitMotor != null && motor == unitMotor;
+        }
+
         public void Configure(UnitMotor unitMotor, ArenaLayout arenaLayout, int obstacles)
         {
             motor = unitMotor;

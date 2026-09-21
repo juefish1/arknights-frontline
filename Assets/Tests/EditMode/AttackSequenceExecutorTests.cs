@@ -116,6 +116,23 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ConfigurationQueryTracksOwnerAndDifferentOwnerReconfigureStillCancels()
+        {
+            CombatUnit replacementOwner = CreateUnit("Replacement Owner", TeamId.Blue, Vector3.zero);
+            Assert.That(executor.IsConfiguredFor(owner), Is.True);
+            Assert.That(executor.IsConfiguredFor(replacementOwner), Is.False);
+            Assert.That(executor.IsConfiguredFor(null), Is.False);
+            Assert.That(executor.TryStart(Plan(5), target), Is.True);
+
+            executor.Configure(replacementOwner);
+
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(completions, Is.EqualTo(new[] { false }));
+            Assert.That(executor.IsConfiguredFor(owner), Is.False);
+            Assert.That(executor.IsConfiguredFor(replacementOwner), Is.True);
+        }
+
+        [Test]
         public void StartRejectsNullPlanMissingOwnerAndIllegalOrOutOfRangeTarget()
         {
             Assert.That(executor.TryStart(null, target), Is.False);

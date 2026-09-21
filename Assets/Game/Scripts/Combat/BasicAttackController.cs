@@ -21,6 +21,16 @@ namespace ArknightsFrontline.Combat
 
         public event Action<CombatUnit, CombatUnit> AttackRequested;
 
+        public bool IsConfiguredFor(
+            CombatUnit combatOwner,
+            AttackSequenceExecutor sequenceExecutor)
+        {
+            return combatOwner != null
+                && sequenceExecutor != null
+                && owner == combatOwner
+                && executor == sequenceExecutor;
+        }
+
         private void Awake()
         {
             AttackRequested += SpawnProjectile;

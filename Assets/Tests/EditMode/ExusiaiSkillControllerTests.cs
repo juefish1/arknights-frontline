@@ -646,6 +646,86 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(automaticDash.IsDashing, Is.True);
         }
 
+        [Test]
+        public void AwakePreservesCorrectlyConfiguredRunningSiblingPipeline()
+        {
+            GameObject automatic = new GameObject("Running Automatic Exusiai");
+            gameObjects.Add(automatic);
+            UnitMotor automaticMotor = automatic.AddComponent<UnitMotor>();
+            automaticMotor.Configure(5f, ArenaLayout.CreateDefault());
+            PlayerCommandController automaticCommands = automatic.AddComponent<PlayerCommandController>();
+            InvokePrivate(automaticCommands, "Awake");
+            automatic.AddComponent<UnitStatModifiers>();
+            CombatUnit automaticOwner = automatic.AddComponent<CombatUnit>();
+            automaticOwner.Configure(
+                TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
+            AttackSequenceExecutor automaticExecutor = automatic.AddComponent<AttackSequenceExecutor>();
+            automaticExecutor.Configure(automaticOwner);
+            BasicAttackController automaticAttacks = automatic.AddComponent<BasicAttackController>();
+            automaticAttacks.Configure(automaticOwner, automaticExecutor);
+            SkillDashController automaticDash = automatic.AddComponent<SkillDashController>();
+            automaticDash.Configure(automaticMotor, ArenaLayout.CreateDefault(), 0);
+            CombatUnit automaticTarget = CreateUnit("Running Automatic Target", TeamId.Red, Vector3.right * 2f);
+            automaticAttacks.SetPlanProvider(() => new AttackSequencePlan(
+                AttackSequenceKind.Basic, 5, 0.05f, 50f, 1f, 0f, 1f, 0f, true, false));
+            automaticAttacks.SetTarget(automaticTarget);
+            automaticAttacks.Tick(0f);
+            Assert.That(automaticDash.TryStart(Vector3.right * 4f), Is.True);
+
+            ExusiaiSkillController automaticController = automatic.AddComponent<ExusiaiSkillController>();
+            InvokePrivate(automaticController, "Awake");
+
+            Assert.That(automaticExecutor.IsRunning, Is.True);
+            Assert.That(automaticAttacks.CurrentTarget, Is.SameAs(automaticTarget));
+            Assert.That(automaticDash.IsDashing, Is.True);
+            automaticExecutor.Tick(1f);
+            Assert.That(automaticController.Snapshot.SweepProgress, Is.EqualTo(1));
+            Assert.That(automaticController.BeginChargeTargeting(), Is.True);
+        }
+
+        [Test]
+        public void AwakePreservesCorrectlyConfiguredIdlePipelineAndSubscribesOnce()
+        {
+            GameObject automatic = new GameObject("Idle Automatic Exusiai");
+            gameObjects.Add(automatic);
+            automatic.transform.position = Vector3.left * 4f;
+            UnitMotor automaticMotor = automatic.AddComponent<UnitMotor>();
+            automaticMotor.Configure(5f, ArenaLayout.CreateDefault());
+            PlayerCommandController automaticCommands = automatic.AddComponent<PlayerCommandController>();
+            InvokePrivate(automaticCommands, "Awake");
+            automatic.AddComponent<UnitStatModifiers>();
+            CombatUnit automaticOwner = automatic.AddComponent<CombatUnit>();
+            automaticOwner.Configure(
+                TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
+            AttackSequenceExecutor automaticExecutor = automatic.AddComponent<AttackSequenceExecutor>();
+            automaticExecutor.Configure(automaticOwner);
+            BasicAttackController automaticAttacks = automatic.AddComponent<BasicAttackController>();
+            automaticAttacks.Configure(automaticOwner, automaticExecutor);
+            SkillDashController automaticDash = automatic.AddComponent<SkillDashController>();
+            const int customObstacleLayer = 10;
+            automaticDash.Configure(automaticMotor, default, 1 << customObstacleLayer);
+            GameObject obstacle = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            gameObjects.Add(obstacle);
+            obstacle.layer = customObstacleLayer;
+            obstacle.transform.position = new Vector3(-2f, 0.5f, 0f);
+            Physics.SyncTransforms();
+            CombatUnit automaticTarget = CreateUnit("Idle Automatic Target", TeamId.Red, Vector3.right * 2f);
+            automaticAttacks.SetTarget(automaticTarget);
+            Assert.That(automaticDash.Preview(Vector3.right * 4f, out Vector3 beforeEndpoint), Is.True);
+            Assert.That(beforeEndpoint.x, Is.EqualTo(-2.75f).Within(0.001f));
+
+            ExusiaiSkillController automaticController = automatic.AddComponent<ExusiaiSkillController>();
+            InvokePrivate(automaticController, "Awake");
+
+            Assert.That(automaticExecutor.IsRunning, Is.False);
+            Assert.That(automaticAttacks.CurrentTarget, Is.SameAs(automaticTarget));
+            Assert.That(automaticDash.IsDashing, Is.False);
+            Assert.That(automaticDash.Preview(Vector3.right * 4f, out Vector3 afterEndpoint), Is.True);
+            Assert.That(afterEndpoint, Is.EqualTo(beforeEndpoint));
+            automaticAttacks.Tick(0f);
+            Assert.That(automaticController.Snapshot.SweepProgress, Is.EqualTo(1));
+        }
+
         [TestCase(typeof(UnitMotor))]
         [TestCase(typeof(CombatUnit))]
         [TestCase(typeof(PlayerCommandController))]

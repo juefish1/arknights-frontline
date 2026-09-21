@@ -183,6 +183,32 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ConfigurationQueryTracksOwnerAndExecutorAndReconfigureStillClearsState()
+        {
+            CreateSequenceAttack(out CombatUnit owner, out CombatUnit target, out BasicAttackController attack,
+                out AttackSequenceExecutor executor);
+            CombatUnit otherOwner = CreateUnit(
+                "Other Owner", TeamId.Blue, Vector3.zero, 5f, 0.5f, true);
+            AttackSequenceExecutor replacementExecutor = owner.gameObject.AddComponent<AttackSequenceExecutor>();
+            replacementExecutor.Configure(owner);
+            Assert.That(attack.IsConfiguredFor(owner, executor), Is.True);
+            Assert.That(attack.IsConfiguredFor(otherOwner, executor), Is.False);
+            Assert.That(attack.IsConfiguredFor(owner, replacementExecutor), Is.False);
+            Assert.That(attack.IsConfiguredFor(null, executor), Is.False);
+            Assert.That(attack.IsConfiguredFor(owner, null), Is.False);
+            attack.SetPlanProvider(() => CreatePlan(5));
+            attack.Tick(0f);
+            Assert.That(executor.IsRunning, Is.True);
+
+            attack.Configure(owner, replacementExecutor);
+
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(attack.CurrentTarget, Is.Null);
+            Assert.That(attack.IsConfiguredFor(owner, executor), Is.False);
+            Assert.That(attack.IsConfiguredFor(owner, replacementExecutor), Is.True);
+        }
+
+        [Test]
         public void SequenceLongerThanIntervalCanRestartOnlyAfterItCompletes()
         {
             CreateSequenceAttack(out CombatUnit owner, out CombatUnit target, out BasicAttackController attack,

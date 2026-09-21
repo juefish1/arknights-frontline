@@ -78,6 +78,26 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ConfigurationQueryTracksMotorAndDifferentMotorReconfigureStillCancels()
+        {
+            GameObject replacementOwner = new GameObject("Replacement Dash Owner");
+            gameObjects.Add(replacementOwner);
+            UnitMotor replacementMotor = replacementOwner.AddComponent<UnitMotor>();
+            replacementMotor.Configure(1f, ArenaLayout.CreateDefault());
+            Assert.That(dash.IsConfiguredFor(motor), Is.True);
+            Assert.That(dash.IsConfiguredFor(replacementMotor), Is.False);
+            Assert.That(dash.IsConfiguredFor(null), Is.False);
+            Assert.That(dash.TryStart(new Vector3(7f, 0f, 0f)), Is.True);
+
+            dash.Configure(replacementMotor, default, 123);
+
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(dash.IsConfiguredFor(motor), Is.False);
+            Assert.That(dash.IsConfiguredFor(replacementMotor), Is.True);
+            Assert.That(dash.Preview(Vector3.right * 4f, out _), Is.False);
+        }
+
+        [Test]
         public void PreviewUsesActualResolverWithoutChangingMotorOrDashState()
         {
             motor.SetDestination(new Vector3(4f, 0f, 0f));
