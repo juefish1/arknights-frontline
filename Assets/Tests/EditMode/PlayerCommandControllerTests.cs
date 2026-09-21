@@ -3,6 +3,7 @@ using ArknightsFrontline.Commands;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -136,6 +137,55 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.CommandRevision, Is.GreaterThan(firstRevision));
             Object.DestroyImmediate(target);
             Object.DestroyImmediate(player);
+        }
+
+        [Test]
+        public void SkillInputHandlerCanBeReplacedAndCleared()
+        {
+            PlayerCommandController controller = CreateController(out _, out GameObject player);
+            RecordingSkillInputHandler first = new RecordingSkillInputHandler();
+            RecordingSkillInputHandler second = new RecordingSkillInputHandler();
+
+            controller.SetSkillInputHandler(first);
+            controller.SetSkillInputHandler(second);
+            controller.SetSkillInputHandler(null);
+
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Object.DestroyImmediate(player);
+        }
+
+        private sealed class RecordingSkillInputHandler : IPlayerSkillInputHandler
+        {
+            public bool BlocksAttackMove => false;
+
+            public bool BlocksNormalCommands => false;
+
+            public void HandleSkill2()
+            {
+            }
+
+            public void HandleSkill3()
+            {
+            }
+
+            public bool TryHandleConfirm(Vector3 worldPoint, GameObject hitObject)
+            {
+                return false;
+            }
+
+            public bool TryHandleMoveClick(Vector3 worldPoint)
+            {
+                return false;
+            }
+
+            public bool TryHandleCancel()
+            {
+                return false;
+            }
+
+            public void HandleStop()
+            {
+            }
         }
 
         private static PlayerCommandController CreateController(out UnitMotor motor, out GameObject player)

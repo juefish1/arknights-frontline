@@ -5,6 +5,7 @@ using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Input;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -476,6 +477,194 @@ namespace ArknightsFrontline.Tests.PlayMode
             Object.Destroy(player);
         }
 
+        [UnityTest]
+        public IEnumerator SkillActionsUseOnlyTheCurrentHandlerAcrossDisableAndClear()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            PlayerCommandController controller = CreateControllerAt(Vector3.zero, out _, out GameObject player);
+            RecordingSkillInputHandler first = new RecordingSkillInputHandler();
+            RecordingSkillInputHandler second = new RecordingSkillInputHandler();
+            controller.SetSkillInputHandler(first);
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(first.Skill2Count, Is.EqualTo(1));
+
+            controller.SetSkillInputHandler(second);
+            Press(keyboard.rKey);
+            yield return null;
+            Release(keyboard.rKey);
+            yield return null;
+            Assert.That(first.Skill3Count, Is.Zero);
+            Assert.That(second.Skill3Count, Is.EqualTo(1));
+
+            controller.enabled = false;
+            yield return null;
+            controller.enabled = true;
+            yield return null;
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(second.Skill2Count, Is.EqualTo(1));
+
+            controller.SetSkillInputHandler(null);
+            Press(keyboard.rKey);
+            yield return null;
+            Release(keyboard.rKey);
+            yield return null;
+            Assert.That(second.Skill3Count, Is.EqualTo(1));
+            Object.Destroy(player);
+        }
+
+        [UnityTest]
+        public IEnumerator HandledConfirmReceivesSinglePointerHitWithoutIssuingAttackMove()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ConfigurePlayerCombatUnit(player);
+            RecordingSkillInputHandler handler = new RecordingSkillInputHandler { AcceptConfirm = true };
+            controller.SetSkillInputHandler(handler);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject target = CreateTargetableCube(TeamId.Red);
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(keyboard.aKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            Release(keyboard.aKey);
+            yield return null;
+
+            Assert.That(handler.ConfirmCount, Is.EqualTo(1));
+            Assert.That(handler.LastConfirmHit, Is.EqualTo(target));
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(target);
+        }
+
+        [UnityTest]
+        public IEnumerator HandledCancelConsumesSharedRightClickBeforeItCanBecomeMove()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            RecordingSkillInputHandler handler = new RecordingSkillInputHandler { AcceptCancel = true };
+            controller.SetSkillInputHandler(handler);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+
+            Assert.That(handler.CancelCount, Is.EqualTo(1));
+            Assert.That(handler.MoveClickCount, Is.Zero);
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand, Is.Null);
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
+        }
+
+        [UnityTest]
+        public IEnumerator SkillMoveWindowConsumesClickThenOrdinaryMoveResumesAfterHandlerDeclines()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            RecordingSkillInputHandler handler = new RecordingSkillInputHandler { AcceptMoveClick = true };
+            controller.SetSkillInputHandler(handler);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(handler.MoveClickCount, Is.EqualTo(1));
+            Assert.That(motor.IsMoving, Is.False);
+
+            handler.AcceptMoveClick = false;
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(handler.MoveClickCount, Is.EqualTo(2));
+            Assert.That(motor.IsMoving, Is.True);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
+        }
+
+        [UnityTest]
+        public IEnumerator BlockingSkillStatePreventsAttackMoveAndNormalMoveButStopStillIssues()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(new Vector3(-10f, 0f, 0f), out UnitMotor motor, out GameObject player);
+            RecordingSkillInputHandler handler = new RecordingSkillInputHandler
+            {
+                BlockAttackMove = true,
+                BlockNormalCommands = true
+            };
+            controller.SetSkillInputHandler(handler);
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            controller.Issue(UnitCommand.Move(Vector3.zero));
+
+            Press(keyboard.aKey);
+            yield return null;
+            Release(keyboard.aKey);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.False);
+
+            handler.BlockAttackMove = false;
+            handler.BlockNormalCommands = false;
+            Keyboard preArmedKeyboard = InputSystem.AddDevice<Keyboard>();
+            Press(preArmedKeyboard.aKey);
+            yield return null;
+            Assert.That(controller.IsAttackMoveArmed, Is.True);
+
+            handler.BlockNormalCommands = true;
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            Release(preArmedKeyboard.aKey);
+            yield return null;
+            Assert.That(handler.ConfirmCount, Is.EqualTo(1));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(handler.MoveClickCount, Is.EqualTo(1));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+
+            Press(keyboard.sKey);
+            yield return null;
+            Release(keyboard.sKey);
+            yield return null;
+            Assert.That(handler.StopCount, Is.EqualTo(1));
+            Assert.That(motor.IsMoving, Is.False);
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Stop));
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
+        }
+
         public override void TearDown()
         {
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
@@ -530,6 +719,71 @@ namespace ArknightsFrontline.Tests.PlayMode
                 Quaternion.Euler(45f, 0f, 0f));
             cameraObject.AddComponent<UnityEngine.Camera>();
             return cameraObject;
+        }
+
+        private sealed class RecordingSkillInputHandler : IPlayerSkillInputHandler
+        {
+            public bool BlockAttackMove { get; set; }
+
+            public bool BlockNormalCommands { get; set; }
+
+            public bool AcceptConfirm { get; set; }
+
+            public bool AcceptMoveClick { get; set; }
+
+            public bool AcceptCancel { get; set; }
+
+            public int Skill2Count { get; private set; }
+
+            public int Skill3Count { get; private set; }
+
+            public int ConfirmCount { get; private set; }
+
+            public int MoveClickCount { get; private set; }
+
+            public int CancelCount { get; private set; }
+
+            public int StopCount { get; private set; }
+
+            public GameObject LastConfirmHit { get; private set; }
+
+            public bool BlocksAttackMove => BlockAttackMove;
+
+            public bool BlocksNormalCommands => BlockNormalCommands;
+
+            public void HandleSkill2()
+            {
+                Skill2Count++;
+            }
+
+            public void HandleSkill3()
+            {
+                Skill3Count++;
+            }
+
+            public bool TryHandleConfirm(Vector3 worldPoint, GameObject hitObject)
+            {
+                ConfirmCount++;
+                LastConfirmHit = hitObject;
+                return AcceptConfirm;
+            }
+
+            public bool TryHandleMoveClick(Vector3 worldPoint)
+            {
+                MoveClickCount++;
+                return AcceptMoveClick;
+            }
+
+            public bool TryHandleCancel()
+            {
+                CancelCount++;
+                return AcceptCancel;
+            }
+
+            public void HandleStop()
+            {
+                StopCount++;
+            }
         }
     }
 }

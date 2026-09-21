@@ -3,6 +3,7 @@ using ArknightsFrontline.Camera;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Input;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,6 +24,7 @@ namespace ArknightsFrontline.Commands
         private bool pendingMoveClickWasArmed;
         private InputControl pendingMoveControl;
         private bool isAttackMoveHeld;
+        private IPlayerSkillInputHandler skillInputHandler;
 
         public GameObject CurrentTarget => currentTarget;
 
@@ -38,6 +40,11 @@ namespace ArknightsFrontline.Commands
 
         private void Awake()
         {
+            if (input != null)
+            {
+                return;
+            }
+
             motor = GetComponent<UnitMotor>();
             input = new GameInputActions();
             InputBindingStore.Load(input.Asset);
@@ -47,6 +54,8 @@ namespace ArknightsFrontline.Commands
             input.Confirm.performed += OnConfirm;
             input.Stop.performed += OnStop;
             input.Cancel.performed += OnCancel;
+            input.Skill2.performed += OnSkill2;
+            input.Skill3.performed += OnSkill3;
             input.CenterCamera.performed += OnCenterCamera;
         }
 
@@ -59,6 +68,9 @@ namespace ArknightsFrontline.Commands
         {
             isAttackMoveHeld = false;
             attackMoveState.Cancel();
+            hasPendingMoveClick = false;
+            pendingMoveClickWasArmed = false;
+            pendingMoveControl = null;
             input?.Gameplay.Disable();
         }
 
@@ -75,8 +87,15 @@ namespace ArknightsFrontline.Commands
             input.Confirm.performed -= OnConfirm;
             input.Stop.performed -= OnStop;
             input.Cancel.performed -= OnCancel;
+            input.Skill2.performed -= OnSkill2;
+            input.Skill3.performed -= OnSkill3;
             input.CenterCamera.performed -= OnCenterCamera;
             input.Dispose();
+        }
+
+        public void SetSkillInputHandler(IPlayerSkillInputHandler handler)
+        {
+            skillInputHandler = handler;
         }
 
         public void Issue(UnitCommand command)
@@ -136,16 +155,7 @@ namespace ArknightsFrontline.Commands
                 return;
             }
 
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
-            {
-                Issue(UnitCommand.Attack(hit.collider.gameObject));
-                return;
-            }
-
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
-            {
-                Issue(UnitCommand.Move(layout.Clamp(hit.point)));
-            }
+            HandleMoveClick(hit);
         }
 
         private void OnMoveClick(UnityEngine.InputSystem.InputAction.CallbackContext context)
@@ -155,6 +165,11 @@ namespace ArknightsFrontline.Commands
 
         private void OnAttackMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (skillInputHandler != null && skillInputHandler.BlocksAttackMove)
+            {
+                return;
+            }
+
             isAttackMoveHeld = true;
             ArmAttackMove();
         }
@@ -166,18 +181,36 @@ namespace ArknightsFrontline.Commands
 
         private void OnConfirm(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (skillInputHandler == null && (!IsAttackMoveArmed || !IsAttackMoveHeld))
+            {
+                return;
+            }
+
+            bool hasHit = TryGetPointerHit(out RaycastHit hit);
+            Vector3 worldPoint = hasHit ? hit.point : default;
+            GameObject hitObject = hasHit ? hit.collider.gameObject : null;
+            if (skillInputHandler != null && skillInputHandler.TryHandleConfirm(worldPoint, hitObject))
+            {
+                return;
+            }
+
+            if (skillInputHandler != null && skillInputHandler.BlocksNormalCommands)
+            {
+                return;
+            }
+
             if (!IsAttackMoveArmed || !IsAttackMoveHeld)
             {
                 return;
             }
 
             attackMoveState.Confirm();
-            if (TryGetPointerHit(out RaycastHit hit)
-                && hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable")
-                && hit.collider.TryGetComponent(out CombatUnit target)
+            if (hasHit
+                && hitObject.layer == LayerMask.NameToLayer("Targetable")
+                && hitObject.TryGetComponent(out CombatUnit target)
                 && TargetRules.IsLegal(GetComponent<CombatUnit>(), target))
             {
-                Issue(UnitCommand.Attack(hit.collider.gameObject));
+                Issue(UnitCommand.Attack(hitObject));
                 return;
             }
 
@@ -186,23 +219,37 @@ namespace ArknightsFrontline.Commands
 
         private void OnStop(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            skillInputHandler?.HandleStop();
+            CancelAttackMove();
             Issue(UnitCommand.Stop());
         }
 
         private void OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (skillInputHandler != null && skillInputHandler.TryHandleCancel())
+            {
+                CancelAttackMove();
+                ConsumeCancelInput(context.control);
+                return;
+            }
+
             if (!attackMoveState.IsArmed && !isAttackMoveHeld)
             {
                 return;
             }
 
             CancelAttackMove();
-            consumedCancelControl = context.control;
-            consumedCancelFrame = Time.frameCount;
-            if (hasPendingMoveClick && pendingMoveControl == context.control)
-            {
-                hasPendingMoveClick = false;
-            }
+            ConsumeCancelInput(context.control);
+        }
+
+        private void OnSkill2(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            skillInputHandler?.HandleSkill2();
+        }
+
+        private void OnSkill3(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            skillInputHandler?.HandleSkill3();
         }
 
         private void Update()
@@ -215,6 +262,36 @@ namespace ArknightsFrontline.Commands
             bool wasArmed = pendingMoveClickWasArmed;
             hasPendingMoveClick = false;
             pendingMoveControl = null;
+
+            if (skillInputHandler != null)
+            {
+                bool hasHit = TryGetPointerHit(out RaycastHit hit);
+                Vector3 worldPoint = hasHit ? hit.point : default;
+                GameObject hitObject = hasHit ? hit.collider.gameObject : null;
+                if (skillInputHandler.TryHandleMoveClick(worldPoint))
+                {
+                    return;
+                }
+
+                if (skillInputHandler.BlocksNormalCommands)
+                {
+                    return;
+                }
+
+                if (wasArmed)
+                {
+                    CancelAttackMove();
+                    return;
+                }
+
+                if (hasHit)
+                {
+                    HandleMoveClick(hit);
+                }
+
+                return;
+            }
+
             if (wasArmed)
             {
                 CancelAttackMove();
@@ -258,6 +335,16 @@ namespace ArknightsFrontline.Commands
             attackMoveState.Cancel();
         }
 
+        private void ConsumeCancelInput(InputControl control)
+        {
+            consumedCancelControl = control;
+            consumedCancelFrame = Time.frameCount;
+            if (hasPendingMoveClick && pendingMoveControl == control)
+            {
+                hasPendingMoveClick = false;
+            }
+        }
+
         private void QueueMoveClick(InputControl control)
         {
             if (consumedCancelFrame == Time.frameCount && consumedCancelControl == control)
@@ -268,6 +355,20 @@ namespace ArknightsFrontline.Commands
             hasPendingMoveClick = true;
             pendingMoveClickWasArmed = attackMoveState.IsArmed;
             pendingMoveControl = control;
+        }
+
+        private void HandleMoveClick(RaycastHit hit)
+        {
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Targetable"))
+            {
+                Issue(UnitCommand.Attack(hit.collider.gameObject));
+                return;
+            }
+
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
+            {
+                Issue(UnitCommand.Move(layout.Clamp(hit.point)));
+            }
         }
     }
 }

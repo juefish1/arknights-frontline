@@ -49,7 +49,7 @@ namespace ArknightsFrontline.Skills
     }
 
     [DisallowMultipleComponent]
-    public sealed class ExusiaiSkillController : MonoBehaviour
+    public sealed class ExusiaiSkillController : MonoBehaviour, IPlayerSkillInputHandler
     {
         private const int SweepRequiredAttacks = 3;
         private const float SweepDamageMultiplier = 1.45f;
@@ -324,6 +324,87 @@ namespace ArknightsFrontline.Skills
             modifiers.SetMovementSpeedMultiplier(OverloadModifierSource, OverloadMovementMultiplier);
             modifiers.SetAttackIntervalOffset(OverloadModifierSource, OverloadAttackIntervalOffset);
             return true;
+        }
+
+        public void HandleSkill2()
+        {
+            if (!CanRun())
+            {
+                return;
+            }
+
+            if (selectingChargeTarget)
+            {
+                CancelChargeTargeting();
+                return;
+            }
+
+            BeginChargeTargeting();
+        }
+
+        public void HandleSkill3()
+        {
+            TryActivateOverload();
+        }
+
+        public bool TryHandleConfirm(Vector3 worldPoint, GameObject hitObject)
+        {
+            if (!CanRun())
+            {
+                return false;
+            }
+
+            if (IsDashWindowOpen || dash.IsDashing)
+            {
+                return true;
+            }
+
+            CombatUnit directTarget = null;
+            if (hitObject != null
+                && hitObject.layer == LayerMask.NameToLayer("Targetable")
+                && hitObject.TryGetComponent(out CombatUnit hitUnit)
+                && TargetRules.IsLegal(owner, hitUnit))
+            {
+                directTarget = hitUnit;
+            }
+
+            return TryConfirmCharge(worldPoint, directTarget);
+        }
+
+        public bool TryHandleMoveClick(Vector3 worldPoint)
+        {
+            if (!CanRun())
+            {
+                return false;
+            }
+
+            if (IsDashWindowOpen)
+            {
+                TryConsumeDashMove(worldPoint);
+                return true;
+            }
+
+            return dash.IsDashing;
+        }
+
+        public bool TryHandleCancel()
+        {
+            return CancelChargeTargeting();
+        }
+
+        public void HandleStop()
+        {
+            if (!CanRun())
+            {
+                return;
+            }
+
+            CancelChargeTargeting();
+            dashWindowOpen = false;
+            dashWindow.Reset(0f);
+            SelectedChargeTarget = null;
+            basicAttacks.ClearTarget();
+            sequenceExecutor.Cancel();
         }
 
         public void ResetForDeployment()

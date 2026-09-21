@@ -238,6 +238,88 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void SkillInputKeysToggleChargeTargetingAndActivateOverload()
+        {
+            IPlayerSkillInputHandler handler = controller;
+
+            handler.HandleSkill2();
+            Assert.That(controller.IsSelectingChargeTarget, Is.True);
+            handler.HandleSkill2();
+            Assert.That(controller.IsSelectingChargeTarget, Is.False);
+
+            controller.Tick(10f);
+            handler.HandleSkill3();
+
+            Assert.That(controller.IsOverloadActive, Is.True);
+        }
+
+        [Test]
+        public void SkillInputConfirmUsesOnlyLegalTargetableHitsAsDirectTargets()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            CombatUnit friendly = CreateUnit("Friendly Hit", TeamId.Blue, new Vector3(5f, 0f, 0f));
+            friendly.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            CombatUnit firstShotTarget = null;
+            executor.ShotRequested += (shotTarget, _) => firstShotTarget ??= shotTarget;
+
+            handler.HandleSkill2();
+            bool accepted = handler.TryHandleConfirm(friendly.transform.position, friendly.gameObject);
+
+            Assert.That(accepted, Is.True);
+            Assert.That(firstShotTarget, Is.SameAs(target));
+        }
+
+        [Test]
+        public void SkillInputConsumesFirstDashWindowMoveEvenWhenDashCannotStart()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleConfirm(target.transform.position, target.gameObject), Is.True);
+
+            bool accepted = handler.TryHandleMoveClick(owner.transform.position);
+
+            Assert.That(accepted, Is.True);
+            Assert.That(controller.IsDashWindowOpen, Is.False);
+            Assert.That(dash.IsDashing, Is.False);
+        }
+
+        [Test]
+        public void SkillInputConsumesConfirmAndMoveClicksWhileDashIsActive()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleConfirm(target.transform.position, target.gameObject), Is.True);
+            Assert.That(handler.TryHandleMoveClick(Vector3.right * 4f), Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+
+            Assert.That(handler.TryHandleConfirm(Vector3.zero, null), Is.True);
+            Assert.That(handler.TryHandleMoveClick(Vector3.right * 6f), Is.True);
+        }
+
+        [Test]
+        public void SkillInputCancelOnlyWorksBeforeConfirmationAndStopDoesNotCancelDash()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleCancel(), Is.True);
+
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleConfirm(target.transform.position, target.gameObject), Is.True);
+            Assert.That(handler.TryHandleCancel(), Is.False);
+            Assert.That(handler.TryHandleMoveClick(Vector3.right * 4f), Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+
+            handler.HandleStop();
+
+            Assert.That(dash.IsDashing, Is.True);
+        }
+
+        [Test]
         public void OutOfRangeChargePointDoesNotConsumeCooldownOrLeaveTargeting()
         {
             Assert.That(controller.BeginChargeTargeting(), Is.True);
