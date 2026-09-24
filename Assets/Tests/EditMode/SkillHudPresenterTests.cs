@@ -81,6 +81,41 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void DashWindowShowsCountdownBarThatShrinksAndClearsAtWindowEnd()
+        {
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            GameObject targetObject = Track(new GameObject("Target"));
+            CombatUnit target = targetObject.AddComponent<CombatUnit>();
+            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
+            targetObject.transform.position = new Vector3(2f, 0f, 0f);
+            Assert.That(skills.TryConfirmCharge(targetObject.transform.position, target), Is.True);
+            hud.Refresh();
+
+            Transform barTransform = hud.transform.Find("E/DashWindowPromptTrack/DashWindowPromptBar");
+            Assert.That(barTransform, Is.Not.Null, "The E slot needs a visible dash-window countdown bar.");
+            if (barTransform == null) return;
+
+            Image bar = barTransform.GetComponent<Image>();
+            RectTransform barRect = barTransform.GetComponent<RectTransform>();
+            Assert.That(bar, Is.Not.Null);
+            Assert.That(barRect, Is.Not.Null);
+            Assert.That(bar.gameObject.activeInHierarchy, Is.True);
+            Assert.That(barRect.anchorMax.x, Is.EqualTo(1f).Within(0.001f));
+            Assert.That(hud.ELabel, Is.EqualTo("E  MOVE!"));
+
+            skills.Tick(0.125f);
+            hud.Refresh();
+            Assert.That(bar.gameObject.activeInHierarchy, Is.True);
+            Assert.That(barRect.anchorMax.x, Is.EqualTo(0.5f).Within(0.001f));
+
+            skills.Tick(0.125f);
+            hud.Refresh();
+            Assert.That(bar.gameObject.activeInHierarchy, Is.False);
+            Assert.That(barRect.anchorMax.x, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(hud.ELabel, Is.EqualTo("E  19.8"));
+        }
+
+        [Test]
         public void ConfigureUsesItsExistingRectTransformForThreeNonInteractiveSlots()
         {
             hud.Configure(skills);

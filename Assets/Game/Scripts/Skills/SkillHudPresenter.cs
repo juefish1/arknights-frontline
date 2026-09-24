@@ -10,11 +10,16 @@ namespace ArknightsFrontline.Skills
         private const float SlotWidth = 120f;
         private const float SlotHeight = 64f;
         private const float SlotSpacing = 8f;
+        private const float DashWindowDuration = 0.25f;
+        private const float DashWindowBarHeight = 5f;
         private readonly GameObject[] slots = new GameObject[3];
         private readonly Text[] labels = new Text[3];
         private readonly Image[] overlays = new Image[3];
         private readonly Outline[] outlines = new Outline[3];
 
+        private Image dashWindowPromptTrack;
+        private Image dashWindowPromptBar;
+        private RectTransform dashWindowPromptBarRect;
         private ExusiaiSkillController controller;
         private GameObject hudRoot;
         private GameObject ownedCanvas;
@@ -39,6 +44,7 @@ namespace ArknightsFrontline.Skills
 
         private void OnDisable()
         {
+            SetDashWindowPromptBar(0f, false);
             SetVisible(false);
         }
 
@@ -53,6 +59,7 @@ namespace ArknightsFrontline.Skills
             controller = skillController;
             if (controller == null)
             {
+                SetDashWindowPromptBar(0f, false);
                 SetVisible(false);
                 return;
             }
@@ -73,6 +80,10 @@ namespace ArknightsFrontline.Skills
             ExusiaiSkillSnapshot snapshot = controller.Snapshot;
             WLabel = snapshot.IsSweepReady ? "W  READY" : $"W  {snapshot.SweepProgress}/3";
             ELabel = FormatCharge(snapshot);
+            bool showDashWindowBar = snapshot.ChargePhase == ExusiaiChargePhase.DashWindow;
+            SetDashWindowPromptBar(showDashWindowBar
+                ? snapshot.DashWindowRemaining / DashWindowDuration
+                : 0f, showDashWindowBar);
             RLabel = snapshot.IsOverloadActive
                 ? $"R  ACTIVE {FormatSeconds(snapshot.OverloadDuration)}"
                 : $"R  {FormatSeconds(snapshot.OverloadCooldown)}";
@@ -179,6 +190,50 @@ namespace ArknightsFrontline.Skills
             labels[index].alignment = TextAnchor.MiddleCenter;
             labels[index].color = Color.white;
             labels[index].raycastTarget = false;
+
+            if (index == 1) CreateDashWindowPromptBar(slot.transform);
+        }
+
+        private void CreateDashWindowPromptBar(Transform parent)
+        {
+            GameObject trackObject = new GameObject("DashWindowPromptTrack", typeof(RectTransform), typeof(Image));
+            trackObject.transform.SetParent(parent, false);
+            RectTransform trackRect = trackObject.GetComponent<RectTransform>();
+            trackRect.anchorMin = new Vector2(0f, 0f);
+            trackRect.anchorMax = new Vector2(1f, 0f);
+            trackRect.pivot = new Vector2(0.5f, 0f);
+            trackRect.offsetMin = new Vector2(8f, 7f);
+            trackRect.offsetMax = new Vector2(-8f, 7f + DashWindowBarHeight);
+            dashWindowPromptTrack = trackObject.GetComponent<Image>();
+            dashWindowPromptTrack.color = new Color(0.06f, 0.1f, 0.16f, 0.95f);
+            dashWindowPromptTrack.raycastTarget = false;
+
+            GameObject barObject = new GameObject("DashWindowPromptBar", typeof(RectTransform), typeof(Image));
+            barObject.transform.SetParent(trackObject.transform, false);
+            dashWindowPromptBarRect = barObject.GetComponent<RectTransform>();
+            dashWindowPromptBarRect.anchorMin = Vector2.zero;
+            dashWindowPromptBarRect.anchorMax = Vector2.one;
+            dashWindowPromptBarRect.offsetMin = Vector2.zero;
+            dashWindowPromptBarRect.offsetMax = Vector2.zero;
+            dashWindowPromptBar = barObject.GetComponent<Image>();
+            dashWindowPromptBar.color = new Color(0.2f, 0.65f, 1f, 1f);
+            dashWindowPromptBar.raycastTarget = false;
+            SetDashWindowPromptBar(0f, false);
+        }
+
+        private void SetDashWindowPromptBar(float fill, bool visible)
+        {
+            if (dashWindowPromptBar != null)
+            {
+                float progress = Mathf.Clamp01(fill);
+                if (dashWindowPromptBarRect != null)
+                    dashWindowPromptBarRect.anchorMax = new Vector2(progress, 1f);
+                dashWindowPromptBar.gameObject.SetActive(visible);
+            }
+            if (dashWindowPromptTrack != null)
+            {
+                dashWindowPromptTrack.gameObject.SetActive(visible);
+            }
         }
 
         private void SetSlot(int index, string text, bool ready, bool cooldown)

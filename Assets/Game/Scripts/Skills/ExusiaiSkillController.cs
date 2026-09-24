@@ -23,6 +23,7 @@ namespace ArknightsFrontline.Skills
             bool isSweepReady,
             ExusiaiChargePhase chargePhase,
             bool isChargeReady,
+            float dashWindowRemaining,
             float chargeCooldown,
             bool isOverloadActive,
             float overloadDuration,
@@ -32,6 +33,7 @@ namespace ArknightsFrontline.Skills
             IsSweepReady = isSweepReady;
             ChargePhase = chargePhase;
             IsChargeReady = isChargeReady;
+            DashWindowRemaining = dashWindowRemaining;
             ChargeCooldown = chargeCooldown;
             IsOverloadActive = isOverloadActive;
             OverloadDuration = overloadDuration;
@@ -42,6 +44,7 @@ namespace ArknightsFrontline.Skills
         public bool IsSweepReady { get; }
         public ExusiaiChargePhase ChargePhase { get; }
         public bool IsChargeReady { get; }
+        public float DashWindowRemaining { get; }
         public float ChargeCooldown { get; }
         public bool IsOverloadActive { get; }
         public float OverloadDuration { get; }
@@ -105,6 +108,7 @@ namespace ArknightsFrontline.Skills
             sweepProgress >= SweepRequiredAttacks,
             GetChargePhase(),
             IsChargeReady(),
+            dashWindow.Remaining,
             chargeCooldown.Remaining,
             overloadActive,
             overloadActive ? overloadDuration.Remaining : 0f,
