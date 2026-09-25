@@ -1,6 +1,7 @@
 using System;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
+using ArknightsFrontline.Skills;
 using UnityEngine;
 
 namespace ArknightsFrontline.Arena
@@ -135,6 +136,30 @@ namespace ArknightsFrontline.Arena
             {
                 attack.ClearTarget();
                 attack.enabled = false;
+            }
+
+            foreach (ExusiaiSkillController skills in
+                     UnityEngine.Object.FindObjectsByType<ExusiaiSkillController>(FindObjectsSortMode.None))
+            {
+                skills.StopForMatch();
+            }
+
+            foreach (AttackSequenceExecutor sequence in
+                     UnityEngine.Object.FindObjectsByType<AttackSequenceExecutor>(FindObjectsSortMode.None))
+            {
+                sequence.Cancel();
+            }
+
+            foreach (SkillDashController dash in
+                     UnityEngine.Object.FindObjectsByType<SkillDashController>(FindObjectsSortMode.None))
+            {
+                dash.Cancel();
+            }
+
+            foreach (TimedStatModifierController effects in
+                     UnityEngine.Object.FindObjectsByType<TimedStatModifierController>(FindObjectsSortMode.None))
+            {
+                effects.StopForMatch();
             }
         }
 

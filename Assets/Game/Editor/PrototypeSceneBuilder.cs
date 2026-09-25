@@ -5,6 +5,7 @@ using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace ArknightsFrontline.Editor
     {
         private const string ScenePath = "Assets/Game/Scenes/PrototypeArena.unity";
         private const string MaterialsPath = "Assets/Game/Materials";
+        private const int ObstacleLayerIndex = ExusiaiSkillController.ReservedObstacleLayerIndex;
 
         [MenuItem("Arknights Frontline/Build Prototype Arena")]
         public static void Build()
@@ -31,6 +33,8 @@ namespace ArknightsFrontline.Editor
             Material laneMaterial = GetOrCreateMaterial("Lane.mat", new Color(0.25f, 0.25f, 0.25f));
             int groundLayer = EnsureLayer("Ground");
             int targetableLayer = EnsureLayer("Targetable");
+            // Reserve the next numeric layer for obstacles without rewriting the user-owned TagManager.
+            int obstacleLayer = ObstacleLayerIndex;
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -74,12 +78,21 @@ namespace ArknightsFrontline.Editor
 
             CreateDeploymentMarker(arenaRoot.transform, "BlueDeployment", layout.BlueDeployment, blueMaterial);
             CreateDeploymentMarker(arenaRoot.transform, "RedDeployment", layout.RedDeployment, redMaterial);
-            GameObject player = CreatePlayer(arenaRoot.transform, layout.BlueDeployment, blueMaterial, groundLayer);
+            GameObject player = CreatePlayer(
+                arenaRoot.transform,
+                layout.BlueDeployment,
+                blueMaterial,
+                groundLayer,
+                obstacleLayer);
             CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer, groundLayer);
             CreateDirectionalLight();
             MobaCameraController cameraController = CreateMainCamera();
             cameraController.SetCenteringTarget(player.transform);
-            CreateUiRoots();
+            Canvas canvas = CreateUiRoots();
+            GameObject skillHudObject = new GameObject("SkillHud", typeof(RectTransform));
+            skillHudObject.transform.SetParent(canvas.transform, false);
+            SkillHudPresenter skillHud = skillHudObject.AddComponent<SkillHudPresenter>();
+            skillHud.ConfigureControllerReference(player.GetComponent<ExusiaiSkillController>());
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             EnsureBuildScene();
@@ -150,7 +163,12 @@ namespace ArknightsFrontline.Editor
             marker.GetComponent<Renderer>().sharedMaterial = material;
         }
 
-        private static GameObject CreatePlayer(Transform parent, Vector3 deployment, Material material, int groundLayer)
+        private static GameObject CreatePlayer(
+            Transform parent,
+            Vector3 deployment,
+            Material material,
+            int groundLayer,
+            int obstacleLayer)
         {
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Exusiai";
@@ -171,6 +189,14 @@ namespace ArknightsFrontline.Editor
             BasicAttackController attack = player.AddComponent<BasicAttackController>();
             CombatCommandResolver resolver = player.AddComponent<CombatCommandResolver>();
             resolver.Configure(combatUnit, motor, commands, attack);
+            UnitStatModifiers modifiers = player.AddComponent<UnitStatModifiers>();
+            AttackSequenceExecutor sequence = player.AddComponent<AttackSequenceExecutor>();
+            sequence.Configure(combatUnit);
+            SkillDashController dash = player.AddComponent<SkillDashController>();
+            dash.Configure(motor, ArenaLayout.CreateDefault(), 1 << obstacleLayer);
+            attack.Configure(combatUnit, sequence);
+            player.AddComponent<ExusiaiSkillController>();
+            player.AddComponent<ExusiaiSkillIndicator>();
             return player;
         }
 
@@ -219,7 +245,7 @@ namespace ArknightsFrontline.Editor
             return controller;
         }
 
-        private static void CreateUiRoots()
+        private static Canvas CreateUiRoots()
         {
             GameObject eventSystemObject = new GameObject("EventSystem");
             eventSystemObject.AddComponent<EventSystem>();
@@ -230,6 +256,7 @@ namespace ArknightsFrontline.Editor
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvasObject.AddComponent<CanvasScaler>();
             canvasObject.AddComponent<GraphicRaycaster>();
+            return canvas;
         }
 
         private static Material GetOrCreateMaterial(string fileName, Color color)
@@ -253,7 +280,16 @@ namespace ArknightsFrontline.Editor
 
         private static void EnsureBuildScene()
         {
-            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            EditorBuildSettingsScene[] configuredScenes = EditorBuildSettings.scenes;
+            for (int i = 0; i < configuredScenes.Length; i++)
+            {
+                if (configuredScenes[i].path == ScenePath && configuredScenes[i].enabled)
+                {
+                    return;
+                }
+            }
+
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>(configuredScenes);
             scenes.RemoveAll(scene => scene.path == ScenePath);
             scenes.Add(new EditorBuildSettingsScene(ScenePath, true));
             EditorBuildSettings.scenes = scenes.ToArray();

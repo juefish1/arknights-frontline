@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Reflection;
 using ArknightsFrontline.Arena;
+using ArknightsFrontline.Commands;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
 using MatchOutcome = ArknightsFrontline.Common.MatchOutcome;
@@ -136,6 +139,65 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(redMinion.CurrentHealth, Is.EqualTo(targetHealthBeforeOutcome));
         }
 
+        [Test]
+        public void SettlementStopsExusiaiSkillsSequencesDashAndTimedModifiers()
+        {
+            MatchFixture match = CreateMatch();
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit exusiai = CreateUnit("Player_Exusiai", TeamId.Blue, new Vector3(-10f, 0f, 0f), 6f);
+            exusiai.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 2f, 6f, 0.5f, true, false);
+            CombatUnit target = CreateUnit("ChargeTarget", TeamId.Red, new Vector3(-8f, 0f, 0f), 0f);
+            UnitMotor targetMotor = target.gameObject.AddComponent<UnitMotor>();
+            targetMotor.Configure(5f, layout);
+            UnitStatModifiers targetModifiers = target.gameObject.AddComponent<UnitStatModifiers>();
+            TimedStatModifierController effects = target.gameObject.AddComponent<TimedStatModifierController>();
+            effects.ApplyMovementSlow("Exusiai.E.Slow", 0.70f, 2f);
+            UnitMotor motor = exusiai.gameObject.AddComponent<UnitMotor>();
+            motor.Configure(5f, layout);
+            PlayerCommandController commands = exusiai.gameObject.AddComponent<PlayerCommandController>();
+            InvokePrivate(commands, "Awake");
+            UnitStatModifiers modifiers = exusiai.gameObject.AddComponent<UnitStatModifiers>();
+            AttackSequenceExecutor sequence = exusiai.gameObject.AddComponent<AttackSequenceExecutor>();
+            sequence.Configure(exusiai);
+            BasicAttackController attacks = exusiai.gameObject.AddComponent<BasicAttackController>();
+            attacks.Configure(exusiai, sequence);
+            SkillDashController dash = exusiai.gameObject.AddComponent<SkillDashController>();
+            dash.Configure(motor, layout, 0);
+            ExusiaiSkillController skills = exusiai.gameObject.AddComponent<ExusiaiSkillController>();
+            skills.Configure(exusiai, commands, attacks, sequence, modifiers, dash);
+
+            skills.Tick(10f);
+            Assert.That(skills.TryActivateOverload(), Is.True);
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(sequence.IsRunning, Is.True);
+            Assert.That(skills.TryConsumeDashMove(exusiai.transform.position + Vector3.right * 4f), Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(exusiai.AttackPower, Is.EqualTo(55f).Within(0.001f));
+            Assert.That(motor.MovementSpeed, Is.EqualTo(5f * 1.08f).Within(0.001f));
+            Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f * 0.70f).Within(0.001f));
+
+            match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
+            match.OutcomeController.Tick();
+
+            Assert.That(skills.IsOverloadActive, Is.False);
+            Assert.That(skills.TryActivateOverload(), Is.False);
+            Assert.That(skills.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
+            Assert.That(modifiers.ApplyAttackPower(50f), Is.EqualTo(50f).Within(0.001f));
+            Assert.That(modifiers.ApplyAttackInterval(0.5f), Is.EqualTo(0.5f).Within(0.001f));
+            Assert.That(motor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
+            Assert.That(modifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));
+            Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
+            Assert.That(targetModifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));
+            Assert.That(sequence.IsRunning, Is.False);
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(match.OutcomeController.IsMatchOver, Is.True);
+            effects.ApplyMovementSlow("Exusiai.E.Slow", 0.70f, 2f);
+            effects.Tick(100f);
+            Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
+            Assert.That(targetModifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));
+        }
+
         private MatchFixture CreateMatch()
         {
             ArenaLayout layout = ArenaLayout.CreateDefault();
@@ -172,6 +234,15 @@ namespace ArknightsFrontline.Tests.EditMode
             GameObject gameObject = new GameObject(name);
             gameObjects.Add(gameObject);
             return gameObject;
+        }
+
+        private static void InvokePrivate(MonoBehaviour behaviour, string methodName)
+        {
+            MethodInfo method = behaviour.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null, methodName);
+            method.Invoke(behaviour, null);
         }
 
         private Material CreateMaterial(Color color)

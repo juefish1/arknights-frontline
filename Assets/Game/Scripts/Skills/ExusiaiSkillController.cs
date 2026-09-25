@@ -54,6 +54,8 @@ namespace ArknightsFrontline.Skills
     [DisallowMultipleComponent]
     public sealed class ExusiaiSkillController : MonoBehaviour, IPlayerSkillInputHandler
     {
+        // TagManager remains user-owned; Stage 5 reserves numeric layer 10 without naming it.
+        public const int ReservedObstacleLayerIndex = 10;
         private const int SweepRequiredAttacks = 3;
         private const float SweepDamageMultiplier = 1.45f;
         private const float SweepMissingHealthRatio = 0.08f;
@@ -89,8 +91,12 @@ namespace ArknightsFrontline.Skills
         private bool configured;
         private bool stopped;
         private bool missingDependencyLogged;
+        private bool hasFrozenSnapshot;
+        private ExusiaiSkillSnapshot frozenSnapshot;
 
         public bool IsSelectingChargeTarget => selectingChargeTarget;
+
+        public bool IsStopped => stopped;
 
         public bool IsDashWindowOpen => configured && !stopped && dashWindowOpen && dashWindow.Remaining > 0f;
 
@@ -103,16 +109,18 @@ namespace ArknightsFrontline.Skills
 
         public bool BlocksNormalCommands => CanRun() && dash.IsDashing;
 
-        public ExusiaiSkillSnapshot Snapshot => new ExusiaiSkillSnapshot(
-            sweepProgress,
-            sweepProgress >= SweepRequiredAttacks,
-            GetChargePhase(),
-            IsChargeReady(),
-            dashWindow.Remaining,
-            chargeCooldown.Remaining,
-            overloadActive,
-            overloadActive ? overloadDuration.Remaining : 0f,
-            overloadCooldown.Remaining);
+        public ExusiaiSkillSnapshot Snapshot => hasFrozenSnapshot
+            ? frozenSnapshot
+            : new ExusiaiSkillSnapshot(
+                sweepProgress,
+                sweepProgress >= SweepRequiredAttacks,
+                GetChargePhase(),
+                IsChargeReady(),
+                dashWindow.Remaining,
+                chargeCooldown.Remaining,
+                overloadActive,
+                overloadActive ? overloadDuration.Remaining : 0f,
+                overloadCooldown.Remaining);
 
         private void Awake()
         {
@@ -149,7 +157,8 @@ namespace ArknightsFrontline.Skills
             if (!dashController.IsConfiguredFor(unitMotor))
             {
                 dashController.Configure(
-                    unitMotor, ArenaLayout.CreateDefault(), LayerMask.GetMask("Obstacle"));
+                    unitMotor, ArenaLayout.CreateDefault(),
+                    1 << ReservedObstacleLayerIndex);
             }
 
             ConfigureCore(combatOwner, commandController, basicAttackController,
@@ -224,6 +233,9 @@ namespace ArknightsFrontline.Skills
             this.sequenceExecutor = sequenceExecutor;
             modifiers = statModifiers;
             dash = dashController;
+            commands.SetSkillInputHandler(this);
+            CommandFeedbackPresenter feedback = GetComponent<CommandFeedbackPresenter>();
+            if (feedback != null) feedback.ConfigureSkillController(this);
             owner.Died += OnOwnerDied;
             this.sequenceExecutor.SequenceFinished += OnSequenceFinished;
             basicAttacks.SetPlanProvider(CreateNextBasicAttackPlan);
@@ -424,6 +436,7 @@ namespace ArknightsFrontline.Skills
 
         private void InitializeSkillState()
         {
+            hasFrozenSnapshot = false;
             selectingChargeTarget = false;
             dashWindowOpen = false;
             SelectedChargeTarget = null;
@@ -437,7 +450,41 @@ namespace ArknightsFrontline.Skills
 
         public void StopForMatch()
         {
+            Stop(true);
+        }
+
+        private void Stop(bool preserveSnapshot)
+        {
             if (!configured) return;
+            if (preserveSnapshot && !hasFrozenSnapshot)
+            {
+                ExusiaiSkillSnapshot snapshot = Snapshot;
+                bool hasTemporaryChargePhase = snapshot.ChargePhase == ExusiaiChargePhase.Targeting
+                    || snapshot.ChargePhase == ExusiaiChargePhase.DashWindow;
+                if (hasTemporaryChargePhase)
+                {
+                    bool chargeReady = chargeCooldown.IsReady;
+                    frozenSnapshot = new ExusiaiSkillSnapshot(
+                        snapshot.SweepProgress,
+                        snapshot.IsSweepReady,
+                        chargeReady ? ExusiaiChargePhase.Ready : ExusiaiChargePhase.Cooldown,
+                        chargeReady,
+                        0f,
+                        snapshot.ChargeCooldown,
+                        snapshot.IsOverloadActive,
+                        snapshot.OverloadDuration,
+                        snapshot.OverloadCooldown);
+                }
+                else
+                {
+                    frozenSnapshot = snapshot;
+                }
+                hasFrozenSnapshot = true;
+            }
+            else if (!preserveSnapshot)
+            {
+                hasFrozenSnapshot = false;
+            }
             ClearRuntimeState(true);
             stopped = true;
             sweepProgress = 0;
@@ -478,7 +525,7 @@ namespace ArknightsFrontline.Skills
 
         private void OnOwnerDied(CombatUnit _)
         {
-            StopForMatch();
+            Stop(false);
         }
 
         private bool CanRun()

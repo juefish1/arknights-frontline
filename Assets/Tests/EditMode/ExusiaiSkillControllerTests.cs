@@ -582,7 +582,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
             owner.TakePhysicalDamage(owner.MaxHealth);
 
-            AssertTerminatedState();
+            AssertTerminatedState(false);
             Assert.That(controller.BeginChargeTargeting(), Is.False);
             Assert.That(controller.TryActivateOverload(), Is.False);
         }
@@ -597,7 +597,7 @@ namespace ArknightsFrontline.Tests.EditMode
             controller.StopForMatch();
             controller.Tick(100f);
 
-            AssertTerminatedState();
+            AssertTerminatedState(true);
             Assert.That(controller.BeginChargeTargeting(), Is.False);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.False);
             Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.False);
@@ -978,7 +978,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.IsDashWindowOpen, Is.True);
         }
 
-        private void AssertTerminatedState()
+        private void AssertTerminatedState(bool expectFrozenSnapshot)
         {
             Assert.That(executor.IsRunning, Is.False);
             Assert.That(controller.IsDashWindowOpen, Is.False);
@@ -987,10 +987,24 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.IsOverloadActive, Is.False);
             Assert.That(owner.AttackPower, Is.EqualTo(50f).Within(0.001f));
             Assert.That(owner.AttackInterval, Is.EqualTo(0.5f).Within(0.001f));
-            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.Snapshot.OverloadCooldown, Is.Zero);
-            Assert.That(controller.Snapshot.OverloadDuration, Is.Zero);
-            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Inactive));
+            if (expectFrozenSnapshot)
+            {
+                Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
+                Assert.That(controller.Snapshot.OverloadCooldown, Is.EqualTo(30f));
+                Assert.That(controller.Snapshot.OverloadDuration, Is.EqualTo(10f));
+                Assert.That(controller.Snapshot.IsOverloadActive, Is.True);
+                Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
+                Assert.That(controller.Snapshot.IsChargeReady, Is.False);
+                Assert.That(controller.Snapshot.DashWindowRemaining, Is.Zero);
+            }
+            else
+            {
+                Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
+                Assert.That(controller.Snapshot.OverloadCooldown, Is.Zero);
+                Assert.That(controller.Snapshot.OverloadDuration, Is.Zero);
+                Assert.That(controller.Snapshot.IsOverloadActive, Is.False);
+                Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Inactive));
+            }
             Assert.That(controller.BlocksAttackMove, Is.False);
             Assert.That(controller.BlocksNormalCommands, Is.False);
         }

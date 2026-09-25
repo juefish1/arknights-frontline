@@ -48,8 +48,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             CombatUnit playerUnit = player.GetComponent<CombatUnit>();
             Assert.That(playerUnit, Is.Not.Null);
             Assert.That(playerUnit.Team, Is.EqualTo(TeamId.Blue));
-            Assert.That(playerUnit.MaxHealth, Is.EqualTo(100f));
-            Assert.That(playerUnit.CurrentHealth, Is.EqualTo(100f));
+            Assert.That(playerUnit.MaxHealth, Is.EqualTo(1000f));
+            Assert.That(playerUnit.CurrentHealth, Is.EqualTo(1000f));
             Assert.That(playerUnit.IsDead, Is.False);
             Assert.That(player.GetComponent<CombatCommandResolver>(), Is.Not.Null);
             Assert.That(player.GetComponent<BasicAttackController>(), Is.Not.Null);

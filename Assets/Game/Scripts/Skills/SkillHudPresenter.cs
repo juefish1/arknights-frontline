@@ -20,7 +20,7 @@ namespace ArknightsFrontline.Skills
         private Image dashWindowPromptTrack;
         private Image dashWindowPromptBar;
         private RectTransform dashWindowPromptBarRect;
-        private ExusiaiSkillController controller;
+        [SerializeField] private ExusiaiSkillController controller;
         private GameObject hudRoot;
         private GameObject ownedCanvas;
         private bool ownsHudRoot;
@@ -31,6 +31,11 @@ namespace ArknightsFrontline.Skills
         public int SlotCount => hudRoot == null ? 0 : slots.Length;
         public bool IsVisible => isActiveAndEnabled && hudRoot != null
             && (ownsHudRoot ? hudRoot.activeSelf : slots[0] != null && slots[0].activeSelf);
+
+        private void Awake()
+        {
+            if (controller != null) Configure(controller);
+        }
 
         private void OnEnable()
         {
@@ -66,6 +71,11 @@ namespace ArknightsFrontline.Skills
 
             EnsureHud();
             Refresh();
+        }
+
+        public void ConfigureControllerReference(ExusiaiSkillController skillController)
+        {
+            controller = skillController;
         }
 
         public void Refresh()

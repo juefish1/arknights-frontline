@@ -41,6 +41,18 @@ namespace ArknightsFrontline.Skills
             || (arrowRenderer != null && arrowRenderer.enabled)
             || (markerRenderer != null && markerRenderer.enabled);
 
+        private void Awake()
+        {
+            CombatUnit combatOwner = GetComponent<CombatUnit>();
+            ExusiaiSkillController skillController = GetComponent<ExusiaiSkillController>();
+            PlayerCommandController commandController = GetComponent<PlayerCommandController>();
+            SkillDashController dashController = GetComponent<SkillDashController>();
+            if (combatOwner != null && skillController != null && dashController != null)
+            {
+                Configure(combatOwner, skillController, commandController, dashController);
+            }
+        }
+
         private void OnEnable()
         {
             RefreshWithDelta(Time.deltaTime);
@@ -89,6 +101,15 @@ namespace ArknightsFrontline.Skills
             if (!isActiveAndEnabled || owner == null || skills == null || dash == null)
             {
                 Mode = ExusiaiSkillIndicatorMode.None;
+                SetAllVisible(false);
+                return;
+            }
+
+            if (skills.IsStopped)
+            {
+                Mode = ExusiaiSkillIndicatorMode.None;
+                fadeRemaining = 0f;
+                wasDashWindow = false;
                 SetAllVisible(false);
                 return;
             }
