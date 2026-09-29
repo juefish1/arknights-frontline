@@ -17,7 +17,7 @@ namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
-        private readonly HashSet<int> baselineRootIds = new HashSet<int>();
+        private readonly HashSet<EntityId> baselineRootIds = new HashSet<EntityId>();
         private Scene cleanupScene;
 
         public override void Setup()
@@ -33,7 +33,7 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             foreach (GameObject root in cleanupScene.GetRootGameObjects())
             {
-                baselineRootIds.Add(root.GetInstanceID());
+                baselineRootIds.Add(root.GetEntityId());
             }
         }
 
@@ -784,7 +784,7 @@ namespace ArknightsFrontline.Tests.PlayMode
                 {
                     foreach (GameObject root in cleanupScene.GetRootGameObjects())
                     {
-                        if (!baselineRootIds.Contains(root.GetInstanceID()))
+                        if (!baselineRootIds.Contains(root.GetEntityId()))
                         {
                             Object.Destroy(root);
                         }

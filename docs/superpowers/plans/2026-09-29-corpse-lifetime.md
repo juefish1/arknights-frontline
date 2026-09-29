@@ -34,6 +34,35 @@
 
 ---
 
+### Task 0: Unity 6000.6 test API compatibility prerequisite
+
+**Files:**
+- Modify: `Assets/Tests/EditMode/DeathCorpsePresenterTests.cs`
+- Modify: `Assets/Tests/EditMode/TargetSelectorTests.cs`
+- Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
+
+**Interfaces:**
+- Consumes: Unity 6000.6.2f1 `UnityEngine.Object.GetEntityId()` and `UnityEngine.EntityId`.
+- Produces: existing test fixtures compile under Unity 6000.6.2f1 while preserving their identity tracking and stable tie-break intent.
+
+- [ ] **Step 1: Preserve compiler RED evidence**
+
+Use `TestResults/corpse-lifetime-baseline-playmode-retry.log`: Unity 6000.6.2f1 failed before tests with nine CS0619 errors because `GetInstanceID()` is obsolete-as-error. The failed compile is the red signal for this compatibility task.
+
+- [ ] **Step 2: Make the minimal test-only API migration**
+
+Replace only the reported `GetInstanceID()` calls with `GetEntityId()`. Change the two identity `HashSet<int>` fields/locals to `HashSet<EntityId>`. In `TargetSelectorTests`, compare `EntityId` values with `Comparer<EntityId>.Default.Compare(firstCreated.GetEntityId(), secondCreated.GetEntityId()) < 0`. Preserve all test assertions and existing unrelated hunks.
+
+- [ ] **Step 3: Run complete EditMode and PlayMode baselines**
+
+Run both platforms under Unity 6000.6.2f1 and require valid XML. Record total, passed, failed, skipped, inconclusive, and every non-passing test fullname. The EditMode and PlayMode XMLs from this point are the feature's pre-change baseline.
+
+- [ ] **Step 4: Independent review and commit**
+
+Review that only the obsolete API calls and necessary collection/comparison types changed. Since `PlayerCommandInputPlayModeTests.cs` contains existing user modifications, stage only the compatibility hunk. Commit only these three test files/hunks and this approved plan addendum.
+
+---
+
 ### Task 1: 尸体生命周期核心与死亡表现接入
 
 **Files:**

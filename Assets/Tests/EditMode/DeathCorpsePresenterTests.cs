@@ -12,7 +12,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
         private readonly List<Material> materials = new List<Material>();
-        private readonly HashSet<int> initialCorpseIds = new HashSet<int>();
+        private readonly HashSet<EntityId> initialCorpseIds = new HashSet<EntityId>();
 
         [SetUp]
         public void SetUp()
@@ -20,7 +20,7 @@ namespace ArknightsFrontline.Tests.EditMode
             initialCorpseIds.Clear();
             foreach (GameObject corpse in FindCorpses())
             {
-                initialCorpseIds.Add(corpse.GetInstanceID());
+                initialCorpseIds.Add(corpse.GetEntityId());
             }
         }
 
@@ -161,7 +161,7 @@ namespace ArknightsFrontline.Tests.EditMode
             GameObject corpse = null;
             foreach (GameObject candidate in FindCorpses())
             {
-                if (candidate.name == name && !initialCorpseIds.Contains(candidate.GetInstanceID()))
+                if (candidate.name == name && !initialCorpseIds.Contains(candidate.GetEntityId()))
                 {
                     corpse = candidate;
                     break;
@@ -180,12 +180,12 @@ namespace ArknightsFrontline.Tests.EditMode
                 gameObject => gameObject.name.EndsWith("_Corpse"));
         }
 
-        private static HashSet<int> GetCorpseIds()
+        private static HashSet<EntityId> GetCorpseIds()
         {
-            HashSet<int> corpseIds = new HashSet<int>();
+            HashSet<EntityId> corpseIds = new HashSet<EntityId>();
             foreach (GameObject corpse in FindCorpses())
             {
-                corpseIds.Add(corpse.GetInstanceID());
+                corpseIds.Add(corpse.GetEntityId());
             }
 
             return corpseIds;

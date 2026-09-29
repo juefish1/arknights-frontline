@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using NUnit.Framework;
@@ -45,7 +46,7 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit attacker = CreateUnitAt("Blue", TeamId.Blue, Altitude.Ground, Vector3.zero, 4f, true, false);
             CombatUnit firstCreated = CreateUnitAt("First", TeamId.Red, Altitude.Ground, new Vector3(-2f, 0f, 0f), 1f, false, false);
             CombatUnit secondCreated = CreateUnitAt("Second", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 1f, false, false);
-            CombatUnit expected = firstCreated.GetInstanceID() < secondCreated.GetInstanceID() ? firstCreated : secondCreated;
+            CombatUnit expected = Comparer<EntityId>.Default.Compare(firstCreated.GetEntityId(), secondCreated.GetEntityId()) < 0 ? firstCreated : secondCreated;
 
             Assert.That(TargetSelector.FindNearestInRange(attacker), Is.EqualTo(expected));
         }
@@ -78,7 +79,7 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit attacker = CreateUnitAt("Blue", TeamId.Blue, Altitude.Ground, Vector3.zero, 6f, true, false);
             CombatUnit firstCreated = CreateUnitAt("First", TeamId.Red, Altitude.Ground, new Vector3(2f, 0f, 0f), 1f, false, false);
             CombatUnit secondCreated = CreateUnitAt("Second", TeamId.Red, Altitude.Ground, new Vector3(4f, 0f, 0f), 1f, false, false);
-            CombatUnit expected = firstCreated.GetInstanceID() < secondCreated.GetInstanceID() ? firstCreated : secondCreated;
+            CombatUnit expected = Comparer<EntityId>.Default.Compare(firstCreated.GetEntityId(), secondCreated.GetEntityId()) < 0 ? firstCreated : secondCreated;
 
             Assert.That(TargetSelector.FindNearestInRangeFromPoint(attacker, new Vector3(3f, 0f, 0f)), Is.EqualTo(expected));
         }
