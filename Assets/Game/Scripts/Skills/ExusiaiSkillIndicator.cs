@@ -142,21 +142,28 @@ namespace ArknightsFrontline.Skills
             bool completedDashBeforeRefresh = wasTargeting
                 && skills.Snapshot.ChargePhase == ExusiaiChargePhase.Cooldown;
             wasTargeting = false;
+            bool startedFadeThisRefresh = false;
             Mode = ExusiaiSkillIndicatorMode.None;
             if (completedDashBeforeRefresh)
             {
                 Mode = ExusiaiSkillIndicatorMode.DashPath;
                 ShowDashPath(targetingOrigin);
                 fadeRemaining = FadeDuration;
+                startedFadeThisRefresh = true;
             }
             else if (wasDashing && arrowRenderer != null && arrowRenderer.enabled)
             {
                 fadeRemaining = FadeDuration;
+                startedFadeThisRefresh = true;
             }
             wasDashing = false;
             if (fadeRemaining > 0f)
             {
-                fadeRemaining = Mathf.Max(0f, fadeRemaining - Mathf.Max(0f, deltaTime));
+                if (!startedFadeThisRefresh)
+                {
+                    fadeRemaining = Mathf.Max(0f, fadeRemaining - Mathf.Max(0f, deltaTime));
+                }
+
                 SetFade(fadeRemaining / FadeDuration);
                 if (fadeRemaining > 0f) return;
             }

@@ -197,13 +197,16 @@ namespace ArknightsFrontline.Tests.EditMode
             dash.Tick(0.1f);
             Assert.That(dash.IsDashing, Is.False);
 
-            InvokePrivate(indicator, "RefreshWithDelta", 0f);
+            InvokePrivate(indicator, "RefreshWithDelta", 0.2f);
 
             LineRenderer arrow = GetRenderer("arrowRenderer");
             Assert.That(arrow.enabled, Is.True);
             Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(new Vector3(0.12f, 0f, 0f)));
             Assert.That(arrow.GetPosition(0), Is.EqualTo(new Vector3(0f, 0.05f, 0f)));
             Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(0.12f, 0.05f, 0f)));
+
+            InvokePrivate(indicator, "RefreshWithDelta", 0.15f);
+            Assert.That(arrow.enabled, Is.False);
         }
 
         [Test]
