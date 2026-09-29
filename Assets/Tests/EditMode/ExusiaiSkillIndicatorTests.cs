@@ -183,6 +183,30 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ShortDashCompletedBeforeIndicatorRefreshStillShowsArrivalTrail()
+        {
+            Vector3 previewPoint = Vector3.right * 0.08f;
+            Vector3 clickedPoint = Vector3.right * 0.12f;
+            SetCachedPointer(previewPoint);
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            indicator.Refresh();
+            Assert.That(GetRenderer("arrowRenderer").enabled, Is.True);
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(previewPoint));
+
+            Assert.That(skills.TryConfirmCharge(clickedPoint, null), Is.True);
+            dash.Tick(0.1f);
+            Assert.That(dash.IsDashing, Is.False);
+
+            InvokePrivate(indicator, "RefreshWithDelta", 0f);
+
+            LineRenderer arrow = GetRenderer("arrowRenderer");
+            Assert.That(arrow.enabled, Is.True);
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(new Vector3(0.12f, 0f, 0f)));
+            Assert.That(arrow.GetPosition(0), Is.EqualTo(new Vector3(0f, 0.05f, 0f)));
+            Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(0.12f, 0.05f, 0f)));
+        }
+
+        [Test]
         public void RefreshWithoutPointerKeepsTargetingHiddenAndDisableHidesRenderers()
         {
             Assert.That(skills.BeginChargeTargeting(), Is.True);

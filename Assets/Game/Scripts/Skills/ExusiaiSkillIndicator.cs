@@ -29,7 +29,9 @@ namespace ArknightsFrontline.Skills
         private LineRenderer rangeRenderer;
         private LineRenderer arrowRenderer;
         private float fadeRemaining;
+        private bool wasTargeting;
         private bool wasDashing;
+        private Vector3 targetingOrigin;
 
         public ExusiaiSkillIndicatorMode Mode { get; private set; }
         public Vector3 DisplayedEndpoint { get; private set; }
@@ -64,6 +66,7 @@ namespace ArknightsFrontline.Skills
         {
             Mode = ExusiaiSkillIndicatorMode.None;
             fadeRemaining = 0f;
+            wasTargeting = false;
             wasDashing = false;
             SetAllVisible(false);
         }
@@ -98,6 +101,9 @@ namespace ArknightsFrontline.Skills
             if (!isActiveAndEnabled || owner == null || skills == null || dash == null)
             {
                 Mode = ExusiaiSkillIndicatorMode.None;
+                fadeRemaining = 0f;
+                wasTargeting = false;
+                wasDashing = false;
                 SetAllVisible(false);
                 return;
             }
@@ -106,6 +112,7 @@ namespace ArknightsFrontline.Skills
             {
                 Mode = ExusiaiSkillIndicatorMode.None;
                 fadeRemaining = 0f;
+                wasTargeting = false;
                 wasDashing = false;
                 SetAllVisible(false);
                 return;
@@ -115,6 +122,8 @@ namespace ArknightsFrontline.Skills
             {
                 fadeRemaining = 0f;
                 Mode = ExusiaiSkillIndicatorMode.ChargeTargeting;
+                wasTargeting = true;
+                targetingOrigin = GetOwnerPosition();
                 wasDashing = false;
                 ShowTargetingPreview();
                 return;
@@ -124,13 +133,23 @@ namespace ArknightsFrontline.Skills
             {
                 fadeRemaining = 0f;
                 Mode = ExusiaiSkillIndicatorMode.DashPath;
+                wasTargeting = false;
                 wasDashing = true;
                 ShowDashPath();
                 return;
             }
 
+            bool completedDashBeforeRefresh = wasTargeting
+                && skills.Snapshot.ChargePhase == ExusiaiChargePhase.Cooldown;
+            wasTargeting = false;
             Mode = ExusiaiSkillIndicatorMode.None;
-            if (wasDashing && arrowRenderer != null && arrowRenderer.enabled)
+            if (completedDashBeforeRefresh)
+            {
+                Mode = ExusiaiSkillIndicatorMode.DashPath;
+                ShowDashPath(targetingOrigin);
+                fadeRemaining = FadeDuration;
+            }
+            else if (wasDashing && arrowRenderer != null && arrowRenderer.enabled)
             {
                 fadeRemaining = FadeDuration;
             }
@@ -168,12 +187,16 @@ namespace ArknightsFrontline.Skills
 
         private void ShowDashPath()
         {
+            ShowDashPath(GetOwnerPosition());
+        }
+
+        private void ShowDashPath(Vector3 start)
+        {
             EnsureRenderers();
-            Vector3 center = GetOwnerPosition();
             RangeRadius = DashRadius;
             DisplayedEndpoint = dash.Destination;
             rangeRenderer.enabled = false;
-            DrawArrow(center, dash.Destination, Color.blue);
+            DrawArrow(start, dash.Destination, Color.blue);
             arrowRenderer.enabled = true;
         }
 
