@@ -79,16 +79,15 @@ Review that only the obsolete API calls and necessary collection/comparison type
 
 - [ ] **Step 1: 记录实施前基线与工作区边界**
 
-确认分支、HEAD、暂存区和现有修改，并保存输出。关闭所有交互式 Unity 后，用以下编辑器执行一次完整 PlayMode，作为最终比较基线：
+确认分支、HEAD、暂存区和现有修改，并保存输出。完整 PlayMode 基线已在 Task 0 记录；本任务开始前仅确认前置 Task 0 已提交且代码基线仍在 `dev`：
 
 ```powershell
 git branch --show-current
 git rev-parse HEAD
 git status --short
-& 'C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -runTests -testPlatform PlayMode -testResults 'D:\arknights-frontline\TestResults\corpse-lifetime-baseline-playmode.xml' -logFile 'D:\arknights-frontline\TestResults\corpse-lifetime-baseline-playmode.log' -quit
 ```
 
-Expected: `dev`；XML 可解析并记录总数、通过数和全部非通过项。若没有有效 XML，原样去掉 `-quit` 重跑。不得把 TestResults 或日志加入提交。
+Expected: `dev`，Task 0 compatibility commit is the current base; confirm user-owned changes remain unstaged. Do not add TestResults or logs to commits.
 
 - [ ] **Step 2: 写核心控制器的失败测试**
 
