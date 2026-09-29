@@ -326,6 +326,97 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator ExusiaiConfirmWithoutPointerHitKeepsTargetingFromNonOriginPlayer()
+        {
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(
+                new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            GameObject cameraObject = CreateMainCamera();
+            cameraObject.transform.SetPositionAndRotation(
+                new Vector3(0f, 10f, 0f), Quaternion.LookRotation(Vector3.up, Vector3.forward));
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            yield return null;
+
+            Assert.That(controller.TryGetCachedPointerHit(out _), Is.False,
+                "The centered pointer ray should have no collider hit in this fixture.");
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+
+            Assert.That(skills.IsSelectingChargeTarget, Is.True,
+                "A no-hit click must not confirm E with the default world origin.");
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero,
+                "A no-hit click must not consume E's cooldown.");
+            Assert.That(dash.IsDashing, Is.False,
+                "A no-hit click must not start a dash from the non-origin player.");
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+        }
+
+        [UnityTest]
+        public IEnumerator ExusiaiClickOnTargetableUsesGroundProjectionWithoutPreselectingTarget()
+        {
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(
+                new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            GameObject clickedTarget = CreateTargetableCube(TeamId.Red);
+            clickedTarget.GetComponent<CombatUnit>().Configure(
+                TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
+            Vector2 pointer = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Set(mouse.position, pointer);
+            Physics.SyncTransforms();
+            yield return null;
+
+            Assert.That(controller.TryGetCachedPointerHit(out RaycastHit pointerHit), Is.True);
+            Assert.That(pointerHit.collider.gameObject, Is.SameAs(clickedTarget),
+                "The real pointer hit must be the Targetable enemy, not the ground behind it.");
+            Ray pointerRay = cameraObject.GetComponent<UnityEngine.Camera>().ScreenPointToRay(pointer);
+            int groundMask = 1 << LayerMask.NameToLayer("Ground");
+            Assert.That(Physics.Raycast(pointerRay, out RaycastHit groundHit, Mathf.Infinity, groundMask), Is.True,
+                "The pointer ray must also intersect the ground when Targetable colliders are ignored.");
+            Assert.That(Vector3.Distance(groundHit.point, Vector3.zero), Is.LessThan(0.001f),
+                "The independently ground-projected landing point should be the arena origin.");
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+
+            Assert.That(skills.IsSelectingChargeTarget, Is.False);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "Clicking an enemy supplies a destination only; selection waits until dash arrival.");
+            Assert.That(Vector3.Distance(dash.Destination, new Vector3(-3f, 0f, 0f)), Is.LessThan(0.001f),
+                "The landing should clamp seven meters from the player toward the ground-projected origin.");
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+            Object.Destroy(ground);
+            Object.Destroy(clickedTarget);
+        }
+
+        [UnityTest]
         public IEnumerator EscapeAfterConfirmationCancelsHeldAFeedback()
         {
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();

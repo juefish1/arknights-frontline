@@ -192,7 +192,11 @@ namespace ArknightsFrontline.Commands
             }
 
             bool hasHit = TryGetPointerHit(out RaycastHit hit);
-            Vector3 worldPoint = hasHit ? hit.point : default;
+            Vector3 worldPoint = transform.position;
+            if (hasHit && TryGetPointerGroundPoint(out Vector3 groundPoint))
+            {
+                worldPoint = groundPoint;
+            }
             GameObject hitObject = hasHit ? hit.collider.gameObject : null;
             if (skillInputHandler != null && skillInputHandler.TryHandleConfirm(worldPoint, hitObject))
             {
@@ -357,6 +361,30 @@ namespace ArknightsFrontline.Commands
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
             hasCachedPointerHit = Physics.Raycast(
                 ray, out cachedPointerHit, Mathf.Infinity, Physics.DefaultRaycastLayers);
+        }
+
+        private bool TryGetPointerGroundPoint(out Vector3 groundPoint)
+        {
+            groundPoint = transform.position;
+            int groundLayer = LayerMask.NameToLayer("Ground");
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            if (groundLayer < 0 || mainCamera == null || input == null)
+            {
+                return false;
+            }
+
+            Ray pointerRay = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
+            if (!Physics.Raycast(
+                    pointerRay,
+                    out RaycastHit groundHit,
+                    Mathf.Infinity,
+                    1 << groundLayer))
+            {
+                return false;
+            }
+
+            groundPoint = groundHit.point;
+            return true;
         }
 
         private void ClearPointerHitCache()
