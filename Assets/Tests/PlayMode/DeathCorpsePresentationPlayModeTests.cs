@@ -134,6 +134,68 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SpawnedGroundAndAirMinionCorpsesExpireFiveSecondsAfterCreation()
+        {
+            CreateGround();
+            GameObject ground = gameObjects.Single(gameObject => gameObject.name == "Ground");
+            ground.transform.localScale = new Vector3(20f, 1f, 20f);
+
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit blueTower = CreateUnit("BlueTower", TeamId.Blue, Altitude.Ground, layout.BlueTower, 1000f);
+            CombatUnit redTower = CreateUnit("RedTower", TeamId.Red, Altitude.Ground, layout.RedTower, 1000f);
+            Material blueMaterial = CreateMaterial(Color.blue);
+            Material redMaterial = CreateMaterial(Color.red);
+            GameObject minionParent = CreateGameObject("MinionParent");
+            MinionWaveSpawner spawner = CreateGameObject("MinionWaveSpawner").AddComponent<MinionWaveSpawner>();
+            spawner.Configure(
+                minionParent.transform,
+                layout,
+                blueTower,
+                redTower,
+                blueMaterial,
+                redMaterial,
+                9,
+                GroundLayer);
+            spawner.enabled = false;
+            spawner.SpawnWaveNow();
+
+            CombatUnit groundMinion = FindMinion(minionParent.transform, TeamId.Blue, Altitude.Ground);
+            CombatUnit airMinion = FindMinion(minionParent.transform, TeamId.Red, Altitude.Air);
+            string groundCorpseName = groundMinion.name + "_Corpse";
+            string airCorpseName = airMinion.name + "_Corpse";
+            float deathTime = Time.time;
+            groundMinion.TakePhysicalDamage(groundMinion.MaxHealth);
+            airMinion.TakePhysicalDamage(airMinion.MaxHealth);
+
+            yield return null;
+
+            GameObject groundCorpse = TrackCorpse(groundCorpseName);
+            GameObject airCorpse = TrackCorpse(airCorpseName);
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 0.35f - Time.time));
+
+            Assert.That(airCorpse.GetComponent<CorpseFallController>().HasLanded, Is.True);
+            Assert.That(
+                groundCorpse != null && airCorpse != null,
+                Is.True,
+                "Both spawned minion corpses should remain through the air fall.");
+
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 4.8f - Time.time));
+
+            Assert.That(
+                groundCorpse != null && airCorpse != null,
+                Is.True,
+                "Both spawned minion corpses should remain shortly before five seconds.");
+
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 5.2f - Time.time));
+            yield return null;
+
+            Assert.That(
+                groundCorpse == null && airCorpse == null,
+                Is.True,
+                $"Both spawned minion corpses should be destroyed after five seconds. Ground destroyed: {groundCorpse == null}; air destroyed: {airCorpse == null}.");
+        }
+
+        [UnityTest]
         public IEnumerator AirCorpseFallsToZeroHeightWhenGroundRaycastMisses()
         {
             Vector3 deathPosition = new Vector3(123f, 5f, 123f);
