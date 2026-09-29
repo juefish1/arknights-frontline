@@ -241,7 +241,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ExusiaiSelectingChargeConsumesOutOfRangeTargetAndGroundConfirmsBeforeAttackMove()
+        public IEnumerator ExusiaiSingleLeftClickStartsDashAndRightClickOnlyCancelsSelectionBeforeConfirmation()
         {
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
@@ -249,17 +249,23 @@ namespace ArknightsFrontline.Tests.PlayMode
             PlayerCommandController controller = CreateControllerAt(
                 new Vector3(-10f, 0f, 0f), out _, out GameObject player);
             ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            AttackSequenceExecutor sequence = player.GetComponent<AttackSequenceExecutor>();
             GameObject cameraObject = CreateMainCamera();
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.layer = LayerMask.NameToLayer("Ground");
-            GameObject target = CreateTargetableCube(TeamId.Red);
+            GameObject clickedTarget = CreateTargetableCube(TeamId.Red);
+            CombatUnit clickedUnit = clickedTarget.GetComponent<CombatUnit>();
+            clickedUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
+            GameObject nearestTarget = CreateTargetableCube(TeamId.Red);
+            nearestTarget.transform.position = new Vector3(-3f, 0f, 0f);
+            nearestTarget.GetComponent<CombatUnit>().Configure(
+                TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
             controller.Issue(UnitCommand.Move(Vector3.zero));
             int originalRevision = controller.CommandRevision;
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-
-            Press(keyboard.aKey);
+            Physics.SyncTransforms();
             yield return null;
-            Assert.That(controller.IsAttackMoveArmed, Is.True);
 
             Press(keyboard.eKey);
             yield return null;
@@ -267,31 +273,56 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
             Assert.That(skills.IsSelectingChargeTarget, Is.True);
 
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.False,
+                "Right click before confirmation should cancel E selection.");
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+            Assert.That(dash.IsDashing, Is.False);
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
             Press(mouse.leftButton);
             yield return null;
             Release(mouse.leftButton);
             yield return null;
-            Assert.That(skills.IsSelectingChargeTarget, Is.True);
-            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+            Assert.That(skills.IsSelectingChargeTarget, Is.False);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.InRange(19.8f, 20f),
+                "The one-click E cooldown should start immediately and remain near its full duration.");
+            Assert.That(dash.IsDashing, Is.True,
+                "One valid left click should immediately start the dash.");
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "The click target must not be selected before the owner reaches the landing point.");
+            Assert.That(sequence.IsRunning, Is.False,
+                "The E volley must wait until the dash arrives.");
+            Assert.That(controller.CurrentCommand.HasValue, Is.False);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision + 1));
+            Vector3 confirmedDestination = dash.Destination;
 
-            Object.Destroy(target);
+            Press(mouse.rightButton);
             yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(dash.IsDashing, Is.True,
+                "Right click after confirmation must not cancel an initiated dash.");
+            Assert.That(dash.Destination, Is.EqualTo(confirmedDestination),
+                "Right click after confirmation must not rewrite the selected landing point.");
+            Assert.That(controller.CurrentCommand.HasValue, Is.False,
+                "Right click during the dash must not become a normal move command.");
 
-            Press(mouse.leftButton);
-            yield return null;
-            Release(mouse.leftButton);
-            Release(keyboard.aKey);
-            yield return null;
-            Assert.That(skills.IsSelectingChargeTarget, Is.True);
-            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
-
-            Object.Destroy(player);
-            Object.Destroy(cameraObject);
-            Object.Destroy(ground);
+            dash.Tick(1f);
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(skills.SelectedChargeTarget, Is.SameAs(nearestTarget.GetComponent<CombatUnit>()),
+                "Arrival must select the nearest legal enemy at the landing point, not the clicked enemy.");
+            Assert.That(sequence.IsRunning, Is.True,
+                "The E volley should begin once the dash arrives and selects a target.");
         }
 
         [UnityTest]

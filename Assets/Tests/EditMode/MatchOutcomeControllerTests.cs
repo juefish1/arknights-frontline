@@ -146,12 +146,16 @@ namespace ArknightsFrontline.Tests.EditMode
             ArenaLayout layout = ArenaLayout.CreateDefault();
             CombatUnit exusiai = CreateUnit("Player_Exusiai", TeamId.Blue, new Vector3(-10f, 0f, 0f), 6f);
             exusiai.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 2f, 6f, 0.5f, true, false);
-            CombatUnit target = CreateUnit("ChargeTarget", TeamId.Red, new Vector3(-8f, 0f, 0f), 0f);
+            CombatUnit target = CreateUnit("TimedModifierTarget", TeamId.Red, new Vector3(-8f, 0f, 0f), 0f);
             UnitMotor targetMotor = target.gameObject.AddComponent<UnitMotor>();
             targetMotor.Configure(5f, layout);
             UnitStatModifiers targetModifiers = target.gameObject.AddComponent<UnitStatModifiers>();
             TimedStatModifierController effects = target.gameObject.AddComponent<TimedStatModifierController>();
-            effects.ApplyMovementSlow("Exusiai.E.Slow", 0.70f, 2f);
+            effects.ApplyMovementSlow("Test.TimedMovementSlow", 0.70f, 2f);
+            CombatUnit chargeTarget = CreateUnit(
+                "ChargeLandingTarget", TeamId.Red, exusiai.transform.position + Vector3.right * 4f, 6f);
+            UnitMotor chargeTargetMotor = chargeTarget.gameObject.AddComponent<UnitMotor>();
+            chargeTargetMotor.Configure(5f, layout);
             UnitMotor motor = exusiai.gameObject.AddComponent<UnitMotor>();
             motor.Configure(5f, layout);
             PlayerCommandController commands = exusiai.gameObject.AddComponent<PlayerCommandController>();
@@ -169,13 +173,17 @@ namespace ArknightsFrontline.Tests.EditMode
             skills.Tick(10f);
             Assert.That(skills.TryActivateOverload(), Is.True);
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
-            Assert.That(sequence.IsRunning, Is.True);
-            Assert.That(skills.TryConsumeDashMove(exusiai.transform.position + Vector3.right * 4f), Is.True);
+            Assert.That(skills.TryConfirmCharge(chargeTarget.transform.position, null), Is.True);
             Assert.That(dash.IsDashing, Is.True);
+            Assert.That(sequence.IsRunning, Is.False,
+                "E must not start its volley before the dash reaches its confirmed landing point.");
+            Assert.That(skills.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
             Assert.That(exusiai.AttackPower, Is.EqualTo(55f).Within(0.001f));
             Assert.That(motor.MovementSpeed, Is.EqualTo(5f * 1.08f).Within(0.001f));
             Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f * 0.70f).Within(0.001f));
+            Assert.That(chargeTargetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f),
+                "E must not slow its landing target before arrival.");
+            float landingTargetHealth = chargeTarget.CurrentHealth;
 
             match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
             match.OutcomeController.Tick();
@@ -189,10 +197,19 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(modifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));
             Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
             Assert.That(targetModifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));
+            Assert.That(chargeTargetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
             Assert.That(sequence.IsRunning, Is.False);
             Assert.That(dash.IsDashing, Is.False);
             Assert.That(match.OutcomeController.IsMatchOver, Is.True);
-            effects.ApplyMovementSlow("Exusiai.E.Slow", 0.70f, 2f);
+            dash.Tick(1f);
+            sequence.Tick(1f);
+            Assert.That(sequence.IsRunning, Is.False,
+                "A dash canceled by settlement must not launch its pending E volley afterward.");
+            Assert.That(chargeTarget.CurrentHealth, Is.EqualTo(landingTargetHealth),
+                "Settlement before arrival must not apply deferred E damage.");
+            Assert.That(chargeTargetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f),
+                "Settlement before arrival must not apply the E movement slow later.");
+            effects.ApplyMovementSlow("Test.TimedMovementSlow", 0.70f, 2f);
             effects.Tick(100f);
             Assert.That(targetMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
             Assert.That(targetModifiers.ApplyMovementSpeed(5f), Is.EqualTo(5f).Within(0.001f));

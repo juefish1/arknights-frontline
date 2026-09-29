@@ -122,14 +122,17 @@ namespace ArknightsFrontline.Tests.PlayMode
         [UnityTest]
         public IEnumerator LoadedSceneRestoresSkillInputHudIndicatorAndFeedbackWiring()
         {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
             yield return ReloadArenaAfterInputFixtureSetup();
             BindStageFivePlayer();
             SkillHudPresenter hud = Object.FindFirstObjectByType<SkillHudPresenter>();
             ExusiaiSkillIndicator indicator = player.GetComponent<ExusiaiSkillIndicator>();
             CommandFeedbackPresenter feedback = player.GetComponent<CommandFeedbackPresenter>();
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             Assert.That(hud, Is.Not.Null);
             Assert.That(indicator, Is.Not.Null);
             Assert.That(feedback, Is.Not.Null);
+            Assert.That(mainCamera, Is.Not.Null);
             InputAction attackMove = commands.InputActions.FindAction("AttackMove");
             Assert.That(attackMove, Is.Not.Null);
             Assert.That(commands.isActiveAndEnabled, Is.True);
@@ -165,16 +168,45 @@ namespace ArknightsFrontline.Tests.PlayMode
                 "The saved PlayerCommandController must restore its Exusiai skill input handler.");
             Assert.That(feedback.IsAttackRangeVisible, Is.False,
                 "The command feedback range ring must hide while the same skills block ordinary input.");
-            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT TARGET"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
             Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.ChargeTargeting));
             Assert.That(hud.transform.childCount, Is.EqualTo(3), "The loaded HUD should contain one W/E/R slot each.");
-            Assert.That(indicator.GetComponentsInChildren<LineRenderer>(true).Length, Is.EqualTo(3));
+            Assert.That(indicator.GetComponentsInChildren<LineRenderer>(true).Length, Is.EqualTo(2),
+                "The direct-dash preview contains only the landing range and path arrow.");
 
             Release(keyboard.eKey);
-            Assert.That(skills.CancelChargeTargeting(), Is.True);
+            Vector3 landingPointer = mainCamera.WorldToScreenPoint(
+                new Vector3(owner.transform.position.x + 5f, 0f, owner.transform.position.z));
+            Assert.That(landingPointer.z, Is.GreaterThan(0f));
+            Set(mouse.position, new Vector2(landingPointer.x, landingPointer.y));
             yield return null;
-            Assert.That(hud.ELabel, Is.Not.EqualTo("E  SELECT TARGET"));
-            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.None));
+            Assert.That(commands.TryGetCachedPointerHit(out RaycastHit landingHit), Is.True,
+                "The loaded scene must have a real ground hit for a single left-click E confirmation.");
+            Assert.That(landingHit.collider, Is.Not.Null);
+
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+            Vector3 confirmedEndpoint = skills.GetComponent<SkillDashController>().Destination;
+            Assert.That(skills.IsSelectingChargeTarget, Is.False);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.InRange(19.8f, 20f),
+                "One left click should start E cooldown immediately.");
+            Assert.That(skills.GetComponent<SkillDashController>().IsDashing, Is.True,
+                "One left click in the loaded scene must begin the dash immediately.");
+            StringAssert.StartsWith("E  ", hud.ELabel);
+            StringAssert.Contains(".", hud.ELabel,
+                "The E slot should show its cooldown after confirmation.");
+            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.DashPath));
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(confirmedEndpoint));
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(skills.GetComponent<SkillDashController>().IsDashing, Is.True,
+                "Right click during the initiated dash must not trigger a second E step.");
+            Assert.That(skills.GetComponent<SkillDashController>().Destination, Is.EqualTo(confirmedEndpoint));
             Release(keyboard.aKey);
         }
 
@@ -307,7 +339,13 @@ namespace ArknightsFrontline.Tests.PlayMode
             RecordShots();
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(sequence.IsRunning, Is.False,
+                "E must wait for the dash to arrive before starting its volley.");
+            Assert.That(shotPayloads, Is.Empty,
+                "E must not request or deal a shot during the dash.");
+            dash.Tick(1f);
             TrackProjectiles();
+            Assert.That(sequence.IsRunning, Is.True);
             sequence.Tick(0.2f);
             TrackProjectiles();
 
@@ -322,7 +360,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ChargeGroundPointUsesNearestEnemyDirectEnemyWinsAndNoTargetStillOpensWindow()
+        public IEnumerator ChargeSelectsNearestEnemyAtLandingAndIgnoresClickedEnemy()
         {
             BindStageFivePlayer();
             Vector3 origin = owner.transform.position;
@@ -330,50 +368,58 @@ namespace ArknightsFrontline.Tests.PlayMode
             CombatUnit north = CreateEnemy("NorthTarget", origin + Vector3.forward * 3f);
 
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(origin + Vector3.forward * 2.5f, null), Is.True);
+            Assert.That(skills.TryConfirmCharge(origin + Vector3.forward * 2.5f, east), Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "A clicked enemy is not selected while E is still dashing.");
+            Assert.That(sequence.IsRunning, Is.False);
+            dash.Tick(1f);
             TrackProjectiles();
             Assert.That(skills.SelectedChargeTarget, Is.SameAs(north));
+            Assert.That(sequence.IsRunning, Is.True);
 
             skills.ResetForDeployment();
-            Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(origin + Vector3.forward * 2.5f, east), Is.True);
-            TrackProjectiles();
-            Assert.That(skills.SelectedChargeTarget, Is.SameAs(east));
-
-            skills.ResetForDeployment();
+            owner.transform.position = origin;
+            motor.Stop();
             east.transform.position = origin + Vector3.right * 20f;
             north.transform.position = origin + Vector3.forward * 20f;
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             Assert.That(skills.TryConfirmCharge(origin + Vector3.right, null), Is.True);
+            dash.Tick(1f);
             Assert.That(skills.SelectedChargeTarget, Is.Null);
             Assert.That(sequence.IsRunning, Is.False);
-            Assert.That(skills.IsDashWindowOpen, Is.True);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.EqualTo(20f).Within(0.001f),
+                "E still enters cooldown when no legal enemy is in range at arrival.");
             yield return null;
         }
 
         [UnityTest]
-        public IEnumerator ChargeDashRunsAlongsideRemainingShotsAndClampsClicksBeyondSevenMeters()
+        public IEnumerator ChargeDashUsesOneClickWaitsUntilArrivalAndClampsBeyondSevenMeters()
         {
             BindStageFivePlayer();
             Vector3 start = owner.transform.position;
             CombatUnit target = CreateEnemy("DashTarget", start + Vector3.right * 3f);
             RecordShots();
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
-            Assert.That(skills.TryConsumeDashMove(start + Vector3.right * 4f), Is.True);
+            Assert.That(skills.TryConfirmCharge(start + Vector3.right * 4f, null), Is.True);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(sequence.IsRunning, Is.False);
+            Assert.That(shotTargets, Is.Empty,
+                "No E projectile may be requested before the dash reaches its landing point.");
 
             dash.Tick(0.1f);
             Assert.That(Vector2.Distance(
                 new Vector2(owner.transform.position.x, owner.transform.position.z),
-                new Vector2(start.x + 1.4f, start.z)), Is.EqualTo(0f).Within(0.001f));
-            sequence.Tick(0.05f);
-            TrackProjectiles();
-            Assert.That(shotTargets.Count, Is.EqualTo(2));
-            Assert.That(sequence.IsRunning, Is.True);
-            dash.Tick(1f);
-            sequence.Tick(0.1f);
+                new Vector2(start.x + 2.8f, start.z)), Is.EqualTo(0f).Within(0.001f),
+                "A 28 meter-per-second dash covers 2.8 meters in 0.1 seconds.");
+            Assert.That(shotTargets, Is.Empty);
+            dash.Tick(0.1f);
             TrackProjectiles();
             Assert.That(owner.transform.position.x, Is.EqualTo(start.x + 4f).Within(0.001f));
+            Assert.That(sequence.IsRunning, Is.True,
+                "The E volley should start when the dash reaches its destination.");
+            sequence.Tick(0.15f);
+            TrackProjectiles();
             Assert.That(sequence.IsRunning, Is.False);
             Assert.That(shotTargets.Count, Is.EqualTo(4));
 
@@ -381,9 +427,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             owner.transform.position = start;
             motor.Stop();
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
-            TrackProjectiles();
-            Assert.That(skills.TryConsumeDashMove(start + Vector3.right * 12f), Is.True);
+            Assert.That(skills.TryConfirmCharge(start + Vector3.right * 12f, null), Is.True);
             Assert.That(Vector2.Distance(
                 new Vector2(start.x, start.z),
                 new Vector2(dash.Destination.x, dash.Destination.z)), Is.EqualTo(7f).Within(0.001f));
@@ -395,19 +439,16 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ChargeWindowWithoutRightClickDoesNotMoveOwner()
+        public IEnumerator ChargeSingleConfirmationStartsDashWithoutASecondRightClick()
         {
             BindStageFivePlayer();
             Vector3 start = owner.transform.position;
             CombatUnit target = CreateEnemy("NoDashTarget", start + Vector3.right * 3f);
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
-            TrackProjectiles();
-
-            skills.Tick(0.251f);
-
-            Assert.That(skills.IsDashWindowOpen, Is.False);
-            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.EqualTo(20f).Within(0.001f));
+            Assert.That(dash.IsDashing, Is.True,
+                "One valid landing confirmation should start the dash immediately.");
             Assert.That(owner.transform.position, Is.EqualTo(start));
             yield return null;
         }
@@ -425,11 +466,10 @@ namespace ArknightsFrontline.Tests.PlayMode
             runtimeObjects.Add(obstacle);
             Physics.SyncTransforms();
 
-            CombatUnit target = CreateEnemy("ObstacleDashTarget", start + Vector3.right * 3f);
+            CreateEnemy("ObstacleDashTarget", start + Vector3.right * 3f);
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(skills.TryConfirmCharge(start + Vector3.right * 5f, null), Is.True);
             TrackProjectiles();
-            Assert.That(skills.TryConsumeDashMove(start + Vector3.right * 5f), Is.True);
 
             Assert.That(dash.Destination.x, Is.EqualTo(start.x + 1.5f).Within(0.01f));
             Assert.That(dash.IsDashing, Is.True);
@@ -437,7 +477,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator DeadChargeTargetTransfersOnlyUnspawnedShotsToNearestLegalEnemy()
+        public IEnumerator ChargeRechecksNearestTargetAtLandingAfterClickedEnemyDies()
         {
             BindStageFivePlayer();
             Vector3 origin = owner.transform.position;
@@ -447,20 +487,19 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             Assert.That(skills.TryConfirmCharge(selected.transform.position, selected), Is.True);
-            Projectile firstProjectile = Object.FindFirstObjectByType<Projectile>();
-            Assert.That(firstProjectile, Is.Not.Null);
-            TrackProjectiles();
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "The clicked enemy is not selected before the landing point is reached.");
+            Assert.That(sequence.IsRunning, Is.False);
+            Assert.That(shotTargets, Is.Empty);
             selected.TakePhysicalDamage(selected.MaxHealth);
-            firstProjectile.Tick(0f);
-            Assert.That(firstProjectile.IsFinished, Is.True);
-
+            dash.Tick(1f);
+            TrackProjectiles();
+            Assert.That(skills.SelectedChargeTarget, Is.SameAs(replacement));
             sequence.Tick(0.15f);
             TrackProjectiles();
             Assert.That(shotTargets.Count, Is.EqualTo(4));
-            Assert.That(shotTargets[0], Is.SameAs(selected));
-            Assert.That(shotTargets[1], Is.SameAs(replacement));
-            Assert.That(shotTargets[2], Is.SameAs(replacement));
-            Assert.That(shotTargets[3], Is.SameAs(replacement));
+            Assert.That(shotTargets.TrueForAll(target => target == replacement), Is.True,
+                "All E shots should go to the nearest legal enemy at arrival; the dead click target receives none.");
             Assert.That(sequence.IsRunning, Is.False);
             yield return null;
         }
@@ -516,7 +555,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             hud.Refresh();
             Assert.That(hud.WLabel, Is.EqualTo("W  1/3"));
             Assert.That(hud.RLabel, Is.EqualTo("R  ACTIVE 10.0"));
-            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT TARGET"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
 
             CombatUnit redTower = Object.FindFirstObjectByType<ArenaBootstrap>()
                 .RedTower.GetComponent<CombatUnit>();
@@ -547,7 +586,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator SettlementDuringDashWindowPreservesCooldownAndHidesPromptBar()
+        public IEnumerator SettlementDuringDashPreservesCooldownAndHidesPathPreview()
         {
             Mouse mouse = InputSystem.AddDevice<Mouse>();
             yield return ReloadArenaAfterInputFixtureSetup();
@@ -568,16 +607,31 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             CombatUnit target = CreateEnemy("SettlementDashWindowTarget", owner.transform.position + Vector3.right * 3f);
             Assert.That(skills.BeginChargeTargeting(), Is.True);
+            hud.Refresh();
+            indicator.Refresh();
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
+            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.ChargeTargeting));
+            Assert.That(indicator.RangeRadius, Is.EqualTo(7f).Within(0.001f));
+            Assert.That(indicator.IsVisible, Is.True,
+                "The E targeting state must show the seven-meter landing preview before confirmation.");
+
             Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
             hud.Refresh();
             indicator.Refresh();
 
-            Transform promptTrack = hud.transform.Find("E/DashWindowPromptTrack");
-            Assert.That(promptTrack, Is.Not.Null);
-            Assert.That(hud.ELabel, Is.EqualTo("E  MOVE!"));
-            Assert.That(promptTrack.gameObject.activeInHierarchy, Is.True);
-            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.DashWindow));
-            Assert.That(indicator.IsVisible, Is.True, "A valid pointer hit must render the live dash preview before settlement.");
+            Assert.That(skills.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
+            float cooldownAtConfirmation = skills.Snapshot.ChargeCooldown;
+            string cooldownLabelAtConfirmation = hud.ELabel;
+            Assert.That(cooldownAtConfirmation, Is.InRange(19.8f, 20f),
+                "Confirming a valid landing should start the cooldown immediately.");
+            StringAssert.StartsWith("E  ", cooldownLabelAtConfirmation);
+            StringAssert.Contains(".", cooldownLabelAtConfirmation,
+                "The E HUD should display cooldown without a second-step prompt.");
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.DashPath));
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(dash.Destination));
+            Assert.That(indicator.IsVisible, Is.True,
+                "The path preview should follow the confirmed landing while the dash runs.");
 
             CombatUnit redTower = Object.FindFirstObjectByType<ArenaBootstrap>()
                 .RedTower.GetComponent<CombatUnit>();
@@ -587,10 +641,11 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             Assert.That(Object.FindFirstObjectByType<MatchOutcomeController>().IsMatchOver, Is.True);
             Assert.That(skills.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
-            Assert.That(skills.Snapshot.ChargeCooldown, Is.EqualTo(20f).Within(0.001f));
-            Assert.That(hud.ELabel, Is.EqualTo("E  20.0"));
-            Assert.That(promptTrack.gameObject.activeInHierarchy, Is.False,
-                "The frozen terminal HUD must not retain the transient dash-window bar.");
+            Assert.That(skills.Snapshot.ChargeCooldown,
+                Is.EqualTo(cooldownAtConfirmation).Within(0.001f),
+                "Settlement must freeze the E cooldown at the value reached when the match ended.");
+            Assert.That(hud.ELabel, Is.EqualTo(cooldownLabelAtConfirmation),
+                "Settlement must preserve the visible E cooldown label.");
             Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.None));
             Assert.That(indicator.IsVisible, Is.False,
                 "Settlement must hide the live dash pointer preview immediately rather than starting its normal fade.");
