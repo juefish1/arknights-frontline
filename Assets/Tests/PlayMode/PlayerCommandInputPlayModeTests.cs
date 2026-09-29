@@ -365,7 +365,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ExusiaiClickOnTargetableUsesGroundProjectionWithoutPreselectingTarget()
+        public IEnumerator ExusiaiTargetablePreviewAndConfirmationUseSameGroundProjectedEndpoint()
         {
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
@@ -374,6 +374,7 @@ namespace ArknightsFrontline.Tests.PlayMode
                 new Vector3(-10f, 0f, 0f), out _, out GameObject player);
             ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
             SkillDashController dash = player.GetComponent<SkillDashController>();
+            ExusiaiSkillIndicator indicator = player.AddComponent<ExusiaiSkillIndicator>();
             GameObject cameraObject = CreateMainCamera();
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.layer = LayerMask.NameToLayer("Ground");
@@ -399,6 +400,9 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
             Release(keyboard.eKey);
             yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Assert.That(Vector3.Distance(indicator.DisplayedEndpoint, new Vector3(-3f, 0f, 0f)), Is.LessThan(0.001f),
+                "The selection preview should use the independently ground-projected origin, clamped seven meters from the player.");
             Press(mouse.leftButton);
             yield return null;
             Release(mouse.leftButton);
@@ -410,6 +414,8 @@ namespace ArknightsFrontline.Tests.PlayMode
                 "Clicking an enemy supplies a destination only; selection waits until dash arrival.");
             Assert.That(Vector3.Distance(dash.Destination, new Vector3(-3f, 0f, 0f)), Is.LessThan(0.001f),
                 "The landing should clamp seven meters from the player toward the ground-projected origin.");
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(dash.Destination),
+                "After confirmation, the displayed endpoint should remain the actual dash destination.");
             Object.Destroy(player);
             Object.Destroy(cameraObject);
             Object.Destroy(ground);

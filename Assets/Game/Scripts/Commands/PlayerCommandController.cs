@@ -26,6 +26,8 @@ namespace ArknightsFrontline.Commands
         private InputControl pendingMoveControl;
         private bool isAttackMoveHeld;
         private IPlayerSkillInputHandler skillInputHandler;
+        private Ray cachedPointerRay;
+        private bool hasCachedPointerRay;
         private RaycastHit cachedPointerHit;
         private bool hasCachedPointerHit;
         private int cachedPointerFrame = -1;
@@ -350,6 +352,8 @@ namespace ArknightsFrontline.Commands
             }
 
             cachedPointerFrame = Time.frameCount;
+            cachedPointerRay = default;
+            hasCachedPointerRay = false;
             cachedPointerHit = default;
             hasCachedPointerHit = false;
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
@@ -359,23 +363,23 @@ namespace ArknightsFrontline.Commands
             }
 
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
+            cachedPointerRay = ray;
+            hasCachedPointerRay = true;
             hasCachedPointerHit = Physics.Raycast(
                 ray, out cachedPointerHit, Mathf.Infinity, Physics.DefaultRaycastLayers);
         }
 
-        private bool TryGetPointerGroundPoint(out Vector3 groundPoint)
+        public bool TryGetPointerGroundPoint(out Vector3 groundPoint)
         {
             groundPoint = transform.position;
             int groundLayer = LayerMask.NameToLayer("Ground");
-            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
-            if (groundLayer < 0 || mainCamera == null || input == null)
+            if (groundLayer < 0 || !hasCachedPointerRay)
             {
                 return false;
             }
 
-            Ray pointerRay = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
             if (!Physics.Raycast(
-                    pointerRay,
+                    cachedPointerRay,
                     out RaycastHit groundHit,
                     Mathf.Infinity,
                     1 << groundLayer))
@@ -389,6 +393,8 @@ namespace ArknightsFrontline.Commands
 
         private void ClearPointerHitCache()
         {
+            cachedPointerRay = default;
+            hasCachedPointerRay = false;
             cachedPointerHit = default;
             hasCachedPointerHit = false;
             cachedPointerFrame = -1;

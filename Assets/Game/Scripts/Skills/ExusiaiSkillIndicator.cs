@@ -209,10 +209,12 @@ namespace ArknightsFrontline.Skills
 
         private Vector3 GetPointerPoint(out bool hasPoint)
         {
-            if (commands != null && commands.TryGetCachedPointerHit(out RaycastHit hit))
+            if (commands != null
+                && commands.TryGetCachedPointerHit(out _)
+                && commands.TryGetPointerGroundPoint(out Vector3 groundPoint))
             {
                 hasPoint = true;
-                return hit.point;
+                return groundPoint;
             }
             hasPoint = false;
             return GetOwnerPosition();
