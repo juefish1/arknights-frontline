@@ -135,7 +135,8 @@ namespace ArknightsFrontline.Editor
                 combatUnit,
                 material,
                 groundLayer,
-                new Vector3(0.3f, 1f, 0.3f));
+                new Vector3(0.3f, 1f, 0.3f),
+                UnitKind.Tower);
             BasicAttackController attack = tower.AddComponent<BasicAttackController>();
             attack.Configure(combatUnit);
             TowerCombatController controller = tower.AddComponent<TowerCombatController>();
@@ -184,7 +185,7 @@ namespace ArknightsFrontline.Editor
             combatUnit.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 2f, 6f, 0.5f, true, true);
             player.AddComponent<HealthBarPresenter>();
             DeathCorpsePresenter presenter = player.AddComponent<DeathCorpsePresenter>();
-            presenter.Configure(combatUnit, material, groundLayer);
+            presenter.Configure(combatUnit, material, groundLayer, UnitKind.Operator);
             player.AddComponent<CommandFeedbackPresenter>();
             BasicAttackController attack = player.AddComponent<BasicAttackController>();
             CombatCommandResolver resolver = player.AddComponent<CombatCommandResolver>();
@@ -217,7 +218,7 @@ namespace ArknightsFrontline.Editor
             combatUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 2f, 0f, 0f, false, false);
             dummy.AddComponent<HealthBarPresenter>();
             DeathCorpsePresenter presenter = dummy.AddComponent<DeathCorpsePresenter>();
-            presenter.Configure(combatUnit, material, groundLayer);
+            presenter.Configure(combatUnit, material, groundLayer, UnitKind.Operator);
         }
 
         private static void CreateDirectionalLight()

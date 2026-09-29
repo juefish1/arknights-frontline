@@ -49,6 +49,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(Object.FindFirstObjectByType<MinionWaveSpawner>(), Is.Not.Null);
             GameObject player = GameObject.Find("Player_Exusiai");
             Assert.That(player, Is.Not.Null);
+            Assert.That(player.GetComponent<DeathCorpsePresenter>().UnitKind, Is.EqualTo(UnitKind.Operator));
             CombatUnit playerUnit = player.GetComponent<CombatUnit>();
             Assert.That(playerUnit, Is.Not.Null);
             Assert.That(playerUnit.MaxHealth, Is.EqualTo(1000f));
@@ -72,6 +73,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(enemyOperator.GetComponent<CapsuleCollider>(), Is.Not.Null);
             Assert.That(enemyOperator.GetComponent<HealthBarPresenter>(), Is.Not.Null);
             Assert.That(enemyOperator.GetComponent<DeathCorpsePresenter>(), Is.Not.Null);
+            Assert.That(enemyOperator.GetComponent<DeathCorpsePresenter>().UnitKind,
+                Is.EqualTo(UnitKind.Operator));
             Assert.That(enemyOperator.transform.Find("HealthBar"), Is.Not.Null);
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             Assert.That(mainCamera, Is.Not.Null);
@@ -105,6 +108,13 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             ArenaBootstrap arena = Object.FindFirstObjectByType<ArenaBootstrap>();
             MatchOutcomeController outcome = Object.FindFirstObjectByType<MatchOutcomeController>();
+            GameObject minion = GameObject.Find("BlueGroundMinion_1_1");
+            Assert.That(minion, Is.Not.Null);
+            minion.GetComponent<CombatUnit>().TakePhysicalDamage(minion.GetComponent<CombatUnit>().MaxHealth);
+            yield return null;
+            GameObject minionCorpse = GameObject.Find("BlueGroundMinion_1_1_Corpse");
+            Assert.That(minionCorpse, Is.Not.Null);
+
             GameObject redTowerObject = arena.RedTower.gameObject;
             CombatUnit redTower = redTowerObject.GetComponent<CombatUnit>();
             Renderer redTowerRenderer = redTowerObject.transform.Find("RedTowerVisual").GetComponent<Renderer>();
@@ -129,6 +139,16 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(corpse.GetComponent<TowerCombatController>(), Is.Null);
             Assert.That(corpse.layer, Is.EqualTo(LayerMask.NameToLayer("Default")));
             Assert.That(corpse.GetComponent<Collider>(), Is.Null);
+            CorpseLifetimeController towerLifetime = corpse.GetComponent<CorpseLifetimeController>();
+            Assert.That(towerLifetime, Is.Not.Null);
+            Assert.That(towerLifetime.UnitKind, Is.EqualTo(UnitKind.Tower));
+            towerLifetime.Tick(60f);
+            yield return null;
+            Assert.That(corpse == null, Is.False);
+
+            yield return new WaitForSeconds(CorpseLifetimeController.MinionLifetimeSeconds + 0.2f);
+            Assert.That(minionCorpse == null, Is.True);
+            Assert.That(corpse == null, Is.False);
         }
 
         [UnityTest]
@@ -152,6 +172,9 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(player == null, Is.True);
             GameObject corpse = GameObject.Find("Player_Exusiai_Corpse");
             Assert.That(corpse, Is.Not.Null);
+            CorpseLifetimeController lifetime = corpse.GetComponent<CorpseLifetimeController>();
+            Assert.That(lifetime, Is.Not.Null);
+            Assert.That(lifetime.UnitKind, Is.EqualTo(UnitKind.Operator));
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(playerMaterial));
             Assert.That(corpse.transform.position.x, Is.EqualTo(playerPosition.x));
             Assert.That(corpse.transform.position.y, Is.EqualTo(0.01f).Within(0.0001f));
@@ -159,6 +182,9 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
             Collider collider = corpse.GetComponent<Collider>();
             Assert.That(collider == null || !collider.enabled, Is.True);
+            lifetime.Tick(60f);
+            yield return null;
+            Assert.That(corpse == null, Is.False);
         }
 
         [UnityTest]
@@ -178,12 +204,46 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(enemyOperator == null, Is.True);
             GameObject corpse = GameObject.Find("TrainingDummy_Red_Corpse");
             Assert.That(corpse, Is.Not.Null);
+            CorpseLifetimeController lifetime = corpse.GetComponent<CorpseLifetimeController>();
+            Assert.That(lifetime, Is.Not.Null);
+            Assert.That(lifetime.UnitKind, Is.EqualTo(UnitKind.Operator));
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(material));
             Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(position.x, 0.01f, position.z)));
             Assert.That(corpse.GetComponent<CombatUnit>(), Is.Null);
             Assert.That(corpse.transform.Find("HealthBar"), Is.Null);
             Collider collider = corpse.GetComponent<Collider>();
             Assert.That(collider == null || !collider.enabled, Is.True);
+            lifetime.Tick(60f);
+            yield return null;
+            Assert.That(corpse == null, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator OperatorRegistryDoesNotRetainCorpseAcrossSceneReload()
+        {
+            SceneManager.LoadScene("PrototypeArena");
+            yield return null;
+
+            GameObject player = GameObject.Find("Player_Exusiai");
+            player.GetComponent<CombatUnit>().TakePhysicalDamage(player.GetComponent<CombatUnit>().MaxHealth);
+            yield return null;
+            Assert.That(GameObject.Find("Player_Exusiai_Corpse"), Is.Not.Null);
+
+            Scene prototypeArena = SceneManager.GetSceneByName("PrototypeArena");
+            Scene cleanupScene = SceneManager.CreateScene("OperatorRegistryReloadCleanup");
+            SceneManager.SetActiveScene(cleanupScene);
+            AsyncOperation unload = SceneManager.UnloadSceneAsync(prototypeArena);
+            while (!unload.isDone)
+            {
+                yield return null;
+            }
+
+            SceneManager.LoadScene("PrototypeArena", LoadSceneMode.Single);
+            yield return null;
+            GameObject reloadedPlayer = GameObject.Find("Player_Exusiai");
+            Assert.That(reloadedPlayer, Is.Not.Null);
+            Assert.That(() => CorpseLifetimeController.ClearOperatorCorpse("Player_Exusiai"), Throws.Nothing);
+            Assert.That(reloadedPlayer == null, Is.False);
         }
 
         private static void AssertTowerIsCombatReady(Transform tower)
@@ -195,6 +255,8 @@ namespace ArknightsFrontline.Tests.PlayMode
                 $"{tower.name} needs a TowerCombatController.");
             Assert.That(tower.GetComponent<DeathCorpsePresenter>(), Is.Not.Null,
                 $"{tower.name} needs a DeathCorpsePresenter.");
+            Assert.That(tower.GetComponent<DeathCorpsePresenter>().UnitKind, Is.EqualTo(UnitKind.Tower),
+                $"{tower.name} corpse category should be Tower.");
             Assert.That(tower.GetComponent<BoxCollider>(), Is.Not.Null,
                 $"{tower.name} needs a root BoxCollider.");
             CombatUnit combatUnit = tower.GetComponent<CombatUnit>();
