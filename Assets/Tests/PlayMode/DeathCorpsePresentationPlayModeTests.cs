@@ -202,7 +202,10 @@ namespace ArknightsFrontline.Tests.PlayMode
             source.TakePhysicalDamage(source.MaxHealth);
             yield return null;
 
-            TrackCorpse("SerializedSource_Corpse");
+            Assert.That(
+                FindCorpses().Any(candidate => candidate.name == "SerializedSource_Corpse"),
+                Is.False,
+                "The earlier same-key corpse should be replaced by the rehydrated presenter's corpse.");
             GameObject corpse = TrackCorpse("RehydratedPresenter_Corpse");
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(configuredMaterial));
             Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(4f, 3.01f, 0f)));
