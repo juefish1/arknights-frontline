@@ -43,6 +43,28 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator DeferredDestroyOfReplacedOperatorLeavesNewRegistrationClearable()
+        {
+            CorpseLifetimeController first = CreateGameObject("FirstOperatorCorpse")
+                .AddComponent<CorpseLifetimeController>();
+            first.Configure(UnitKind.Operator, "shared-owner");
+
+            CorpseLifetimeController second = CreateGameObject("SecondOperatorCorpse")
+                .AddComponent<CorpseLifetimeController>();
+            second.Configure(UnitKind.Operator, "shared-owner");
+
+            yield return null;
+
+            Assert.That(first == null, Is.True, "The replaced corpse should finish deferred destruction.");
+            Assert.That(second == null, Is.False, "The replacement should survive the old corpse's OnDestroy callback.");
+
+            CorpseLifetimeController.ClearOperatorCorpse("shared-owner");
+            yield return null;
+
+            Assert.That(second == null, Is.True, "The key should still clear the replacement after the old callback.");
+        }
+
+        [UnityTest]
         public IEnumerator ConfiguredPresentersCreateCorpsesWhileUnconfiguredUnitsDoNot()
         {
             CreateGround();
