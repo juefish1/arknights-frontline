@@ -140,6 +140,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
 
+            dash.Tick(1f);
             executor.Tick(1f);
 
             Assert.That(controller.Snapshot.SweepProgress, Is.EqualTo(1));
@@ -200,6 +201,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
             Assert.That(controller.TryActivateOverload(), Is.True);
+            dash.Tick(1f);
 
             AttackSequencePlan plan = CancelRunningAndCapturePlan();
 
@@ -214,6 +216,7 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryActivateOverload(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            dash.Tick(1f);
 
             AttackSequencePlan plan = CancelRunningAndCapturePlan();
 
@@ -238,6 +241,201 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ConfirmStartsDashWithoutFiringOrPreselectingTarget()
+        {
+            RouteShotsThroughRealProjectiles();
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+            IPlayerSkillInputHandler handler = controller;
+
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleConfirm(Vector3.right * 4f, target.gameObject), Is.True);
+
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
+
+            dash.Tick(0.05f);
+            Assert.That(owner.transform.position.x, Is.GreaterThan(0f));
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+        }
+
+        [Test]
+        public void ArrivalChoosesNearestLegalEnemyFromActualEndpoint()
+        {
+            RouteShotsThroughRealProjectiles();
+            AddMovementMotor(target);
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(Vector3.right * 5.5f, target), Is.True);
+
+            target.transform.position = Vector3.right * 20f;
+            CombatUnit nearestAtArrival = CreateUnit("Nearest At Arrival", TeamId.Red, Vector3.right * 6.5f);
+            UnitMotor nearestMotor = AddMovementMotor(nearestAtArrival);
+            CombatUnit fartherAtArrival = CreateUnit("Farther At Arrival", TeamId.Red, Vector3.right * 3f);
+            dash.Tick(0.05f);
+
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+            Assert.That(nearestAtArrival.CurrentHealth, Is.EqualTo(1000f));
+
+            dash.Tick(1f);
+
+            Assert.That(owner.transform.position.x, Is.EqualTo(5.5f).Within(0.001f));
+            Assert.That(controller.SelectedChargeTarget, Is.SameAs(nearestAtArrival));
+            Assert.That(executor.IsRunning, Is.True);
+            Assert.That(nearestAtArrival.CurrentHealth, Is.EqualTo(937.5f).Within(0.01f));
+            Assert.That(fartherAtArrival.CurrentHealth, Is.EqualTo(1000f));
+            Assert.That(nearestMotor.MovementSpeed, Is.EqualTo(3.5f).Within(0.001f));
+
+            executor.Tick(0.05f);
+            executor.Tick(0.05f);
+            executor.Tick(0.05f);
+
+            Assert.That(nearestAtArrival.CurrentHealth, Is.EqualTo(750f).Within(0.01f));
+            Assert.That(nearestMotor.MovementSpeed, Is.EqualTo(3.5f).Within(0.001f));
+
+            TimedStatModifierController slow = nearestAtArrival.GetComponent<TimedStatModifierController>();
+            Assert.That(slow, Is.Not.Null);
+            slow.Tick(1.99f);
+            Assert.That(nearestMotor.MovementSpeed, Is.EqualTo(3.5f).Within(0.001f));
+            slow.Tick(0.02f);
+            Assert.That(nearestMotor.MovementSpeed, Is.EqualTo(5f).Within(0.001f));
+        }
+
+        [Test]
+        public void ArrivalWithNoTargetSpendsCooldownWithoutVolley()
+        {
+            RouteShotsThroughRealProjectiles();
+            target.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(Vector3.right * 5.5f, target), Is.True);
+
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(executor.IsRunning, Is.False);
+            dash.Tick(1f);
+
+            Assert.That(owner.transform.position.x, Is.EqualTo(5.5f).Within(0.001f));
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
+            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
+        }
+
+        [Test]
+        public void InvalidEndpointKeepsTargetingAndCooldownReady()
+        {
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+
+            Assert.That(controller.TryConfirmCharge(owner.transform.position, target), Is.False);
+
+            Assert.That(controller.IsSelectingChargeTarget, Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Targeting));
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(executor.IsRunning, Is.False);
+        }
+
+        [Test]
+        public void OverloadAtConfirmSnapshotsFiveShotsAcrossDash()
+        {
+            RouteShotsThroughRealProjectiles();
+            UnitMotor targetMotor = AddMovementMotor(target);
+            controller.Tick(10f);
+            Assert.That(controller.TryActivateOverload(), Is.True);
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(Vector3.right * 5.5f, target), Is.True);
+
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+            controller.Tick(10f);
+            Assert.That(controller.IsOverloadActive, Is.False);
+            Assert.That(owner.AttackPower, Is.EqualTo(50f).Within(0.001f));
+
+            dash.Tick(1f);
+            Assert.That(target.CurrentHealth, Is.EqualTo(931.25f).Within(0.01f));
+            Assert.That(executor.IsRunning, Is.True);
+            Assert.That(targetMotor.MovementSpeed, Is.EqualTo(3.5f).Within(0.001f));
+
+            executor.Tick(0.05f);
+            executor.Tick(0.05f);
+            executor.Tick(0.05f);
+            executor.Tick(0.05f);
+
+            Assert.That(target.CurrentHealth, Is.EqualTo(656.25f).Within(0.01f));
+            Assert.That(targetMotor.MovementSpeed, Is.EqualTo(3.5f).Within(0.001f));
+        }
+
+        [TestCase("stop")]
+        [TestCase("death")]
+        [TestCase("settlement")]
+        [TestCase("disable")]
+        public void StopDeathSettlementAndDisablePreventDeferredVolley(string cancellation)
+        {
+            RouteShotsThroughRealProjectiles();
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+            Assert.That(controller.TryConfirmCharge(Vector3.right * 5.5f, target), Is.True);
+            dash.Tick(0.05f);
+            Vector3 partialPosition = owner.transform.position;
+
+            switch (cancellation)
+            {
+                case "stop":
+                    controller.HandleStop();
+                    break;
+                case "death":
+                    owner.TakePhysicalDamage(owner.MaxHealth);
+                    break;
+                case "settlement":
+                    controller.StopForMatch();
+                    break;
+                case "disable":
+                    controller.enabled = false;
+                    InvokePrivate(controller, "OnDisable");
+                    break;
+                default:
+                    Assert.Fail($"Unknown cancellation case: {cancellation}");
+                    break;
+            }
+
+            dash.Tick(1f);
+            executor.Tick(1f);
+            controller.Tick(30f);
+
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(executor.IsRunning, Is.False);
+            Assert.That(owner.transform.position, Is.EqualTo(partialPosition));
+            Assert.That(target.CurrentHealth, Is.EqualTo(1000f));
+            Assert.That(target.GetComponent<TimedStatModifierController>(), Is.Null);
+        }
+
+        [Test]
+        public void RightClickCancelsSelectionAndCannotRedirectStartedDash()
+        {
+            IPlayerSkillInputHandler handler = controller;
+            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
+
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleCancel(), Is.True);
+            Assert.That(controller.IsSelectingChargeTarget, Is.False);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
+
+            handler.HandleSkill2();
+            Assert.That(handler.TryHandleConfirm(Vector3.right * 5.5f, target.gameObject), Is.True);
+            Vector3 destination = dash.Destination;
+
+            Assert.That(handler.TryHandleMoveClick(Vector3.left * 4f), Is.True);
+            Assert.That(handler.TryHandleCancel(), Is.False);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(dash.Destination, Is.EqualTo(destination));
+        }
+
+        [Test]
         public void SkillInputKeysToggleChargeTargetingAndActivateOverload()
         {
             IPlayerSkillInputHandler handler = controller;
@@ -254,60 +452,37 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void SkillInputConfirmUsesOnlyLegalTargetableHitsAsDirectTargets()
+        public void SkillInputLeftClickUsesGroundPointInsteadOfTargetableHit()
         {
             IPlayerSkillInputHandler handler = controller;
             CombatUnit friendly = CreateUnit("Friendly Hit", TeamId.Blue, new Vector3(5f, 0f, 0f));
             friendly.gameObject.layer = LayerMask.NameToLayer("Targetable");
-            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
-            CombatUnit firstShotTarget = null;
-            executor.ShotRequested += (shotTarget, _) => firstShotTarget ??= shotTarget;
 
             handler.HandleSkill2();
-            bool accepted = handler.TryHandleConfirm(friendly.transform.position, friendly.gameObject);
+            bool accepted = handler.TryHandleConfirm(Vector3.right * 5.5f, friendly.gameObject);
 
             Assert.That(accepted, Is.True);
-            Assert.That(firstShotTarget, Is.SameAs(target));
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(dash.Destination, Is.EqualTo(Vector3.right * 5.5f));
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+            Assert.That(executor.IsRunning, Is.False);
         }
 
         [Test]
-        public void SkillInputOutOfRangeConfirmIsConsumedAndLeavesChargeTargetingUntouched()
+        public void SkillInputBeyondDashMaximumStartsClampedDash()
         {
             IPlayerSkillInputHandler handler = controller;
-            CombatUnit outOfRangeTarget = CreateUnit("Out Of Range Hit", TeamId.Red, Vector3.right * 6.001f);
-            outOfRangeTarget.gameObject.layer = LayerMask.NameToLayer("Targetable");
-            commands.Issue(UnitCommand.Move(Vector3.right));
-            int originalRevision = commands.CommandRevision;
+            CombatUnit distantHit = CreateUnit("Distant Hit", TeamId.Red, Vector3.right * 7.001f);
+            distantHit.gameObject.layer = LayerMask.NameToLayer("Targetable");
 
             handler.HandleSkill2();
 
             Assert.That(handler.TryHandleConfirm(
-                outOfRangeTarget.transform.position, outOfRangeTarget.gameObject), Is.True);
-            Assert.That(controller.IsSelectingChargeTarget, Is.True);
-            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(commands.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(commands.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
-
-            Assert.That(handler.TryHandleConfirm(Vector3.right * 6.002f, null), Is.True);
-            Assert.That(controller.IsSelectingChargeTarget, Is.True);
-            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(commands.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(commands.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
-        }
-
-        [Test]
-        public void SkillInputConsumesFirstDashWindowMoveEvenWhenDashCannotStart()
-        {
-            IPlayerSkillInputHandler handler = controller;
-            target.gameObject.layer = LayerMask.NameToLayer("Targetable");
-            handler.HandleSkill2();
-            Assert.That(handler.TryHandleConfirm(target.transform.position, target.gameObject), Is.True);
-
-            bool accepted = handler.TryHandleMoveClick(owner.transform.position);
-
-            Assert.That(accepted, Is.True);
-            Assert.That(controller.IsDashWindowOpen, Is.False);
-            Assert.That(dash.IsDashing, Is.False);
+                distantHit.transform.position, distantHit.gameObject), Is.True);
+            Assert.That(controller.IsSelectingChargeTarget, Is.False);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(dash.Destination, Is.EqualTo(Vector3.right * 7f));
         }
 
         [Test]
@@ -317,15 +492,17 @@ namespace ArknightsFrontline.Tests.EditMode
             target.gameObject.layer = LayerMask.NameToLayer("Targetable");
             handler.HandleSkill2();
             Assert.That(handler.TryHandleConfirm(target.transform.position, target.gameObject), Is.True);
+            Vector3 destination = dash.Destination;
             Assert.That(handler.TryHandleMoveClick(Vector3.right * 4f), Is.True);
             Assert.That(dash.IsDashing, Is.True);
 
             Assert.That(handler.TryHandleConfirm(Vector3.zero, null), Is.True);
             Assert.That(handler.TryHandleMoveClick(Vector3.right * 6f), Is.True);
+            Assert.That(dash.Destination, Is.EqualTo(destination));
         }
 
         [Test]
-        public void SkillInputCancelOnlyWorksBeforeConfirmationAndStopDoesNotCancelDash()
+        public void SkillInputCancelOnlyWorksBeforeConfirmationAndStopCancelsDash()
         {
             IPlayerSkillInputHandler handler = controller;
             target.gameObject.layer = LayerMask.NameToLayer("Targetable");
@@ -341,47 +518,21 @@ namespace ArknightsFrontline.Tests.EditMode
 
             handler.HandleStop();
 
+            Assert.That(dash.IsDashing, Is.False);
+        }
+
+        [Test]
+        public void BeyondMaximumDashPointClampsToSevenAndConsumesCooldown()
+        {
+            Assert.That(controller.BeginChargeTargeting(), Is.True);
+
+            Assert.That(controller.TryConfirmCharge(new Vector3(7.001f, 0f, 0f), target), Is.True);
+
+            Assert.That(controller.IsSelectingChargeTarget, Is.False);
+            Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
+            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
             Assert.That(dash.IsDashing, Is.True);
-        }
-
-        [Test]
-        public void OutOfRangeChargePointDoesNotConsumeCooldownOrLeaveTargeting()
-        {
-            Assert.That(controller.BeginChargeTargeting(), Is.True);
-
-            Assert.That(controller.TryConfirmCharge(new Vector3(6.001f, 0f, 0f), target), Is.False);
-
-            Assert.That(controller.IsSelectingChargeTarget, Is.True);
-            Assert.That(controller.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Targeting));
-        }
-
-        [Test]
-        public void DirectLegalTargetWinsOverPointNearestTarget()
-        {
-            CombatUnit pointNearest = CreateUnit("Point Nearest", TeamId.Red, new Vector3(5f, 0f, 0f));
-            CombatUnit firstShotTarget = null;
-            executor.ShotRequested += (shotTarget, _) => firstShotTarget ??= shotTarget;
-            Assert.That(controller.BeginChargeTargeting(), Is.True);
-
-            Assert.That(controller.TryConfirmCharge(pointNearest.transform.position, target), Is.True);
-
-            Assert.That(firstShotTarget, Is.SameAs(target));
-            Assert.That(controller.SelectedChargeTarget, Is.SameAs(target));
-        }
-
-        [Test]
-        public void GroundPointSelectsLegalOwnerRangeTargetNearestThatPoint()
-        {
-            CombatUnit pointNearest = CreateUnit("Point Nearest", TeamId.Red, new Vector3(5f, 0f, 0f));
-            CombatUnit firstShotTarget = null;
-            executor.ShotRequested += (shotTarget, _) => firstShotTarget ??= shotTarget;
-            Assert.That(controller.BeginChargeTargeting(), Is.True);
-
-            Assert.That(controller.TryConfirmCharge(new Vector3(5.5f, 0f, 0f), null), Is.True);
-
-            Assert.That(firstShotTarget, Is.SameAs(pointNearest));
-            Assert.That(controller.SelectedChargeTarget, Is.SameAs(pointNearest));
+            Assert.That(dash.Destination, Is.EqualTo(Vector3.right * 7f));
         }
 
         [Test]
@@ -389,6 +540,9 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+
+            dash.Tick(1f);
             Assert.That(controller.SelectedChargeTarget, Is.SameAs(target));
 
             executor.Tick(1f);
@@ -401,6 +555,9 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
+            Assert.That(controller.SelectedChargeTarget, Is.Null);
+
+            dash.Tick(1f);
             Assert.That(controller.SelectedChargeTarget, Is.SameAs(target));
 
             executor.Cancel();
@@ -409,24 +566,7 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void NoTargetStillConsumesChargeAndOpensWindowWithoutSequence()
-        {
-            target.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 0f, 6f, 0.5f, true, false);
-            Assert.That(controller.BeginChargeTargeting(), Is.True);
-
-            Assert.That(controller.TryConfirmCharge(Vector3.right, null), Is.True);
-
-            Assert.That(controller.SelectedChargeTarget, Is.Null);
-            Assert.That(executor.IsRunning, Is.False);
-            Assert.That(controller.IsDashWindowOpen, Is.True);
-            Assert.That(controller.BlocksAttackMove, Is.True);
-            Assert.That(controller.BlocksNormalCommands, Is.False);
-            Assert.That(controller.Snapshot.ChargeCooldown, Is.EqualTo(20f));
-            Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.DashWindow));
-        }
-
-        [Test]
-        public void CommandBlockingMatchesTargetingWindowDashAndIdlePhases()
+        public void CommandBlockingMatchesTargetingAndDirectDashPhases()
         {
             Assert.That(controller.BlocksAttackMove, Is.False);
             Assert.That(controller.BlocksNormalCommands, Is.False);
@@ -436,10 +576,6 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.BlocksNormalCommands, Is.False);
 
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
-            Assert.That(controller.BlocksAttackMove, Is.True);
-            Assert.That(controller.BlocksNormalCommands, Is.False);
-
-            Assert.That(controller.TryConsumeDashMove(Vector3.right * 4f), Is.True);
             Assert.That(controller.BlocksAttackMove, Is.True);
             Assert.That(controller.BlocksNormalCommands, Is.True);
 
@@ -480,62 +616,9 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
 
             Assert.That(attacks.IsOwnedSequenceRunning, Is.False);
+            dash.Tick(1f);
             AttackSequencePlan charge = CancelRunningAndCapturePlan();
             Assert.That(charge.Kind, Is.EqualTo(AttackSequenceKind.Charge));
-        }
-
-        [Test]
-        public void DashWindowAcceptsPointZeroTwoFourNineButRejectsPointTwoFive()
-        {
-            OpenDashWindow();
-            controller.Tick(0.249f);
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.True);
-            Assert.That(dash.IsDashing, Is.True);
-
-            controller.ResetForDeployment();
-            OpenDashWindow();
-            controller.Tick(0.25f);
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.False);
-            Assert.That(dash.IsDashing, Is.False);
-            Assert.That(controller.IsDashWindowOpen, Is.False);
-        }
-
-        [Test]
-        public void FirstWindowClickClosesWindowAndLaterClicksAreNotAccepted()
-        {
-            OpenDashWindow();
-
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.True);
-            Vector3 destination = dash.Destination;
-            Assert.That(controller.IsDashWindowOpen, Is.False);
-            Assert.That(controller.TryConsumeDashMove(new Vector3(7f, 0f, 0f)), Is.False);
-            Assert.That(dash.Destination, Is.EqualTo(destination));
-        }
-
-        [Test]
-        public void InvalidFirstWindowClickReturnsFalseButStillConsumesWindow()
-        {
-            OpenDashWindow();
-
-            Assert.That(controller.TryConsumeDashMove(owner.transform.position), Is.False);
-
-            Assert.That(controller.IsDashWindowOpen, Is.False);
-            Assert.That(dash.IsDashing, Is.False);
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.False);
-        }
-
-        [Test]
-        public void WindowExpiresWithoutClickAndDoesNotMoveOwner()
-        {
-            OpenDashWindow();
-            Vector3 initialPosition = owner.transform.position;
-
-            controller.Tick(0.25f);
-            dash.Tick(1f);
-
-            Assert.That(controller.IsDashWindowOpen, Is.False);
-            Assert.That(dash.IsDashing, Is.False);
-            Assert.That(owner.transform.position, Is.EqualTo(initialPosition));
         }
 
         [Test]
@@ -553,7 +636,7 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void OverloadCanActivateDuringTargetingWindowAndDash()
+        public void OverloadCanActivateDuringTargetingAndDash()
         {
             controller.Tick(10f);
             Assert.That(controller.BeginChargeTargeting(), Is.True);
@@ -561,23 +644,22 @@ namespace ArknightsFrontline.Tests.EditMode
 
             controller.ResetForDeployment();
             controller.Tick(10f);
-            OpenDashWindow();
+            StartChargeDash();
             Assert.That(controller.TryActivateOverload(), Is.True);
 
             controller.ResetForDeployment();
             controller.Tick(10f);
-            OpenDashWindow();
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.True);
+            StartChargeDash();
             Assert.That(controller.TryActivateOverload(), Is.True);
         }
 
         [Test]
-        public void DeathCancelsSequenceWindowDashModifiersAndTimers()
+        public void DeathCancelsSequenceDashModifiersAndTimers()
         {
             controller.Tick(10f);
             Assert.That(controller.TryActivateOverload(), Is.True);
-            OpenDashWindow();
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.True);
+            StartChargeDash();
+            dash.Tick(1f);
             Assert.That(executor.IsRunning, Is.True);
 
             owner.TakePhysicalDamage(owner.MaxHealth);
@@ -592,7 +674,7 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             controller.Tick(10f);
             Assert.That(controller.TryActivateOverload(), Is.True);
-            OpenDashWindow();
+            StartChargeDash();
 
             controller.StopForMatch();
             controller.Tick(100f);
@@ -610,9 +692,8 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             controller.Tick(10f);
             Assert.That(controller.TryActivateOverload(), Is.True);
-            OpenDashWindow();
-            Assert.That(controller.TryConsumeDashMove(Vector3.right * 4f), Is.True);
-            Assert.That(executor.IsRunning, Is.True);
+            StartChargeDash();
+            Assert.That(executor.IsRunning, Is.False);
             Assert.That(dash.IsDashing, Is.True);
 
             controller.enabled = false;
@@ -644,8 +725,7 @@ namespace ArknightsFrontline.Tests.EditMode
         {
             controller.Tick(10f);
             Assert.That(controller.TryActivateOverload(), Is.True);
-            OpenDashWindow();
-            Assert.That(controller.TryConsumeDashMove(new Vector3(4f, 0f, 0f)), Is.True);
+            StartChargeDash();
             commands.Issue(UnitCommand.Move(Vector3.right * 4f));
 
             controller.ResetForDeployment();
@@ -748,9 +828,10 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(automaticController.BeginChargeTargeting(), Is.True);
             Assert.That(automaticController.TryConfirmCharge(
                 automaticTarget.transform.position, automaticTarget), Is.True);
-            Assert.That(automaticExecutor.IsRunning, Is.True);
-            Assert.That(automaticController.TryConsumeDashMove(Vector3.right * 4f), Is.True);
+            Assert.That(automaticExecutor.IsRunning, Is.False);
             Assert.That(automaticDash.IsDashing, Is.True);
+            automaticDash.Tick(1f);
+            Assert.That(automaticExecutor.IsRunning, Is.True);
         }
 
         [Test]
@@ -929,6 +1010,30 @@ namespace ArknightsFrontline.Tests.EditMode
             return unit;
         }
 
+        private UnitMotor AddMovementMotor(CombatUnit unit)
+        {
+            UnitMotor targetMotor = unit.GetComponent<UnitMotor>();
+            if (targetMotor == null)
+            {
+                targetMotor = unit.gameObject.AddComponent<UnitMotor>();
+            }
+            targetMotor.Configure(5f, ArenaLayout.CreateDefault());
+            return targetMotor;
+        }
+
+        private void RouteShotsThroughRealProjectiles()
+        {
+            executor.ShotRequested += (shotTarget, payload) =>
+            {
+                GameObject projectileObject = new GameObject("EditMode Projectile");
+                gameObjects.Add(projectileObject);
+                projectileObject.SetActive(false);
+                Projectile projectile = projectileObject.AddComponent<Projectile>();
+                projectile.Initialize(owner, shotTarget, payload, 16f);
+                projectile.Tick(1f);
+            };
+        }
+
         private void ReadySweep()
         {
             CompleteBasicAttack();
@@ -971,17 +1076,16 @@ namespace ArknightsFrontline.Tests.EditMode
             return result;
         }
 
-        private void OpenDashWindow()
+        private void StartChargeDash()
         {
             Assert.That(controller.BeginChargeTargeting(), Is.True);
             Assert.That(controller.TryConfirmCharge(target.transform.position, target), Is.True);
-            Assert.That(controller.IsDashWindowOpen, Is.True);
+            Assert.That(dash.IsDashing, Is.True);
         }
 
         private void AssertTerminatedState(bool expectFrozenSnapshot)
         {
             Assert.That(executor.IsRunning, Is.False);
-            Assert.That(controller.IsDashWindowOpen, Is.False);
             Assert.That(controller.IsSelectingChargeTarget, Is.False);
             Assert.That(dash.IsDashing, Is.False);
             Assert.That(controller.IsOverloadActive, Is.False);
@@ -995,7 +1099,6 @@ namespace ArknightsFrontline.Tests.EditMode
                 Assert.That(controller.Snapshot.IsOverloadActive, Is.True);
                 Assert.That(controller.Snapshot.ChargePhase, Is.EqualTo(ExusiaiChargePhase.Cooldown));
                 Assert.That(controller.Snapshot.IsChargeReady, Is.False);
-                Assert.That(controller.Snapshot.DashWindowRemaining, Is.Zero);
             }
             else
             {
