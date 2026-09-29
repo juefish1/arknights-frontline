@@ -8,7 +8,8 @@ namespace ArknightsFrontline.Skills
     {
         None,
         ChargeTargeting,
-        DashWindow
+        DashWindow,
+        DashPath
     }
 
     [DefaultExecutionOrder(100)]
@@ -16,7 +17,6 @@ namespace ArknightsFrontline.Skills
     public sealed class ExusiaiSkillIndicator : MonoBehaviour
     {
         private const int RangePoints = 65;
-        private const int MarkerPoints = 33;
         private const float Height = 0.05f;
         private const float LineWidth = 0.06f;
         private const float DashRadius = 7f;
@@ -28,18 +28,15 @@ namespace ArknightsFrontline.Skills
         private SkillDashController dash;
         private LineRenderer rangeRenderer;
         private LineRenderer arrowRenderer;
-        private LineRenderer markerRenderer;
         private float fadeRemaining;
-        private bool wasDashWindow;
+        private bool wasDashing;
 
         public ExusiaiSkillIndicatorMode Mode { get; private set; }
         public Vector3 DisplayedEndpoint { get; private set; }
         public int RangePointCount => rangeRenderer == null ? 0 : rangeRenderer.positionCount;
-        public int MarkerPointCount => markerRenderer == null ? 0 : markerRenderer.positionCount;
         public float RangeRadius { get; private set; }
         public bool IsVisible => (rangeRenderer != null && rangeRenderer.enabled)
-            || (arrowRenderer != null && arrowRenderer.enabled)
-            || (markerRenderer != null && markerRenderer.enabled);
+            || (arrowRenderer != null && arrowRenderer.enabled);
 
         private void Awake()
         {
@@ -67,6 +64,7 @@ namespace ArknightsFrontline.Skills
         {
             Mode = ExusiaiSkillIndicatorMode.None;
             fadeRemaining = 0f;
+            wasDashing = false;
             SetAllVisible(false);
         }
 
@@ -74,7 +72,6 @@ namespace ArknightsFrontline.Skills
         {
             DestroyRenderer(ref rangeRenderer);
             DestroyRenderer(ref arrowRenderer);
-            DestroyRenderer(ref markerRenderer);
         }
 
         public void Configure(
@@ -109,7 +106,7 @@ namespace ArknightsFrontline.Skills
             {
                 Mode = ExusiaiSkillIndicatorMode.None;
                 fadeRemaining = 0f;
-                wasDashWindow = false;
+                wasDashing = false;
                 SetAllVisible(false);
                 return;
             }
@@ -118,26 +115,26 @@ namespace ArknightsFrontline.Skills
             {
                 fadeRemaining = 0f;
                 Mode = ExusiaiSkillIndicatorMode.ChargeTargeting;
-                wasDashWindow = false;
-                ShowChargeTargeting();
+                wasDashing = false;
+                ShowTargetingPreview();
                 return;
             }
 
-            if (skills.IsDashWindowOpen)
+            if (dash.IsDashing)
             {
                 fadeRemaining = 0f;
-                Mode = ExusiaiSkillIndicatorMode.DashWindow;
-                wasDashWindow = true;
-                ShowDashWindow();
+                Mode = ExusiaiSkillIndicatorMode.DashPath;
+                wasDashing = true;
+                ShowDashPath();
                 return;
             }
 
             Mode = ExusiaiSkillIndicatorMode.None;
-            if (wasDashWindow && arrowRenderer != null && arrowRenderer.enabled)
+            if (wasDashing && arrowRenderer != null && arrowRenderer.enabled)
             {
                 fadeRemaining = FadeDuration;
             }
-            wasDashWindow = false;
+            wasDashing = false;
             if (fadeRemaining > 0f)
             {
                 fadeRemaining = Mathf.Max(0f, fadeRemaining - Mathf.Max(0f, deltaTime));
@@ -147,32 +144,7 @@ namespace ArknightsFrontline.Skills
             SetAllVisible(false);
         }
 
-        private void ShowChargeTargeting()
-        {
-            EnsureRenderers();
-            Vector3 point = GetPointerPoint(out bool hasPoint);
-            Vector3 center = GetOwnerPosition();
-            RangeRadius = owner.AttackRange;
-            if (!hasPoint)
-            {
-                DisplayedEndpoint = center;
-                SetAllVisible(false);
-                return;
-            }
-            bool inRange = hasPoint && HorizontalDistance(center, point) <= RangeRadius;
-            Color color = inRange ? Color.blue : Color.red;
-            DrawLoop(rangeRenderer, center, RangeRadius, RangePoints, color);
-            rangeRenderer.enabled = true;
-            arrowRenderer.enabled = false;
-
-            CombatUnit selected = skills.SelectedChargeTarget;
-            Vector3 markerCenter = selected != null ? selected.transform.position : point;
-            DrawLoop(markerRenderer, markerCenter, 0.35f, MarkerPoints, color);
-            markerRenderer.enabled = hasPoint || selected != null;
-            DisplayedEndpoint = markerCenter;
-        }
-
-        private void ShowDashWindow()
+        private void ShowTargetingPreview()
         {
             EnsureRenderers();
             Vector3 point = GetPointerPoint(out bool hasPoint);
@@ -184,23 +156,25 @@ namespace ArknightsFrontline.Skills
                 SetAllVisible(false);
                 return;
             }
-            Color color = Color.blue;
-            Vector3 endpoint = center;
-            bool valid = hasPoint && dash.Preview(point, out endpoint);
-            if (!valid)
-            {
-                endpoint = center;
-                color = Color.red;
-            }
+            bool valid = dash.Preview(point, out Vector3 endpoint);
+            if (!valid) endpoint = center;
+            Color color = valid ? Color.blue : Color.red;
             DisplayedEndpoint = endpoint;
             DrawLoop(rangeRenderer, center, RangeRadius, RangePoints, color);
             rangeRenderer.enabled = true;
             DrawArrow(center, endpoint, color);
             arrowRenderer.enabled = true;
-            CombatUnit selectedTarget = skills.SelectedChargeTarget;
-            Vector3 markerCenter = selectedTarget != null ? selectedTarget.transform.position : endpoint;
-            DrawLoop(markerRenderer, markerCenter, 0.35f, MarkerPoints, color);
-            markerRenderer.enabled = true;
+        }
+
+        private void ShowDashPath()
+        {
+            EnsureRenderers();
+            Vector3 center = GetOwnerPosition();
+            RangeRadius = DashRadius;
+            DisplayedEndpoint = dash.Destination;
+            rangeRenderer.enabled = false;
+            DrawArrow(center, dash.Destination, Color.blue);
+            arrowRenderer.enabled = true;
         }
 
         private Vector3 GetPointerPoint(out bool hasPoint)
@@ -218,7 +192,6 @@ namespace ArknightsFrontline.Skills
         {
             if (rangeRenderer == null) rangeRenderer = CreateRenderer("ExusiaiSkillRange", RangePoints, true);
             if (arrowRenderer == null) arrowRenderer = CreateRenderer("ExusiaiSkillArrow", 2, false);
-            if (markerRenderer == null) markerRenderer = CreateRenderer("ExusiaiSkillMarker", MarkerPoints, true);
         }
 
         private LineRenderer CreateRenderer(string objectName, int points, bool loop)
@@ -266,24 +239,17 @@ namespace ArknightsFrontline.Skills
             arrowRenderer.startColor = color;
             arrowRenderer.endColor = color;
             rangeRenderer.enabled = false;
-            markerRenderer.enabled = false;
         }
 
         private void SetAllVisible(bool visible)
         {
             if (rangeRenderer != null) rangeRenderer.enabled = visible;
             if (arrowRenderer != null) arrowRenderer.enabled = visible;
-            if (markerRenderer != null) markerRenderer.enabled = visible;
         }
 
         private Vector3 GetOwnerPosition()
         {
             return owner == null ? Vector3.zero : owner.transform.position;
-        }
-
-        private static float HorizontalDistance(Vector3 first, Vector3 second)
-        {
-            return Vector2.Distance(new Vector2(first.x, first.z), new Vector2(second.x, second.z));
         }
 
         private static void DestroyRenderer(ref LineRenderer renderer)

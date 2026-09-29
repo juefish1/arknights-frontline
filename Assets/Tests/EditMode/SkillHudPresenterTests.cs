@@ -56,19 +56,15 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void RefreshPrioritizesTargetingDashWindowAndActiveOverloadText()
+        public void RefreshPrioritizesDestinationTargetingAndActiveOverloadText()
         {
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             hud.Refresh();
-            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT TARGET"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
 
-            GameObject targetObject = Track(new GameObject("Target"));
-            CombatUnit target = targetObject.AddComponent<CombatUnit>();
-            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
-            targetObject.transform.position = new Vector3(2f, 0f, 0f);
-            Assert.That(skills.TryConfirmCharge(targetObject.transform.position, target), Is.True);
+            Assert.That(skills.TryConfirmCharge(Vector3.right * 2f, null), Is.True);
             hud.Refresh();
-            Assert.That(hud.ELabel, Is.EqualTo("E  MOVE!"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  20.0"));
 
             skills.Tick(0.25f);
             hud.Refresh();
@@ -81,38 +77,20 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void DashWindowShowsCountdownBarThatShrinksAndClearsAtWindowEnd()
+        public void HudPromptsForDestinationWithoutSecondClickBar()
         {
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            GameObject targetObject = Track(new GameObject("Target"));
-            CombatUnit target = targetObject.AddComponent<CombatUnit>();
-            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
-            targetObject.transform.position = new Vector3(2f, 0f, 0f);
-            Assert.That(skills.TryConfirmCharge(targetObject.transform.position, target), Is.True);
             hud.Refresh();
 
             Transform barTransform = hud.transform.Find("E/DashWindowPromptTrack/DashWindowPromptBar");
-            Assert.That(barTransform, Is.Not.Null, "The E slot needs a visible dash-window countdown bar.");
-            if (barTransform == null) return;
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
+            Assert.That(barTransform, Is.Null);
+            Assert.That(hud.transform.Find("E/DashWindowPromptTrack"), Is.Null);
 
-            Image bar = barTransform.GetComponent<Image>();
-            RectTransform barRect = barTransform.GetComponent<RectTransform>();
-            Assert.That(bar, Is.Not.Null);
-            Assert.That(barRect, Is.Not.Null);
-            Assert.That(bar.gameObject.activeInHierarchy, Is.True);
-            Assert.That(barRect.anchorMax.x, Is.EqualTo(1f).Within(0.001f));
-            Assert.That(hud.ELabel, Is.EqualTo("E  MOVE!"));
-
-            skills.Tick(0.125f);
+            Assert.That(skills.TryConfirmCharge(Vector3.right * 4f, null), Is.True);
             hud.Refresh();
-            Assert.That(bar.gameObject.activeInHierarchy, Is.True);
-            Assert.That(barRect.anchorMax.x, Is.EqualTo(0.5f).Within(0.001f));
-
-            skills.Tick(0.125f);
-            hud.Refresh();
-            Assert.That(bar.gameObject.activeInHierarchy, Is.False);
-            Assert.That(barRect.anchorMax.x, Is.EqualTo(0f).Within(0.001f));
-            Assert.That(hud.ELabel, Is.EqualTo("E  19.8"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  20.0"));
+            Assert.That(hud.transform.Find("E/DashWindowPromptTrack"), Is.Null);
         }
 
         [Test]
