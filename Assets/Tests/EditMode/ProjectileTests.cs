@@ -8,17 +8,37 @@ namespace ArknightsFrontline.Tests.EditMode
 {
     public sealed class ProjectileTests
     {
+        private const int GroundLayer = 8;
+
         private readonly List<GameObject> gameObjects = new List<GameObject>();
+        private readonly List<Material> materials = new List<Material>();
 
         [TearDown]
         public void TearDown()
         {
             foreach (GameObject gameObject in gameObjects)
             {
-                Object.DestroyImmediate(gameObject);
+                if (gameObject != null)
+                {
+                    Object.DestroyImmediate(gameObject);
+                }
+            }
+
+            foreach (Material material in materials)
+            {
+                Object.DestroyImmediate(material);
+            }
+
+            foreach (GameObject candidate in GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+            {
+                if (candidate.name == "ProjectileLethalTarget_Corpse")
+                {
+                    Object.DestroyImmediate(candidate);
+                }
             }
 
             gameObjects.Clear();
+            materials.Clear();
         }
 
         [Test]
@@ -27,13 +47,79 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
             CombatUnit target = CreateUnit("Target", TeamId.Red, new Vector3(4f, 0f, 0f), 40f, 0f, 2f, false);
             Projectile projectile = CreateProjectile();
+            CombatUnit reportedAttacker = null;
+            float reportedDamage = 0f;
+            target.DamageTaken += (source, amount) =>
+            {
+                reportedAttacker = source;
+                reportedDamage = amount;
+            };
 
             projectile.Initialize(attacker, target, 12f, 16f);
             projectile.Tick(10f);
 
             Assert.That(target.CurrentHealth, Is.EqualTo(target.MaxHealth - 10f));
+            Assert.That(reportedAttacker, Is.SameAs(attacker));
+            Assert.That(reportedDamage, Is.EqualTo(10f));
             Assert.That(projectile.IsFinished, Is.True);
             Assert.That(projectile.GetComponent<Renderer>(), Is.Not.Null);
+        }
+
+        [Test]
+        public void LethalProjectileDamageNotifiesBeforeCorpsePresenterDestroysUnit()
+        {
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.name = "ProjectileTestGround";
+            ground.layer = GroundLayer;
+            gameObjects.Add(ground);
+
+            CombatUnit attacker = CreateUnit("ProjectileAttacker", TeamId.Blue, Vector3.zero, 100f, 12f, 0f, true);
+            CombatUnit target = CreateUnit("ProjectileLethalTarget", TeamId.Red, new Vector3(4f, 0f, 0f), 40f, 0f, 2f, false);
+            float maxHealth = target.MaxHealth;
+            var notifications = new List<string>();
+            float reportedDamage = 0f;
+            bool deadWhenDamageWasReported = false;
+            target.DamageTaken += (_, amount) =>
+            {
+                notifications.Add("DamageTaken");
+                reportedDamage = amount;
+                deadWhenDamageWasReported = target.IsDead;
+            };
+            target.Died += _ => notifications.Add("Died");
+
+            Material corpseMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            corpseMaterial.color = Color.red;
+            materials.Add(corpseMaterial);
+            target.gameObject.AddComponent<DeathCorpsePresenter>().Configure(target, corpseMaterial, GroundLayer);
+
+            Projectile projectile = CreateProjectile();
+            projectile.Initialize(
+                attacker,
+                target,
+                new PhysicalDamagePayload(100f, 1f, 0f, 1f, 0f),
+                16f);
+
+            Assert.DoesNotThrow(() => projectile.Tick(10f));
+
+            Assert.That(projectile.IsFinished, Is.True);
+            Assert.That(target == null, Is.True);
+            Assert.That(reportedDamage, Is.EqualTo(maxHealth));
+            Assert.That(deadWhenDamageWasReported, Is.True);
+            Assert.That(notifications, Is.EqualTo(new[] { "DamageTaken", "Died" }));
+
+            GameObject corpse = null;
+            foreach (GameObject candidate in GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+            {
+                if (candidate.name == "ProjectileLethalTarget_Corpse")
+                {
+                    corpse = candidate;
+                    break;
+                }
+            }
+
+            Assert.That(corpse, Is.Not.Null);
+            gameObjects.Add(corpse);
+            Assert.That(corpse.GetComponent<CorpseLifetimeController>().OwnerKey, Is.EqualTo("ProjectileLethalTarget"));
         }
 
         [Test]

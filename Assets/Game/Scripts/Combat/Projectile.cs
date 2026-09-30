@@ -91,7 +91,7 @@ namespace ArknightsFrontline.Combat
                 float rawDamage = payload.AttackPower * payload.DamageMultiplier
                     + missingHealth * payload.MissingHealthRatio;
                 float resolvedDamage = Mathf.Round(Mathf.Max(1f, rawDamage - target.Defense) * 100f) / 100f;
-                target.TakePhysicalDamage(resolvedDamage);
+                target.TakePhysicalDamage(resolvedDamage, attacker);
 
                 if (!target.IsDead && payload.SlowDuration > 0f && payload.MovementSlowMultiplier < 1f)
                 {
