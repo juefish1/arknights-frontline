@@ -17,6 +17,10 @@ namespace ArknightsFrontline.Arena
 
         public bool IsMatchOver { get; private set; }
 
+        public bool IsEnding => settlementPending || IsMatchOver;
+
+        public event Action MatchEnding;
+
         public MatchOutcome Outcome { get; private set; }
 
         private void Awake()
@@ -112,6 +116,7 @@ namespace ArknightsFrontline.Arena
             }
 
             settlementPending = true;
+            MatchEnding?.Invoke();
             StopCombatProducers();
         }
 

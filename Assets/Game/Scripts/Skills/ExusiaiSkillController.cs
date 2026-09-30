@@ -82,6 +82,7 @@ namespace ArknightsFrontline.Skills
         private AttackSequenceExecutor sequenceExecutor;
         private UnitStatModifiers modifiers;
         private SkillDashController dash;
+        private OperatorRetreatController retreat;
         private AttackSequencePlan pendingChargePlan;
         private int sweepProgress;
         private bool selectingChargeTarget;
@@ -232,6 +233,7 @@ namespace ArknightsFrontline.Skills
             this.sequenceExecutor = sequenceExecutor;
             modifiers = statModifiers;
             dash = dashController;
+            retreat = GetComponent<OperatorRetreatController>();
             commands.SetSkillInputHandler(this);
             CommandFeedbackPresenter feedback = GetComponent<CommandFeedbackPresenter>();
             if (feedback != null) feedback.ConfigureSkillController(this);
@@ -265,7 +267,7 @@ namespace ArknightsFrontline.Skills
 
         public bool BeginChargeTargeting()
         {
-            if (!CanRun() || !IsChargeReady()) return false;
+            if (!CanAcceptSkillInput() || !IsChargeReady()) return false;
             selectingChargeTarget = true;
             SelectedChargeTarget = null;
             return true;
@@ -273,7 +275,7 @@ namespace ArknightsFrontline.Skills
 
         public bool TryConfirmCharge(Vector3 point, CombatUnit directTarget)
         {
-            if (!CanRun() || !selectingChargeTarget || !dash.TryStart(point)) return false;
+            if (!CanAcceptSkillInput() || !selectingChargeTarget || !dash.TryStart(point)) return false;
 
             selectingChargeTarget = false;
             SelectedChargeTarget = null;
@@ -314,7 +316,7 @@ namespace ArknightsFrontline.Skills
 
         public bool TryActivateOverload()
         {
-            if (!CanRun() || overloadActive || !overloadCooldown.IsReady) return false;
+            if (!CanAcceptSkillInput() || overloadActive || !overloadCooldown.IsReady) return false;
             overloadActive = true;
             overloadDuration.Start(OverloadDuration);
             overloadCooldown.Start(OverloadCooldownDuration);
@@ -326,7 +328,7 @@ namespace ArknightsFrontline.Skills
 
         public void HandleSkill2()
         {
-            if (!CanRun())
+            if (!CanAcceptSkillInput())
             {
                 return;
             }
@@ -342,6 +344,11 @@ namespace ArknightsFrontline.Skills
 
         public void HandleSkill3()
         {
+            if (!CanAcceptSkillInput())
+            {
+                return;
+            }
+
             TryActivateOverload();
         }
 
@@ -350,6 +357,11 @@ namespace ArknightsFrontline.Skills
             if (!CanRun())
             {
                 return false;
+            }
+
+            if (IsRetreatGuiding)
+            {
+                return true;
             }
 
             if (dash.IsDashing)
@@ -369,17 +381,27 @@ namespace ArknightsFrontline.Skills
                 return false;
             }
 
+            if (IsRetreatGuiding)
+            {
+                return true;
+            }
+
             return dash.IsDashing;
         }
 
         public bool TryHandleCancel()
         {
+            if (IsRetreatGuiding)
+            {
+                return false;
+            }
+
             return CancelChargeTargeting();
         }
 
         public void HandleStop()
         {
-            if (!CanRun())
+            if (!CanRun() || IsRetreatGuiding)
             {
                 return;
             }
@@ -398,6 +420,18 @@ namespace ArknightsFrontline.Skills
             stopped = false;
             ClearRuntimeState(true);
             InitializeSkillState();
+        }
+
+        public void CancelPendingTargetingForRetreat()
+        {
+            if (!CanRun())
+            {
+                return;
+            }
+
+            CancelChargeTargeting();
+            ClearPendingChargePlan();
+            SelectedChargeTarget = null;
         }
 
         private void InitializeSkillState()
@@ -517,6 +551,13 @@ namespace ArknightsFrontline.Skills
         {
             return configured && isActiveAndEnabled && !stopped && owner != null && !owner.IsDead;
         }
+
+        private bool CanAcceptSkillInput()
+        {
+            return CanRun() && !IsRetreatGuiding;
+        }
+
+        private bool IsRetreatGuiding => retreat != null && retreat.IsGuiding;
 
         private bool IsChargeReady()
         {

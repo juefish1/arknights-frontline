@@ -189,6 +189,7 @@ namespace ArknightsFrontline.Combat
                 slot.IsStopped = true;
                 slot.RedeployRemaining = 0f;
                 UnsubscribeFromDeath(slot);
+                UnsubscribeFromRetreat(slot);
             }
         }
 
@@ -202,6 +203,7 @@ namespace ArknightsFrontline.Combat
             foreach (OperatorRosterSlot slot in slots)
             {
                 UnsubscribeFromDeath(slot);
+                UnsubscribeFromRetreat(slot);
             }
         }
 
@@ -248,6 +250,7 @@ namespace ArknightsFrontline.Combat
             liveOperator.Died += OnOperatorDied;
 
             instance.SetActive(true);
+            SubscribeToRetreat(liveOperator);
             DeathCorpsePresenter corpsePresenter = instance.GetComponent<DeathCorpsePresenter>();
             DeathCorpsePresenter templateCorpsePresenter = slot.Template.GetComponent<DeathCorpsePresenter>();
             if (corpsePresenter != null && templateCorpsePresenter != null)
@@ -281,6 +284,7 @@ namespace ArknightsFrontline.Combat
             }
 
             departingOperator.Died -= OnOperatorDied;
+            UnsubscribeFromRetreat(slot);
             slot.CurrentOperator = null;
             slot.DepartureCount++;
             float fullWait = Mathf.Min(8f + 4f * (slot.DepartureCount - 1), 24f);
@@ -298,6 +302,45 @@ namespace ArknightsFrontline.Combat
             if (slot.CurrentOperator != null)
             {
                 slot.CurrentOperator.Died -= OnOperatorDied;
+            }
+        }
+
+        private void SubscribeToRetreat(CombatUnit liveOperator)
+        {
+            if (liveOperator == null)
+            {
+                return;
+            }
+
+            OperatorRetreatController retreat = liveOperator.GetComponent<OperatorRetreatController>();
+            if (retreat == null)
+            {
+                return;
+            }
+
+            retreat.GuidanceCompleted -= OnOperatorRetreatCompleted;
+            retreat.GuidanceCompleted += OnOperatorRetreatCompleted;
+        }
+
+        private void UnsubscribeFromRetreat(OperatorRosterSlot slot)
+        {
+            if (slot.CurrentOperator == null)
+            {
+                return;
+            }
+
+            OperatorRetreatController retreat = slot.CurrentOperator.GetComponent<OperatorRetreatController>();
+            if (retreat != null)
+            {
+                retreat.GuidanceCompleted -= OnOperatorRetreatCompleted;
+            }
+        }
+
+        private void OnOperatorRetreatCompleted(CombatUnit liveOperator)
+        {
+            if (liveOperator != null)
+            {
+                NotifySuccessfulRetreat(liveOperator);
             }
         }
 
