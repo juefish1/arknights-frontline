@@ -92,6 +92,28 @@ namespace ArknightsFrontline.Combat
             SubscribeToDeath();
         }
 
+        public void ConfigureFromTemplate(DeathCorpsePresenter templatePresenter, CombatUnit liveCombatUnit)
+        {
+            if (templatePresenter == null)
+            {
+                throw new ArgumentNullException(nameof(templatePresenter));
+            }
+
+            if (liveCombatUnit == null)
+            {
+                throw new ArgumentNullException(nameof(liveCombatUnit));
+            }
+
+            UnsubscribeFromDeath();
+            corpseMaterial = templatePresenter.corpseMaterial;
+            groundLayer = templatePresenter.groundLayer;
+            corpseScale = templatePresenter.corpseScale;
+            unitKind = templatePresenter.unitKind;
+            combatUnit = liveCombatUnit;
+            hasSpawnedCorpse = false;
+            SubscribeToDeath();
+        }
+
         private void OnUnitDied(CombatUnit _)
         {
             if (hasSpawnedCorpse)
