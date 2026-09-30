@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ArknightsFrontline.Arena;
+using ArknightsFrontline.Camera;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
@@ -11,12 +13,36 @@ using UnityEngine.TestTools;
 
 namespace ArknightsFrontline.Tests.PlayMode
 {
+    [DefaultExecutionOrder(1000)]
+    public sealed class LateTowerProjectileImpactDriver : MonoBehaviour
+    {
+        private Projectile projectile;
+        private bool hasImpacted;
+
+        public void Configure(Projectile configuredProjectile)
+        {
+            projectile = configuredProjectile;
+        }
+
+        private void Update()
+        {
+            if (hasImpacted || projectile == null)
+            {
+                return;
+            }
+
+            hasImpacted = true;
+            projectile.Tick(1000f);
+        }
+    }
+
     public sealed class OperatorRosterLifecyclePlayModeTests
     {
         private const int GroundLayer = 8;
 
         private readonly List<GameObject> ownedObjects = new List<GameObject>();
         private readonly List<GameObject> spawnedObjects = new List<GameObject>();
+        private readonly List<Material> materials = new List<Material>();
         private Material corpseMaterial;
         private float previousTimeScale;
         private int spawnNotifications;
@@ -54,10 +80,19 @@ namespace ArknightsFrontline.Tests.PlayMode
                 Object.Destroy(corpseMaterial);
             }
 
+            foreach (Material material in materials)
+            {
+                if (material != null && material != corpseMaterial)
+                {
+                    Object.Destroy(material);
+                }
+            }
+
             yield return null;
             Time.timeScale = previousTimeScale;
             ownedObjects.Clear();
             spawnedObjects.Clear();
+            materials.Clear();
         }
 
         [UnityTest]
@@ -156,12 +191,259 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(spawnNotifications, Is.EqualTo(2));
         }
 
-        private OperatorRosterController CreateRoster(string stableKey, out OperatorRosterSlot slot)
+        [UnityTest]
+        public IEnumerator TowerDeathStopsPlayerRedeploymentSynchronouslyAndPreventsSettlementFrameSpawn()
+        {
+            MatchOutcomeController match = CreateMatchOutcomeController();
+            OperatorRosterController roster = CreateRoster("roster-match-freeze-player", out OperatorRosterSlot slot);
+            Assert.That(spawnNotifications, Is.EqualTo(1));
+            Assert.That(roster.NotifySuccessfulRetreat(slot.CurrentOperator), Is.True);
+            Assert.That(slot.RedeployRemaining, Is.EqualTo(5.6f).Within(0.0001f));
+
+            CombatUnit redTower = GameObject.Find("match-freeze-red-tower").GetComponent<CombatUnit>();
+            redTower.TakePhysicalDamage(redTower.MaxHealth);
+            roster.Tick(100f);
+
+            Assert.That(match.IsEnding, Is.True);
+            Assert.That(slot.IsStopped, Is.True, "The roster must stop during the tower death callback.");
+            Assert.That(slot.RedeployRemaining, Is.Zero);
+            Assert.That(slot.CurrentOperator, Is.Null);
+            Assert.That(spawnNotifications, Is.EqualTo(1), "No replacement may spawn in the settlement frame.");
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TowerProjectileImpactLaterInFramePreventsAutomaticRedeployment()
+        {
+            MatchOutcomeController match = CreateMatchOutcomeController();
+            OperatorRosterController roster = CreateRoster("roster-late-impact-player", out OperatorRosterSlot slot);
+            Assert.That(roster.NotifySuccessfulRetreat(slot.CurrentOperator), Is.True);
+            roster.Tick(5.599f);
+            Assert.That(slot.CurrentOperator, Is.Null);
+            Assert.That(slot.RedeployRemaining, Is.GreaterThan(0f).And.LessThan(0.01f));
+
+            CombatUnit redTower = GameObject.Find("match-freeze-red-tower").GetComponent<CombatUnit>();
+            GameObject attackerObject = new GameObject("roster-late-impact-attacker");
+            ownedObjects.Add(attackerObject);
+            attackerObject.transform.position = redTower.transform.position + Vector3.right * 4f;
+            CombatUnit attacker = attackerObject.AddComponent<CombatUnit>();
+            attacker.Configure(TeamId.Blue, Altitude.Ground, 100f, 100f, 0f, 0f, 1f, true, false);
+
+            GameObject projectileObject = new GameObject("roster-late-impact-projectile");
+            ownedObjects.Add(projectileObject);
+            Projectile projectile = projectileObject.AddComponent<Projectile>();
+            projectile.Initialize(attacker, redTower, 100f, 0.01f);
+            projectileObject.AddComponent<LateTowerProjectileImpactDriver>().Configure(projectile);
+
+            Time.timeScale = 1f;
+            yield return null;
+
+            Assert.That(match.IsEnding, Is.True, "The real projectile impact ends the match in Update.");
+            Assert.That(slot.IsStopped, Is.True);
+            Assert.That(slot.CurrentOperator, Is.Null,
+                "The roster must not deploy in the same frame after a later Update projectile kills a tower.");
+            Assert.That(spawnNotifications, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator PlayerFeedbackRebindsAcrossRetreatAndRedeploymentWithoutPullingManualCameraMovement()
+        {
+            const string stableKey = "roster-feedback-player";
+            OperatorRosterController roster = CreateRoster(stableKey, out OperatorRosterSlot slot, true);
+            CombatUnit firstLife = slot.CurrentOperator;
+            GameObject canvasObject = new GameObject("feedback-canvas", typeof(Canvas));
+            ownedObjects.Add(canvasObject);
+            GameObject hudObject = new GameObject("feedback-hud", typeof(RectTransform));
+            hudObject.transform.SetParent(canvasObject.transform, false);
+            ownedObjects.Add(hudObject);
+            SkillHudPresenter hud = hudObject.AddComponent<SkillHudPresenter>();
+            GameObject cameraObject = new GameObject("feedback-camera");
+            ownedObjects.Add(cameraObject);
+            MobaCameraController camera = cameraObject.AddComponent<MobaCameraController>();
+
+            GameObject presenterObject = new GameObject("player-deployment-presenter");
+            ownedObjects.Add(presenterObject);
+            PlayerDeploymentPresenter presenter = presenterObject.AddComponent<PlayerDeploymentPresenter>();
+            presenter.Configure(roster, stableKey, hud, camera);
+
+            Assert.That(presenter.CurrentOperator, Is.SameAs(firstLife));
+            Assert.That(hud.transform.Find("DeploymentStatus/Label"), Is.Not.Null,
+                "The HUD needs a visible line for retreat and redeployment feedback.");
+            Assert.That(hud.BoundController, Is.SameAs(firstLife.GetComponent<ExusiaiSkillController>()));
+            Assert.That(camera.CenteringTarget, Is.SameAs(firstLife.transform));
+
+            OperatorRetreatController retreat = firstLife.GetComponent<OperatorRetreatController>();
+            Assert.That(retreat.TryBegin(), Is.True);
+            presenter.Refresh();
+            Assert.That(hud.StatusText, Is.EqualTo("B RETREAT 1.5"));
+            retreat.Tick(0.4f);
+            presenter.Refresh();
+            Assert.That(hud.StatusText, Is.EqualTo("B RETREAT 1.1"));
+
+            retreat.Tick(1.1f);
+            presenter.Refresh();
+            Assert.That(presenter.CurrentOperator, Is.Null);
+            Assert.That(hud.BoundController, Is.Null,
+                "Departure must release the old Exusiai skill controller immediately.");
+            Assert.That(hud.HasVisibleSkillControls, Is.False);
+            Assert.That(hud.StatusText, Is.EqualTo("REDEPLOY 5.6"));
+            Assert.That(camera.CenteringTarget, Is.Not.SameAs(firstLife.transform),
+                "The camera must not retain the departing life as its target.");
+
+            yield return null;
+            Assert.That(firstLife == null, Is.True);
+            roster.Tick(5.6f);
+            CombatUnit secondLife = slot.CurrentOperator;
+            Assert.That(secondLife, Is.Not.Null);
+            presenter.Refresh();
+            Assert.That(presenter.CurrentOperator, Is.SameAs(secondLife));
+            Assert.That(hud.BoundController, Is.SameAs(secondLife.GetComponent<ExusiaiSkillController>()));
+            Assert.That(hud.StatusText, Is.EqualTo(string.Empty));
+            Assert.That(camera.CenteringTarget, Is.SameAs(secondLife.transform));
+            Assert.That(hud.WLabel, Is.EqualTo("W  0/3"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  READY"));
+
+            GameObject manualFocus = new GameObject("manual-camera-focus");
+            manualFocus.transform.position = new Vector3(6f, 0f, 4f);
+            ownedObjects.Add(manualFocus);
+            camera.CenterOn(manualFocus.transform);
+            Vector3 manuallyPositionedCamera = camera.transform.position;
+            presenter.Refresh();
+            yield return null;
+            Assert.That(camera.transform.position, Is.EqualTo(manuallyPositionedCamera),
+                "HUD refreshes must not re-center after a user moves the camera.");
+        }
+
+        [UnityTest]
+        public IEnumerator PresenterConfiguredBeforePlayerSlotRegistrationBindsWhenTheSlotSpawns()
+        {
+            const string stableKey = "roster-late-registered-player";
+            GameObject rosterObject = new GameObject("late-player-roster");
+            ownedObjects.Add(rosterObject);
+            OperatorRosterController roster = rosterObject.AddComponent<OperatorRosterController>();
+            GameObject template = CreatePlayerTemplate("late-player-template", true);
+
+            GameObject canvasObject = new GameObject("late-player-canvas", typeof(Canvas));
+            ownedObjects.Add(canvasObject);
+            GameObject hudObject = new GameObject("late-player-hud", typeof(RectTransform));
+            hudObject.transform.SetParent(canvasObject.transform, false);
+            ownedObjects.Add(hudObject);
+            SkillHudPresenter hud = hudObject.AddComponent<SkillHudPresenter>();
+            GameObject cameraObject = new GameObject("late-player-camera");
+            ownedObjects.Add(cameraObject);
+            MobaCameraController camera = cameraObject.AddComponent<MobaCameraController>();
+            GameObject presenterObject = new GameObject("late-player-presenter");
+            ownedObjects.Add(presenterObject);
+            PlayerDeploymentPresenter presenter = presenterObject.AddComponent<PlayerDeploymentPresenter>();
+
+            presenter.Configure(roster, stableKey, hud, camera);
+            Assert.That(presenter.CurrentOperator, Is.Null);
+
+            roster.OperatorSpawned += (_, liveOperator) => spawnedObjects.Add(liveOperator.gameObject);
+            OperatorRosterSlot slot = roster.RegisterSlot(
+                stableKey,
+                TeamId.Blue,
+                OperatorType.Exusiai,
+                template,
+                Vector3.zero,
+                true);
+            roster.StartMatch();
+
+            Assert.That(presenter.CurrentOperator, Is.SameAs(slot.CurrentOperator));
+            Assert.That(hud.BoundController, Is.SameAs(slot.CurrentOperator.GetComponent<ExusiaiSkillController>()));
+            Assert.That(camera.CenteringTarget, Is.SameAs(slot.CurrentOperator.transform));
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator PlayerDeathUnbindsDestroyedLifeAndRebindsHudAndCameraOnRedeployment()
+        {
+            const string stableKey = "roster-death-feedback-player";
+            OperatorRosterController roster = CreateRoster(stableKey, out OperatorRosterSlot slot, true);
+            GameObject canvasObject = new GameObject("death-feedback-canvas", typeof(Canvas));
+            ownedObjects.Add(canvasObject);
+            GameObject hudObject = new GameObject("death-feedback-hud", typeof(RectTransform));
+            hudObject.transform.SetParent(canvasObject.transform, false);
+            ownedObjects.Add(hudObject);
+            SkillHudPresenter hud = hudObject.AddComponent<SkillHudPresenter>();
+            GameObject cameraObject = new GameObject("death-feedback-camera");
+            ownedObjects.Add(cameraObject);
+            MobaCameraController camera = cameraObject.AddComponent<MobaCameraController>();
+            GameObject presenterObject = new GameObject("death-feedback-presenter");
+            ownedObjects.Add(presenterObject);
+            PlayerDeploymentPresenter presenter = presenterObject.AddComponent<PlayerDeploymentPresenter>();
+            presenter.Configure(roster, stableKey, hud, camera);
+
+            CombatUnit firstLife = slot.CurrentOperator;
+            ExusiaiSkillController firstSkills = firstLife.GetComponent<ExusiaiSkillController>();
+            Assert.That(hud.BoundController, Is.SameAs(firstSkills));
+            Assert.That(camera.CenteringTarget, Is.SameAs(firstLife.transform));
+
+            firstLife.TakePhysicalDamage(firstLife.MaxHealth);
+            Assert.That(slot.CurrentOperator, Is.Null);
+            Assert.That(hud.BoundController, Is.Null,
+                "Death must release the skill controller before Unity destroys the old life.");
+            Assert.That(hud.HasVisibleSkillControls, Is.False);
+            Assert.That(hud.StatusText, Is.EqualTo("REDEPLOY 8.0"));
+            Assert.That(camera.CenteringTarget, Is.Not.SameAs(firstLife.transform),
+                "The camera must stop retaining the dead operator immediately.");
+
+            yield return null;
+            Assert.That(firstLife == null, Is.True);
+            roster.Tick(8f);
+            CombatUnit secondLife = slot.CurrentOperator;
+            Assert.That(secondLife, Is.Not.Null);
+            presenter.Refresh();
+
+            Assert.That(presenter.CurrentOperator, Is.SameAs(secondLife));
+            Assert.That(hud.BoundController, Is.SameAs(secondLife.GetComponent<ExusiaiSkillController>()));
+            Assert.That(hud.HasVisibleSkillControls, Is.True);
+            Assert.That(hud.StatusText, Is.EqualTo(string.Empty));
+            Assert.That(camera.CenteringTarget, Is.SameAs(secondLife.transform));
+            AssertFreshExusiaiState(secondLife.GetComponent<ExusiaiSkillController>());
+            yield return null;
+            Assert.That(firstLife == null, Is.True);
+            Assert.That(hud.BoundController, Is.Not.SameAs(firstSkills));
+        }
+
+        [UnityTest]
+        public IEnumerator ReconfiguringForTheSameLifeKeepsRetreatFeedbackSubscribed()
+        {
+            const string stableKey = "roster-reconfigured-player";
+            OperatorRosterController roster = CreateRoster(stableKey, out OperatorRosterSlot slot, true);
+            GameObject canvasObject = new GameObject("reconfigured-canvas", typeof(Canvas));
+            ownedObjects.Add(canvasObject);
+            GameObject hudObject = new GameObject("reconfigured-hud", typeof(RectTransform));
+            hudObject.transform.SetParent(canvasObject.transform, false);
+            ownedObjects.Add(hudObject);
+            SkillHudPresenter hud = hudObject.AddComponent<SkillHudPresenter>();
+            GameObject cameraObject = new GameObject("reconfigured-camera");
+            ownedObjects.Add(cameraObject);
+            MobaCameraController camera = cameraObject.AddComponent<MobaCameraController>();
+            GameObject presenterObject = new GameObject("reconfigured-presenter");
+            ownedObjects.Add(presenterObject);
+            PlayerDeploymentPresenter presenter = presenterObject.AddComponent<PlayerDeploymentPresenter>();
+            presenter.Configure(roster, stableKey, hud, camera);
+            presenter.Configure(roster, stableKey, hud, camera);
+
+            OperatorRetreatController retreat = slot.CurrentOperator.GetComponent<OperatorRetreatController>();
+            Assert.That(retreat.TryBegin(), Is.True);
+            presenter.Refresh();
+
+            Assert.That(presenter.CurrentOperator, Is.SameAs(slot.CurrentOperator));
+            Assert.That(hud.StatusText, Is.EqualTo("B RETREAT 1.5"));
+            yield return null;
+        }
+
+        private OperatorRosterController CreateRoster(
+            string stableKey,
+            out OperatorRosterSlot slot,
+            bool includeRetreatController = false)
         {
             GameObject rosterObject = new GameObject("roster-playmode-controller");
             ownedObjects.Add(rosterObject);
             OperatorRosterController roster = rosterObject.AddComponent<OperatorRosterController>();
-            GameObject template = CreatePlayerTemplate("roster-playmode-player-template");
+            GameObject template = CreatePlayerTemplate("roster-playmode-player-template", includeRetreatController);
             roster.OperatorSpawned += (registeredSlot, liveOperator) =>
             {
                 spawnNotifications++;
@@ -178,7 +460,43 @@ namespace ArknightsFrontline.Tests.PlayMode
             return roster;
         }
 
-        private GameObject CreatePlayerTemplate(string name)
+        private MatchOutcomeController CreateMatchOutcomeController()
+        {
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit blueTower = CreateTower("match-freeze-blue-tower", TeamId.Blue, layout.BlueTower);
+            CombatUnit redTower = CreateTower("match-freeze-red-tower", TeamId.Red, layout.RedTower);
+            GameObject minionParent = new GameObject("match-freeze-minions");
+            ownedObjects.Add(minionParent);
+            Material blueMaterial = CreateMaterial(Color.blue);
+            Material redMaterial = CreateMaterial(Color.red);
+            MinionWaveSpawner spawner = new GameObject("match-freeze-spawner").AddComponent<MinionWaveSpawner>();
+            ownedObjects.Add(spawner.gameObject);
+            spawner.Configure(minionParent.transform, layout, blueTower, redTower, blueMaterial, redMaterial, 9, 8);
+            MatchOutcomeController match = new GameObject("match-freeze-outcome").AddComponent<MatchOutcomeController>();
+            ownedObjects.Add(match.gameObject);
+            match.Configure(blueTower, redTower, spawner);
+            return match;
+        }
+
+        private CombatUnit CreateTower(string name, TeamId team, Vector3 position)
+        {
+            GameObject towerObject = new GameObject(name);
+            towerObject.transform.position = position;
+            ownedObjects.Add(towerObject);
+            CombatUnit tower = towerObject.AddComponent<CombatUnit>();
+            tower.Configure(team, Altitude.Ground, 100f, 20f, 0f, 8f, 1f, true, false);
+            return tower;
+        }
+
+        private Material CreateMaterial(Color color)
+        {
+            Material material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.color = color;
+            materials.Add(material);
+            return material;
+        }
+
+        private GameObject CreatePlayerTemplate(string name, bool includeRetreatController = false)
         {
             GameObject template = new GameObject(name);
             template.SetActive(false);
@@ -197,6 +515,10 @@ namespace ArknightsFrontline.Tests.PlayMode
             template.AddComponent<MeshRenderer>().sharedMaterial = corpseMaterial;
             template.AddComponent<DeathCorpsePresenter>().Configure(unit, corpseMaterial, GroundLayer);
             template.AddComponent<ExusiaiSkillController>();
+            if (includeRetreatController)
+            {
+                template.AddComponent<OperatorRetreatController>();
+            }
             return template;
         }
 

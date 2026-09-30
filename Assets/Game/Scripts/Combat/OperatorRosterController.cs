@@ -193,8 +193,10 @@ namespace ArknightsFrontline.Combat
             }
         }
 
-        private void Update()
+        private void LateUpdate()
         {
+            // Resolve automatic redeploys after projectile Update callbacks have had a chance
+            // to begin match settlement and synchronously stop this roster.
             Tick(Time.deltaTime);
         }
 

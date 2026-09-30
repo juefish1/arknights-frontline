@@ -124,6 +124,24 @@ namespace ArknightsFrontline.Arena
         {
             spawner.StopForMatch();
 
+            foreach (OperatorRosterController controller in
+                     UnityEngine.Object.FindObjectsByType<OperatorRosterController>(FindObjectsSortMode.None))
+            {
+                controller.StopForMatch();
+            }
+
+            foreach (SimpleOperatorAiController controller in
+                     UnityEngine.Object.FindObjectsByType<SimpleOperatorAiController>(FindObjectsSortMode.None))
+            {
+                controller.StopForMatch();
+            }
+
+            foreach (OperatorRetreatController controller in
+                     UnityEngine.Object.FindObjectsByType<OperatorRetreatController>(FindObjectsSortMode.None))
+            {
+                controller.StopForMatch();
+            }
+
             foreach (LaneMinionController controller in
                      UnityEngine.Object.FindObjectsByType<LaneMinionController>(FindObjectsSortMode.None))
             {

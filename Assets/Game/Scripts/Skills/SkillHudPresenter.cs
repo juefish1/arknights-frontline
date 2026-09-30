@@ -18,14 +18,20 @@ namespace ArknightsFrontline.Skills
         [SerializeField] private ExusiaiSkillController controller;
         private GameObject hudRoot;
         private GameObject ownedCanvas;
+        private GameObject statusObject;
+        private Text statusLabel;
         private bool ownsHudRoot;
 
         public string WLabel { get; private set; } = "W  0/3";
         public string ELabel { get; private set; } = "E  READY";
         public string RLabel { get; private set; } = "R  0.0";
+        public string StatusText { get; private set; } = string.Empty;
+        public ExusiaiSkillController BoundController => controller;
+        public bool HasVisibleSkillControls => isActiveAndEnabled && controller != null
+            && slots[0] != null && slots[0].activeSelf;
         public int SlotCount => hudRoot == null ? 0 : slots.Length;
         public bool IsVisible => isActiveAndEnabled && hudRoot != null
-            && (ownsHudRoot ? hudRoot.activeSelf : slots[0] != null && slots[0].activeSelf);
+            && (ownsHudRoot ? hudRoot.activeSelf : HasVisibleSkillControls || statusObject != null && statusObject.activeSelf);
 
         private void Awake()
         {
@@ -35,6 +41,7 @@ namespace ArknightsFrontline.Skills
         private void OnEnable()
         {
             if (controller != null) Refresh();
+            else UpdateVisibility();
         }
 
         private void Update()
@@ -44,7 +51,7 @@ namespace ArknightsFrontline.Skills
 
         private void OnDisable()
         {
-            SetVisible(false);
+            UpdateVisibility();
         }
 
         private void OnDestroy()
@@ -55,27 +62,52 @@ namespace ArknightsFrontline.Skills
 
         public void Configure(ExusiaiSkillController skillController)
         {
-            controller = skillController;
-            if (controller == null)
-            {
-                SetVisible(false);
-                return;
-            }
-
-            EnsureHud();
-            Refresh();
+            BindOperator(skillController);
         }
 
         public void ConfigureControllerReference(ExusiaiSkillController skillController)
         {
+            BindOperator(skillController);
+        }
+
+        public void BindOperator(ExusiaiSkillController skillController)
+        {
             controller = skillController;
+            if (controller != null || !string.IsNullOrEmpty(StatusText))
+            {
+                EnsureHud();
+            }
+
+            Refresh();
+        }
+
+        public void SetDeploymentStatus(string statusText)
+        {
+            StatusText = statusText ?? string.Empty;
+            if (!string.IsNullOrEmpty(StatusText) || hudRoot != null)
+            {
+                EnsureHud();
+            }
+
+            if (statusLabel != null)
+            {
+                statusLabel.text = StatusText;
+            }
+
+            UpdateVisibility();
         }
 
         public void Refresh()
         {
-            if (controller == null || !isActiveAndEnabled)
+            if (!isActiveAndEnabled)
             {
-                SetVisible(false);
+                UpdateVisibility();
+                return;
+            }
+
+            if (controller == null)
+            {
+                UpdateVisibility();
                 return;
             }
 
@@ -89,7 +121,7 @@ namespace ArknightsFrontline.Skills
             SetSlot(0, WLabel, snapshot.IsSweepReady, !snapshot.IsSweepReady);
             SetSlot(1, ELabel, snapshot.ChargePhase == ExusiaiChargePhase.Ready, snapshot.ChargePhase == ExusiaiChargePhase.Cooldown);
             SetSlot(2, RLabel, snapshot.IsOverloadActive || (!snapshot.IsOverloadActive && snapshot.OverloadCooldown <= 0f), !snapshot.IsOverloadActive && snapshot.OverloadCooldown > 0f);
-            SetVisible(true);
+            UpdateVisibility();
         }
 
         private static string FormatCharge(ExusiaiSkillSnapshot snapshot)
@@ -117,6 +149,7 @@ namespace ArknightsFrontline.Skills
                 ownsHudRoot = false;
                 ConfigureRoot(suppliedRoot);
                 for (int index = 0; index < slots.Length; index++) CreateSlot(index, suppliedRoot);
+                CreateStatus(suppliedRoot);
                 return;
             }
 
@@ -135,6 +168,7 @@ namespace ArknightsFrontline.Skills
             root.SetParent(canvas.transform, false);
             ConfigureRoot(root);
             for (int index = 0; index < slots.Length; index++) CreateSlot(index, root);
+            CreateStatus(root);
         }
 
         private static void ConfigureRoot(RectTransform root)
@@ -143,7 +177,7 @@ namespace ArknightsFrontline.Skills
             root.anchorMax = new Vector2(0.5f, 0f);
             root.pivot = new Vector2(0.5f, 0f);
             root.anchoredPosition = new Vector2(0f, 24f);
-            root.sizeDelta = new Vector2(SlotWidth * 3f + SlotSpacing * 2f, SlotHeight);
+            root.sizeDelta = new Vector2(SlotWidth * 3f + SlotSpacing * 2f, SlotHeight + 30f);
         }
 
         private void CreateSlot(int index, RectTransform root)
@@ -190,6 +224,32 @@ namespace ArknightsFrontline.Skills
             labels[index].raycastTarget = false;
         }
 
+        private void CreateStatus(RectTransform root)
+        {
+            statusObject = new GameObject("DeploymentStatus", typeof(RectTransform));
+            statusObject.transform.SetParent(root, false);
+            GameObject labelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            labelObject.transform.SetParent(statusObject.transform, false);
+            RectTransform containerRect = statusObject.GetComponent<RectTransform>();
+            containerRect.anchorMin = new Vector2(0.5f, 0f);
+            containerRect.anchorMax = new Vector2(0.5f, 0f);
+            containerRect.pivot = new Vector2(0.5f, 0f);
+            containerRect.anchoredPosition = new Vector2(0f, SlotHeight + 3f);
+            containerRect.sizeDelta = new Vector2(SlotWidth * 3f + SlotSpacing * 2f, 24f);
+            RectTransform labelRect = labelObject.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+            statusLabel = labelObject.GetComponent<Text>();
+            statusLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            statusLabel.fontSize = 18;
+            statusLabel.alignment = TextAnchor.MiddleCenter;
+            statusLabel.color = Color.white;
+            statusLabel.raycastTarget = false;
+            statusLabel.text = StatusText;
+        }
+
         private void SetSlot(int index, string text, bool ready, bool cooldown)
         {
             labels[index].text = text;
@@ -197,18 +257,31 @@ namespace ArknightsFrontline.Skills
             overlays[index].enabled = cooldown;
         }
 
-        private void SetVisible(bool visible)
+        private void UpdateVisibility()
         {
-            if (hudRoot == null) return;
-            if (ownsHudRoot)
+            if (hudRoot == null)
             {
-                hudRoot.SetActive(visible);
                 return;
             }
 
-            foreach (GameObject slot in slots)
+            bool showControls = isActiveAndEnabled && controller != null;
+            bool showStatus = isActiveAndEnabled && !string.IsNullOrEmpty(StatusText);
+            for (int index = 0; index < slots.Length; index++)
             {
-                if (slot != null) slot.SetActive(visible);
+                if (slots[index] != null)
+                {
+                    slots[index].SetActive(showControls);
+                }
+            }
+
+            if (statusObject != null)
+            {
+                statusObject.SetActive(showStatus);
+            }
+
+            if (ownsHudRoot)
+            {
+                hudRoot.SetActive(showControls || showStatus);
             }
         }
     }

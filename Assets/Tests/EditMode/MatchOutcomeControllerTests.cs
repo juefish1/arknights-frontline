@@ -85,6 +85,37 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void TowerDeathStopsRedeployCountdownBeforeItCanSpawnAnotherOperator()
+        {
+            MatchFixture match = CreateMatch();
+            OperatorRosterController roster = CreateGameObject("PlayerRoster")
+                .AddComponent<OperatorRosterController>();
+            GameObject template = CreateOperatorTemplate("PlayerTemplate");
+            int playerSpawnCount = 0;
+            roster.PlayerOperatorSpawned += (_, __) => playerSpawnCount++;
+            OperatorRosterSlot slot = roster.RegisterSlot(
+                "match-freeze-player",
+                TeamId.Blue,
+                OperatorType.Exusiai,
+                template,
+                Vector3.zero,
+                true);
+            roster.StartMatch();
+            Assert.That(playerSpawnCount, Is.EqualTo(1));
+            Assert.That(roster.NotifySuccessfulRetreat(slot.CurrentOperator), Is.True);
+            Assert.That(slot.RedeployRemaining, Is.EqualTo(5.6f).Within(0.0001f));
+
+            match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
+            roster.Tick(100f);
+
+            Assert.That(match.OutcomeController.IsEnding, Is.True);
+            Assert.That(slot.IsStopped, Is.True, "Settlement must stop every roster slot synchronously.");
+            Assert.That(slot.RedeployRemaining, Is.Zero, "The pending countdown must stop at settlement.");
+            Assert.That(slot.CurrentOperator, Is.Null, "A settlement frame must not deploy a replacement.");
+            Assert.That(playerSpawnCount, Is.EqualTo(1), "No spawn event may occur after tower death.");
+        }
+
+        [Test]
         public void ResolvingOutcomeStopsSpawnsRetargetingAttacksAndProjectileDamage()
         {
             MatchFixture match = CreateMatch();
@@ -244,6 +275,19 @@ namespace ArknightsFrontline.Tests.EditMode
             CombatUnit unit = gameObject.AddComponent<CombatUnit>();
             unit.Configure(team, Altitude.Ground, 100f, 12f, 0f, attackRange, 1f, true, true);
             return unit;
+        }
+
+        private GameObject CreateOperatorTemplate(string name)
+        {
+            GameObject template = CreateGameObject(name);
+            template.SetActive(false);
+            CombatUnit unit = template.AddComponent<CombatUnit>();
+            unit.Configure(TeamId.Blue, Altitude.Ground, 1000f, 50f, 2f, 6f, 0.5f, true, true);
+            template.AddComponent<OperatorIdentity>();
+            Material corpseMaterial = CreateMaterial(Color.blue);
+            template.AddComponent<MeshRenderer>().sharedMaterial = corpseMaterial;
+            template.AddComponent<DeathCorpsePresenter>().Configure(unit, corpseMaterial, 8);
+            return template;
         }
 
         private GameObject CreateGameObject(string name)

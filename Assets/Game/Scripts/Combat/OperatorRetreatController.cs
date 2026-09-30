@@ -25,6 +25,8 @@ namespace ArknightsFrontline.Combat
 
         public bool IsGuiding { get; private set; }
 
+        public bool IsStopped { get; private set; }
+
         public float RemainingSeconds { get; private set; }
 
         public event Action<CombatUnit> GuidanceStarted;
@@ -107,6 +109,17 @@ namespace ArknightsFrontline.Combat
             return true;
         }
 
+        public void StopForMatch()
+        {
+            if (IsStopped)
+            {
+                return;
+            }
+
+            IsStopped = true;
+            EndGuidance(true, false);
+        }
+
         public void Tick(float deltaTime)
         {
             if (!IsGuiding)
@@ -133,6 +146,7 @@ namespace ArknightsFrontline.Combat
         private bool CanBegin()
         {
             return isActiveAndEnabled
+                && !IsStopped
                 && owner != null
                 && !owner.IsDead
                 && !IsGuiding
@@ -205,7 +219,7 @@ namespace ArknightsFrontline.Combat
 
         private void OnMatchEnding()
         {
-            EndGuidance(true, false);
+            StopForMatch();
         }
 
         private void BindMatch(MatchOutcomeController matchController)

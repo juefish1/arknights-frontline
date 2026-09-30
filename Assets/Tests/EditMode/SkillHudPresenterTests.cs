@@ -120,6 +120,17 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(hud.IsVisible, Is.True);
         }
 
+        [Test]
+        public void ClearingTheLiveSkillControllerImmediatelyHidesSkillControls()
+        {
+            Assert.That(hud.IsVisible, Is.True);
+
+            hud.ConfigureControllerReference(null);
+
+            Assert.That(hud.IsVisible, Is.False,
+                "A departed player must not leave skill operation feedback visible while no life is deployed.");
+        }
+
         private void AssertSlotGeometry()
         {
             RectTransform first = hud.transform.GetChild(0).GetComponent<RectTransform>();
