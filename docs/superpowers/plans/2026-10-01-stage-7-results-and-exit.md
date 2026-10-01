@@ -6,7 +6,7 @@
 
 - [x] 记录 branch/HEAD/status，备份当前脏场景、构建器、ProjectSettings 原字节与受影响资源哈希。
 - [x] 确认交互式 Unity 关闭，用指定版本顺序跑全 EditMode/PlayMode，解析有效 XML 与所有未通过项（304/304、78/78）。
-- [ ] 记录平台模块；按用户平台选择准备构建，不把平台构建或人工体验未执行称为通过。
+- [x] 记录平台模块：已安装 WindowsStandaloneSupport；实际 Windows 构建列入 Task 4，人工体验仍待执行。
 
 ## Task 1 计时与最终结算通知
 
@@ -22,9 +22,9 @@
 
 ## Task 3 HUD、结算和全员退出投票
 
-- [ ] 先写 UI 与真实投票 RED：比赛时间/塔血量、结果六行与 Button、己方三票、AI 自动同意、未结算/重复/敌方票无效、只执行一次退出回调。
-- [ ] 新 MatchHudPresenter、队伍退出投票组件与运行时 presentation bootstrap 接线；读最终快照，独立测试未全员同意时不能退出。
-- [ ] 聚焦 EditMode/PlayMode GREEN，独立复审后提交。
+- [x] 先写 UI 与真实投票 RED：比赛时间/塔血量、结果六行与 Button、己方三票、AI 自动同意、未结算/重复/敌方票无效、只执行一次退出回调。
+- [x] 新 MatchHudPresenter、队伍退出投票组件与运行时 presentation bootstrap 接线；读最终快照，独立测试未全员同意时不能退出。
+- [x] HUD EditMode 10/10、真实字体销毁 PlayMode 1/1 GREEN，独立复审无阻塞项后提交。真实鼠标点击、保存场景和重载由 Task 4 验证，不由 Button.onClick.Invoke 代替。
 
 ## Task 4 保存场景升级、构建与整体交付
 
