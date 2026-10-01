@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ArknightsFrontline.Arena;
+using ArknightsFrontline.Camera;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
@@ -19,6 +20,26 @@ namespace ArknightsFrontline.Tests.PlayMode
     {
         private readonly HashSet<EntityId> baselineRootIds = new HashSet<EntityId>();
         private Scene cleanupScene;
+
+        [Test]
+        public void MiddleMouseDragMovesCameraOppositeScreenRightWithoutVerticalMovement()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject cameraObject = CreateMainCamera();
+            cameraObject.transform.position = MobaCameraController.DefaultOffset;
+            MobaCameraController controller = cameraObject.AddComponent<MobaCameraController>();
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            Press(mouse.middleButton);
+            Set(mouse.delta, new Vector2(100f, 0f));
+            Vector3 before = cameraObject.transform.position;
+
+            controller.SendMessage("Update");
+
+            Vector3 displacement = cameraObject.transform.position - before;
+            Assert.That(Vector3.Dot(displacement, cameraObject.transform.right), Is.EqualTo(-3f).Within(0.001f));
+            Assert.That(displacement.y, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(displacement.magnitude, Is.EqualTo(3f).Within(0.001f));
+        }
 
         public override void Setup()
         {

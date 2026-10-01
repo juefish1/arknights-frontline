@@ -41,6 +41,7 @@ namespace ArknightsFrontline.Editor
 
             GameObject arenaRoot = new GameObject("ArenaBootstrap");
             ArenaBootstrap arena = arenaRoot.AddComponent<ArenaBootstrap>();
+            OperatorRosterController roster = arenaRoot.AddComponent<OperatorRosterController>();
 
             CreateLane(arenaRoot.transform, laneMaterial, groundLayer);
             Transform blueTower = CreateTower(
@@ -82,17 +83,130 @@ namespace ArknightsFrontline.Editor
                 arenaRoot.transform,
                 layout.BlueDeployment,
                 blueMaterial,
+                targetableLayer,
                 groundLayer,
                 obstacleLayer);
-            CreateTrainingDummy(arenaRoot.transform, redMaterial, targetableLayer, groundLayer);
+            GameObject blueEyjafjalla = CreateComputerOperatorTemplate(
+                arenaRoot.transform,
+                "Template_Blue_Eyjafjalla",
+                TeamId.Blue,
+                OperatorType.Eyjafjalla,
+                layout.BlueDeployment + Vector3.up * 2f + Vector3.back * 2f,
+                blueMaterial,
+                targetableLayer,
+                groundLayer,
+                950f,
+                75f,
+                10f,
+                6f,
+                1.2f,
+                4.8f,
+                true);
+            GameObject blueSilverAsh = CreateComputerOperatorTemplate(
+                arenaRoot.transform,
+                "Template_Blue_SilverAsh",
+                TeamId.Blue,
+                OperatorType.SilverAsh,
+                layout.BlueDeployment + Vector3.up * 2f + Vector3.forward * 2f,
+                blueMaterial,
+                targetableLayer,
+                groundLayer,
+                1400f,
+                85f,
+                30f,
+                2.2f,
+                1.1f,
+                4.8f,
+                false);
+            GameObject redExusiai = CreateComputerOperatorTemplate(
+                arenaRoot.transform,
+                "Template_Red_Exusiai",
+                TeamId.Red,
+                OperatorType.Exusiai,
+                layout.RedDeployment + Vector3.up * 2f,
+                redMaterial,
+                targetableLayer,
+                groundLayer,
+                1000f,
+                50f,
+                2f,
+                6f,
+                0.5f,
+                5f,
+                true);
+            GameObject redEyjafjalla = CreateComputerOperatorTemplate(
+                arenaRoot.transform,
+                "Template_Red_Eyjafjalla",
+                TeamId.Red,
+                OperatorType.Eyjafjalla,
+                layout.RedDeployment + Vector3.up * 2f + Vector3.back * 2f,
+                redMaterial,
+                targetableLayer,
+                groundLayer,
+                950f,
+                75f,
+                10f,
+                6f,
+                1.2f,
+                4.8f,
+                true);
+            GameObject redSilverAsh = CreateComputerOperatorTemplate(
+                arenaRoot.transform,
+                "Template_Red_SilverAsh",
+                TeamId.Red,
+                OperatorType.SilverAsh,
+                layout.RedDeployment + Vector3.up * 2f + Vector3.forward * 2f,
+                redMaterial,
+                targetableLayer,
+                groundLayer,
+                1400f,
+                85f,
+                30f,
+                2.2f,
+                1.1f,
+                4.8f,
+                false);
             CreateDirectionalLight();
             MobaCameraController cameraController = CreateMainCamera();
             cameraController.SetCenteringTarget(player.transform);
+            cameraController.CenterOn(player.transform);
             Canvas canvas = CreateUiRoots();
             GameObject skillHudObject = new GameObject("SkillHud", typeof(RectTransform));
             skillHudObject.transform.SetParent(canvas.transform, false);
             SkillHudPresenter skillHud = skillHudObject.AddComponent<SkillHudPresenter>();
-            skillHud.ConfigureControllerReference(player.GetComponent<ExusiaiSkillController>());
+            GameObject playerDeploymentObject = new GameObject("PlayerDeployment");
+            playerDeploymentObject.transform.SetParent(arenaRoot.transform, false);
+            PlayerDeploymentPresenter playerDeployment = playerDeploymentObject.AddComponent<PlayerDeploymentPresenter>();
+            ArenaRosterBootstrap rosterBootstrap = arenaRoot.AddComponent<ArenaRosterBootstrap>();
+            rosterBootstrap.Configure(
+                roster,
+                blueTowerUnit,
+                redTowerUnit,
+                outcome,
+                playerDeployment,
+                skillHud,
+                cameraController,
+                new[]
+                {
+                    new ArenaOperatorSlotConfiguration(
+                        "Player_Exusiai", TeamId.Blue, OperatorType.Exusiai, player,
+                        layout.BlueDeployment + Vector3.up * 2f, true),
+                    new ArenaOperatorSlotConfiguration(
+                        "Blue_Eyjafjalla", TeamId.Blue, OperatorType.Eyjafjalla, blueEyjafjalla,
+                        layout.BlueDeployment + Vector3.up * 2f + Vector3.back * 2f, false),
+                    new ArenaOperatorSlotConfiguration(
+                        "Blue_SilverAsh", TeamId.Blue, OperatorType.SilverAsh, blueSilverAsh,
+                        layout.BlueDeployment + Vector3.up * 2f + Vector3.forward * 2f, false),
+                    new ArenaOperatorSlotConfiguration(
+                        "Red_Exusiai", TeamId.Red, OperatorType.Exusiai, redExusiai,
+                        layout.RedDeployment + Vector3.up * 2f, false),
+                    new ArenaOperatorSlotConfiguration(
+                        "Red_Eyjafjalla", TeamId.Red, OperatorType.Eyjafjalla, redEyjafjalla,
+                        layout.RedDeployment + Vector3.up * 2f + Vector3.back * 2f, false),
+                    new ArenaOperatorSlotConfiguration(
+                        "Red_SilverAsh", TeamId.Red, OperatorType.SilverAsh, redSilverAsh,
+                        layout.RedDeployment + Vector3.up * 2f + Vector3.forward * 2f, false)
+                });
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             EnsureBuildScene();
@@ -168,6 +282,7 @@ namespace ArknightsFrontline.Editor
             Transform parent,
             Vector3 deployment,
             Material material,
+            int targetableLayer,
             int groundLayer,
             int obstacleLayer)
         {
@@ -176,6 +291,7 @@ namespace ArknightsFrontline.Editor
             player.transform.SetParent(parent, false);
             player.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
             player.transform.position = deployment + Vector3.up * 2f;
+            player.layer = targetableLayer;
             player.GetComponent<Renderer>().sharedMaterial = material;
 
             UnitMotor motor = player.AddComponent<UnitMotor>();
@@ -196,29 +312,64 @@ namespace ArknightsFrontline.Editor
             SkillDashController dash = player.AddComponent<SkillDashController>();
             dash.Configure(motor, ArenaLayout.CreateDefault(), 1 << obstacleLayer);
             attack.Configure(combatUnit, sequence);
+            OperatorIdentity identity = player.AddComponent<OperatorIdentity>();
+            identity.Configure("Player_Exusiai", TeamId.Blue, OperatorType.Exusiai);
+            player.AddComponent<OperatorRetreatController>();
             player.AddComponent<ExusiaiSkillController>();
             player.AddComponent<ExusiaiSkillIndicator>();
+            player.SetActive(false);
             return player;
         }
 
-        private static void CreateTrainingDummy(
+        private static GameObject CreateComputerOperatorTemplate(
             Transform parent,
+            string templateName,
+            TeamId team,
+            OperatorType operatorType,
+            Vector3 position,
             Material material,
             int targetableLayer,
-            int groundLayer)
+            int groundLayer,
+            float health,
+            float attackPower,
+            float defense,
+            float attackRange,
+            float attackInterval,
+            float movementSpeed,
+            bool canAttackAir)
         {
-            GameObject dummy = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            dummy.name = "TrainingDummy_Red";
-            dummy.transform.SetParent(parent, false);
-            dummy.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
-            dummy.transform.position = new Vector3(20f, 2f, 0f);
-            dummy.layer = targetableLayer;
-            dummy.GetComponent<Renderer>().sharedMaterial = material;
-            CombatUnit combatUnit = dummy.AddComponent<CombatUnit>();
-            combatUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 2f, 0f, 0f, false, false);
-            dummy.AddComponent<HealthBarPresenter>();
-            DeathCorpsePresenter presenter = dummy.AddComponent<DeathCorpsePresenter>();
+            GameObject template = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            template.name = templateName;
+            template.transform.SetParent(parent, false);
+            template.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
+            template.transform.position = position;
+            template.layer = targetableLayer;
+            template.GetComponent<Renderer>().sharedMaterial = material;
+
+            UnitMotor motor = template.AddComponent<UnitMotor>();
+            motor.Configure(movementSpeed, ArenaLayout.CreateDefault());
+            CombatUnit combatUnit = template.AddComponent<CombatUnit>();
+            combatUnit.Configure(
+                team,
+                Altitude.Ground,
+                health,
+                attackPower,
+                defense,
+                attackRange,
+                attackInterval,
+                true,
+                canAttackAir);
+            template.AddComponent<HealthBarPresenter>();
+            DeathCorpsePresenter presenter = template.AddComponent<DeathCorpsePresenter>();
             presenter.Configure(combatUnit, material, groundLayer, UnitKind.Operator);
+            BasicAttackController attack = template.AddComponent<BasicAttackController>();
+            attack.Configure(combatUnit);
+            OperatorIdentity identity = template.AddComponent<OperatorIdentity>();
+            identity.Configure(templateName, team, operatorType);
+            template.AddComponent<OperatorRetreatController>();
+            template.AddComponent<SimpleOperatorAiController>();
+            template.SetActive(false);
+            return template;
         }
 
         private static void CreateDirectionalLight()
@@ -234,13 +385,13 @@ namespace ArknightsFrontline.Editor
         {
             GameObject cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
-            Vector3 initialPosition = new Vector3(0f, 42f, -34f);
+            Vector3 initialPosition = MobaCameraController.DefaultOffset;
             cameraObject.transform.SetPositionAndRotation(
                 initialPosition,
-                Quaternion.Euler(55f, 0f, 0f));
+                Quaternion.LookRotation(-initialPosition, Vector3.up));
             UnityEngine.Camera camera = cameraObject.AddComponent<UnityEngine.Camera>();
             camera.orthographic = false;
-            camera.fieldOfView = 55f;
+            camera.fieldOfView = MobaCameraController.DefaultFieldOfView;
             MobaCameraController controller = cameraObject.AddComponent<MobaCameraController>();
             controller.ConfigureOffset(initialPosition);
             return controller;
@@ -264,17 +415,18 @@ namespace ArknightsFrontline.Editor
         {
             string path = MaterialsPath + "/" + fileName;
             Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (material == null)
+            if (material != null)
             {
-                Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-                material = new Material(shader)
-                {
-                    name = fileName.Substring(0, fileName.Length - 4)
-                };
-                AssetDatabase.CreateAsset(material, path);
+                return material;
             }
 
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            material = new Material(shader)
+            {
+                name = fileName.Substring(0, fileName.Length - 4)
+            };
             material.color = color;
+            AssetDatabase.CreateAsset(material, path);
             EditorUtility.SetDirty(material);
             return material;
         }

@@ -170,7 +170,12 @@ namespace ArknightsFrontline.Tests.PlayMode
                 "The command feedback range ring must hide while the same skills block ordinary input.");
             Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
             Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.ChargeTargeting));
-            Assert.That(hud.transform.childCount, Is.EqualTo(3), "The loaded HUD should contain one W/E/R slot each.");
+            Assert.That(hud.transform.childCount, Is.EqualTo(4),
+                "The loaded HUD should contain W/E/R slots plus one deployment feedback row.");
+            Assert.That(hud.transform.Find("W"), Is.Not.Null);
+            Assert.That(hud.transform.Find("E"), Is.Not.Null);
+            Assert.That(hud.transform.Find("R"), Is.Not.Null);
+            Assert.That(hud.transform.Find("DeploymentStatus"), Is.Not.Null);
             Assert.That(indicator.GetComponentsInChildren<LineRenderer>(true).Length, Is.EqualTo(2),
                 "The direct-dash preview contains only the landing range and path arrow.");
 

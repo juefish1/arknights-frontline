@@ -10,9 +10,11 @@ namespace ArknightsFrontline.Camera
         private const float EdgeThresholdPixels = 20f;
         private const float MovementSpeed = 18f;
         private const float DragWorldUnitsPerPixel = 0.03f;
+        public static readonly Vector3 DefaultOffset = new Vector3(-14f, 28f, -14f);
+        public const float DefaultFieldOfView = 45f;
 
         private readonly ArenaLayout layout = ArenaLayout.CreateDefault();
-        [SerializeField] private Vector3 cameraOffset = new Vector3(0f, 35f, -28f);
+        [SerializeField] private Vector3 cameraOffset = new Vector3(-14f, 28f, -14f);
 
         [SerializeField] private Transform centeringTarget;
         private Vector3 focusPosition;
@@ -23,6 +25,14 @@ namespace ArknightsFrontline.Camera
         {
             focusPosition = layout.Clamp(transform.position - cameraOffset);
             ApplyFocus();
+        }
+
+        private void Start()
+        {
+            if (centeringTarget != null)
+            {
+                CenterOn(centeringTarget);
+            }
         }
 
         private void Update()
@@ -36,14 +46,15 @@ namespace ArknightsFrontline.Camera
             Vector2 pointerPosition = mouse.position.ReadValue();
             Vector3 edgeMovement = CalculateEdgePanVelocity(
                 pointerPosition,
-                new Vector2(Screen.width, Screen.height));
+                new Vector2(Screen.width, Screen.height),
+                transform.eulerAngles.y);
             focusPosition = layout.Clamp(focusPosition + edgeMovement * Time.deltaTime);
 
             if (mouse.middleButton.isPressed)
             {
                 Vector2 dragDelta = mouse.delta.ReadValue();
                 focusPosition = layout.Clamp(
-                    focusPosition - new Vector3(dragDelta.x, 0f, dragDelta.y) * DragWorldUnitsPerPixel);
+                    focusPosition - ScreenToGround(dragDelta, transform.eulerAngles.y) * DragWorldUnitsPerPixel);
             }
 
             ApplyFocus();
@@ -77,7 +88,7 @@ namespace ArknightsFrontline.Camera
             ApplyFocus();
         }
 
-        public static Vector3 CalculateEdgePanVelocity(Vector2 pointerPosition, Vector2 screenSize)
+        public static Vector3 CalculateEdgePanVelocity(Vector2 pointerPosition, Vector2 screenSize, float cameraYaw = 45f)
         {
             Vector3 movement = Vector3.zero;
             if (pointerPosition.x <= EdgeThresholdPixels)
@@ -98,12 +109,20 @@ namespace ArknightsFrontline.Camera
                 movement.z += MovementSpeed;
             }
 
-            return movement == Vector3.zero ? Vector3.zero : movement.normalized * MovementSpeed;
+            return movement == Vector3.zero
+                ? Vector3.zero
+                : ScreenToGround(new Vector2(movement.x, movement.z), cameraYaw).normalized * MovementSpeed;
+        }
+
+        private static Vector3 ScreenToGround(Vector2 movement, float cameraYaw)
+        {
+            return Quaternion.Euler(0f, cameraYaw, 0f) * new Vector3(movement.x, 0f, movement.y);
         }
 
         private void ApplyFocus()
         {
             transform.position = focusPosition + cameraOffset;
+            transform.rotation = Quaternion.LookRotation(-cameraOffset, Vector3.up);
         }
     }
 }

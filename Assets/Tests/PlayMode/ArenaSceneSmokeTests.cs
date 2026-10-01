@@ -32,6 +32,165 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SavedArenaBootstrapsSixOperatorsFromInactiveTemplates()
+        {
+            SceneManager.LoadScene("PrototypeArena");
+            yield return null;
+
+            OperatorRosterController roster = Object.FindFirstObjectByType<OperatorRosterController>();
+            Assert.That(roster, Is.Not.Null,
+                "The saved arena must rebuild its non-serialized roster when the scene loads.");
+            Assert.That(roster.Slots.Count, Is.EqualTo(6));
+
+            int activeOperatorCount = 0;
+            int playerSkillControllerCount = 0;
+            int computerControllerCount = 0;
+            foreach (CombatUnit unit in Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None))
+            {
+                if (unit.GetComponent<OperatorIdentity>() == null)
+                {
+                    continue;
+                }
+
+                activeOperatorCount++;
+                if (unit.GetComponent<ExusiaiSkillController>() != null)
+                {
+                    playerSkillControllerCount++;
+                    Assert.That(unit.GetComponent<OperatorIdentity>().StableKey, Is.EqualTo("Player_Exusiai"));
+                }
+
+                if (unit.GetComponent<SimpleOperatorAiController>() != null)
+                {
+                    computerControllerCount++;
+                }
+            }
+
+            Assert.That(activeOperatorCount, Is.EqualTo(6));
+            Assert.That(playerSkillControllerCount, Is.EqualTo(1));
+            Assert.That(computerControllerCount, Is.EqualTo(5));
+            Assert.That(GameObject.Find("TrainingDummy_Red"), Is.Null);
+
+            int playerControlledSlots = 0;
+            foreach (OperatorRosterSlot slot in roster.Slots)
+            {
+                Assert.That(slot.Template, Is.Not.Null);
+                Assert.That(slot.Template.activeSelf, Is.False);
+                CombatUnit templateUnit = slot.Template.GetComponent<CombatUnit>();
+                Assert.That(templateUnit, Is.Not.Null);
+                Assert.That(templateUnit.Team, Is.EqualTo(slot.Team));
+                Assert.That(templateUnit.Altitude, Is.EqualTo(Altitude.Ground));
+                Assert.That(templateUnit.CanAttackGround, Is.True);
+
+                float expectedHealth;
+                float expectedAttack;
+                float expectedDefense;
+                float expectedRange;
+                float expectedInterval;
+                float expectedSpeed;
+                bool expectedAirAttack;
+                switch (slot.OperatorType)
+                {
+                    case OperatorType.Exusiai:
+                        expectedHealth = 1000f;
+                        expectedAttack = 50f;
+                        expectedDefense = 2f;
+                        expectedRange = 6f;
+                        expectedInterval = 0.5f;
+                        expectedSpeed = 5f;
+                        expectedAirAttack = true;
+                        break;
+                    case OperatorType.Eyjafjalla:
+                        expectedHealth = 950f;
+                        expectedAttack = 75f;
+                        expectedDefense = 10f;
+                        expectedRange = 6f;
+                        expectedInterval = 1.2f;
+                        expectedSpeed = 4.8f;
+                        expectedAirAttack = true;
+                        break;
+                    case OperatorType.SilverAsh:
+                        expectedHealth = 1400f;
+                        expectedAttack = 85f;
+                        expectedDefense = 30f;
+                        expectedRange = 2.2f;
+                        expectedInterval = 1.1f;
+                        expectedSpeed = 4.8f;
+                        expectedAirAttack = false;
+                        break;
+                    default:
+                        Assert.Fail($"Unexpected operator type {slot.OperatorType}.");
+                        yield break;
+                }
+
+                Assert.That(templateUnit.MaxHealth, Is.EqualTo(expectedHealth));
+                Assert.That(templateUnit.BaseAttackPower, Is.EqualTo(expectedAttack));
+                Assert.That(templateUnit.Defense, Is.EqualTo(expectedDefense));
+                Assert.That(templateUnit.AttackRange, Is.EqualTo(expectedRange));
+                Assert.That(templateUnit.BaseAttackInterval, Is.EqualTo(expectedInterval));
+                Assert.That(templateUnit.CanAttackAir, Is.EqualTo(expectedAirAttack));
+                Assert.That(slot.Template.GetComponent<UnitMotor>().BaseMovementSpeed, Is.EqualTo(expectedSpeed));
+
+                float expectedX = slot.Team == TeamId.Blue ? -46f : 46f;
+                float expectedZ = slot.OperatorType == OperatorType.Eyjafjalla ? -2f
+                    : slot.OperatorType == OperatorType.SilverAsh ? 2f : 0f;
+                Assert.That(slot.DeploymentPosition.x, Is.EqualTo(expectedX));
+                Assert.That(slot.DeploymentPosition.y, Is.EqualTo(2f));
+                Assert.That(slot.DeploymentPosition.z, Is.EqualTo(expectedZ));
+                Assert.That(slot.Template.transform.position, Is.EqualTo(slot.DeploymentPosition));
+                Assert.That(slot.CurrentOperator, Is.Not.Null);
+                Assert.That(slot.CurrentOperator.gameObject, Is.Not.SameAs(slot.Template));
+                Assert.That(slot.CurrentOperator.gameObject.activeInHierarchy, Is.True);
+                Assert.That(slot.CurrentOperator.transform.position, Is.EqualTo(slot.DeploymentPosition));
+                Assert.That(slot.CurrentOperator.Team, Is.EqualTo(slot.Team));
+                Assert.That(slot.CurrentOperator.Altitude, Is.EqualTo(Altitude.Ground));
+                Assert.That(slot.CurrentOperator.MaxHealth, Is.EqualTo(expectedHealth));
+                Assert.That(slot.CurrentOperator.BaseAttackPower, Is.EqualTo(expectedAttack));
+                Assert.That(slot.CurrentOperator.Defense, Is.EqualTo(expectedDefense));
+                Assert.That(slot.CurrentOperator.AttackRange, Is.EqualTo(expectedRange));
+                Assert.That(slot.CurrentOperator.BaseAttackInterval, Is.EqualTo(expectedInterval));
+                Assert.That(slot.CurrentOperator.CanAttackGround, Is.True);
+                Assert.That(slot.CurrentOperator.CanAttackAir, Is.EqualTo(expectedAirAttack));
+                Assert.That(slot.CurrentOperator.GetComponent<UnitMotor>().BaseMovementSpeed,
+                    Is.EqualTo(expectedSpeed));
+                Assert.That(slot.CurrentOperator.GetComponent<OperatorIdentity>().StableKey, Is.EqualTo(slot.StableKey));
+                if (slot.IsPlayerControlled)
+                {
+                    playerControlledSlots++;
+                    Assert.That(slot.CurrentOperator.GetComponent<ExusiaiSkillController>(), Is.Not.Null);
+                    Assert.That(slot.Template.GetComponent<ExusiaiSkillController>(), Is.Not.Null);
+                }
+                else
+                {
+                    Assert.That(slot.CurrentOperator.GetComponent<ExusiaiSkillController>(), Is.Null);
+                    Assert.That(slot.CurrentOperator.GetComponent<SimpleOperatorAiController>(), Is.Not.Null);
+                    Assert.That(slot.Template.GetComponent<ExusiaiSkillController>(), Is.Null);
+                    Assert.That(slot.Template.GetComponent<SimpleOperatorAiController>(), Is.Not.Null);
+                }
+            }
+
+            Assert.That(playerControlledSlots, Is.EqualTo(1));
+            PlayerDeploymentPresenter playerDeployment = Object.FindFirstObjectByType<PlayerDeploymentPresenter>();
+            Assert.That(playerDeployment, Is.Not.Null);
+            Assert.That(playerDeployment.CurrentOperator, Is.SameAs(GameObject.Find("Player_Exusiai").GetComponent<CombatUnit>()));
+            SkillHudPresenter hud = Object.FindFirstObjectByType<SkillHudPresenter>();
+            Assert.That(hud, Is.Not.Null);
+            Assert.That(hud.BoundController,
+                Is.SameAs(playerDeployment.CurrentOperator.GetComponent<ExusiaiSkillController>()));
+
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            Assert.That(mainCamera, Is.Not.Null);
+            Vector3 playerGroundPosition = playerDeployment.CurrentOperator.transform.position;
+            playerGroundPosition.y = 0f;
+            Vector3 playerViewport = mainCamera.WorldToViewportPoint(playerGroundPosition);
+            Assert.That(playerViewport.z, Is.GreaterThan(0f));
+            Assert.That(playerViewport.x, Is.EqualTo(0.5f).Within(0.03f));
+            Assert.That(playerViewport.y, Is.EqualTo(0.5f).Within(0.03f));
+            Vector3 laneAhead = mainCamera.WorldToViewportPoint(playerGroundPosition + Vector3.right * 6f);
+            Assert.That(laneAhead.x, Is.GreaterThan(playerViewport.x));
+            Assert.That(laneAhead.y, Is.GreaterThan(playerViewport.y));
+        }
+
+        [UnityTest]
         public IEnumerator PrototypeArenaContainsRequiredRoots()
         {
             SceneManager.LoadScene("PrototypeArena");
@@ -66,11 +225,12 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(Object.FindFirstObjectByType<SkillHudPresenter>(), Is.Not.Null);
             Assert.That(player.transform.position.y, Is.EqualTo(2f));
             Assert.That(player.GetComponent<HealthBarPresenter>(), Is.Not.Null);
-            GameObject enemyOperator = GameObject.Find("TrainingDummy_Red");
+            GameObject enemyOperator = GameObject.Find("Red_Exusiai");
             Assert.That(enemyOperator, Is.Not.Null);
             Assert.That(enemyOperator.transform.localScale, Is.EqualTo(player.transform.localScale));
             Assert.That(enemyOperator.transform.position.y, Is.EqualTo(player.transform.position.y));
             Assert.That(enemyOperator.GetComponent<CapsuleCollider>(), Is.Not.Null);
+            Assert.That(enemyOperator.GetComponent<OperatorIdentity>().Team, Is.EqualTo(TeamId.Red));
             Assert.That(enemyOperator.GetComponent<HealthBarPresenter>(), Is.Not.Null);
             Assert.That(enemyOperator.GetComponent<DeathCorpsePresenter>(), Is.Not.Null);
             Assert.That(enemyOperator.GetComponent<DeathCorpsePresenter>().UnitKind,
@@ -78,7 +238,15 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(enemyOperator.transform.Find("HealthBar"), Is.Not.Null);
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
             Assert.That(mainCamera, Is.Not.Null);
-            Assert.That(mainCamera.transform.position, Is.EqualTo(new Vector3(0f, 42f, -34f)));
+            Vector3 groundPosition = player.transform.position;
+            groundPosition.y = 0f;
+            Vector3 playerViewport = mainCamera.WorldToViewportPoint(groundPosition);
+            Assert.That(playerViewport.z, Is.GreaterThan(0f));
+            Assert.That(playerViewport.x, Is.EqualTo(0.5f).Within(0.03f));
+            Assert.That(playerViewport.y, Is.EqualTo(0.5f).Within(0.03f));
+            Vector3 laneAhead = mainCamera.WorldToViewportPoint(groundPosition + Vector3.right * 6f);
+            Assert.That(laneAhead.x, Is.GreaterThan(playerViewport.x));
+            Assert.That(laneAhead.y, Is.GreaterThan(playerViewport.y));
         }
 
         [UnityTest]
@@ -193,7 +361,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             SceneManager.LoadScene("PrototypeArena");
             yield return null;
 
-            GameObject enemyOperator = GameObject.Find("TrainingDummy_Red");
+            GameObject enemyOperator = GameObject.Find("Red_Exusiai");
             CombatUnit unit = enemyOperator.GetComponent<CombatUnit>();
             Material material = enemyOperator.GetComponent<Renderer>().sharedMaterial;
             Vector3 position = enemyOperator.transform.position;
@@ -202,7 +370,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
 
             Assert.That(enemyOperator == null, Is.True);
-            GameObject corpse = GameObject.Find("TrainingDummy_Red_Corpse");
+            GameObject corpse = GameObject.Find("Red_Exusiai_Corpse");
             Assert.That(corpse, Is.Not.Null);
             CorpseLifetimeController lifetime = corpse.GetComponent<CorpseLifetimeController>();
             Assert.That(lifetime, Is.Not.Null);
