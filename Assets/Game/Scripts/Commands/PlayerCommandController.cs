@@ -32,6 +32,7 @@ namespace ArknightsFrontline.Commands
         private RaycastHit cachedPointerHit;
         private bool hasCachedPointerHit;
         private int cachedPointerFrame = -1;
+        private bool stoppedForMatch;
 
         public GameObject CurrentTarget => currentTarget;
 
@@ -44,6 +45,8 @@ namespace ArknightsFrontline.Commands
         public bool IsAttackMoveHeld => isAttackMoveHeld;
 
         public bool IsRetreatGuiding => retreat != null && retreat.IsGuiding;
+
+        public bool IsStoppedForMatch => stoppedForMatch;
 
         public InputActionAsset InputActions => input.Asset;
 
@@ -77,7 +80,10 @@ namespace ArknightsFrontline.Commands
 
         private void OnEnable()
         {
-            input?.Gameplay.Enable();
+            if (!stoppedForMatch)
+            {
+                input?.Gameplay.Enable();
+            }
         }
 
         private void OnDisable()
@@ -113,11 +119,21 @@ namespace ArknightsFrontline.Commands
 
         public void SetSkillInputHandler(IPlayerSkillInputHandler handler)
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
             skillInputHandler = handler;
         }
 
         public void Issue(UnitCommand command)
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
             if (IsRetreatGuiding)
             {
                 return;
@@ -154,15 +170,42 @@ namespace ArknightsFrontline.Commands
 
         public void CancelCurrentCommand()
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
             CurrentCommand = null;
             currentTarget = null;
             motor.Stop();
             CommandRevision++;
         }
 
+        public void StopForMatch()
+        {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
+            CurrentCommand = null;
+            currentTarget = null;
+            motor?.Stop();
+            CommandRevision++;
+            CancelAttackMove();
+            hasPendingMoveClick = false;
+            pendingMoveClickWasArmed = false;
+            pendingMoveControl = null;
+            ClearPointerHitCache();
+            skillInputHandler = null;
+            stoppedForMatch = true;
+            input?.Gameplay.Disable();
+            enabled = false;
+        }
+
         public void ArmAttackMove()
         {
-            if (IsRetreatGuiding)
+            if (stoppedForMatch || IsRetreatGuiding)
             {
                 return;
             }
@@ -182,7 +225,7 @@ namespace ArknightsFrontline.Commands
 
         public void HandleMoveClick()
         {
-            if (IsRetreatGuiding)
+            if (stoppedForMatch || IsRetreatGuiding)
             {
                 return;
             }

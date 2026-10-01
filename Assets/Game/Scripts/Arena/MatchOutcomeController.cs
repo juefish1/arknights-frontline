@@ -1,6 +1,8 @@
 using System;
+using ArknightsFrontline.Commands;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Common;
+using ArknightsFrontline.Movement;
 using ArknightsFrontline.Skills;
 using UnityEngine;
 
@@ -21,7 +23,11 @@ namespace ArknightsFrontline.Arena
 
         public event Action MatchEnding;
 
+        public event Action MatchResolved;
+
         public MatchOutcome Outcome { get; private set; }
+
+        public float ElapsedSeconds { get; private set; }
 
         private void Awake()
         {
@@ -33,7 +39,7 @@ namespace ArknightsFrontline.Arena
 
         private void LateUpdate()
         {
-            Tick();
+            Tick(Time.deltaTime);
         }
 
         private void OnDestroy()
@@ -71,6 +77,7 @@ namespace ArknightsFrontline.Arena
             blueTowerDestroyed = blueTower.IsDead;
             redTowerDestroyed = redTower.IsDead;
             Outcome = MatchOutcome.None;
+            ElapsedSeconds = 0f;
             IsMatchOver = false;
             settlementPending = false;
 
@@ -85,7 +92,25 @@ namespace ArknightsFrontline.Arena
 
         public void Tick()
         {
-            if (IsMatchOver || !settlementPending)
+            Tick(0f);
+        }
+
+        public void Tick(float deltaTime)
+        {
+            if (IsMatchOver)
+            {
+                return;
+            }
+
+            if (!settlementPending
+                && deltaTime > 0f
+                && !float.IsNaN(deltaTime)
+                && !float.IsInfinity(deltaTime))
+            {
+                ElapsedSeconds += deltaTime;
+            }
+
+            if (!settlementPending)
             {
                 return;
             }
@@ -106,6 +131,7 @@ namespace ArknightsFrontline.Arena
             IsMatchOver = true;
             settlementPending = false;
             CancelInFlightProjectiles();
+            MatchResolved?.Invoke();
         }
 
         private void BeginSettlement()
@@ -123,6 +149,12 @@ namespace ArknightsFrontline.Arena
         private void StopCombatProducers()
         {
             spawner.StopForMatch();
+
+            foreach (PlayerCommandController controller in
+                     UnityEngine.Object.FindObjectsByType<PlayerCommandController>(FindObjectsSortMode.None))
+            {
+                controller.StopForMatch();
+            }
 
             foreach (OperatorRosterController controller in
                      UnityEngine.Object.FindObjectsByType<OperatorRosterController>(FindObjectsSortMode.None))
@@ -183,6 +215,13 @@ namespace ArknightsFrontline.Arena
                      UnityEngine.Object.FindObjectsByType<TimedStatModifierController>(FindObjectsSortMode.None))
             {
                 effects.StopForMatch();
+            }
+
+            foreach (UnitMotor motor in
+                     UnityEngine.Object.FindObjectsByType<UnitMotor>(FindObjectsSortMode.None))
+            {
+                motor.Stop();
+                motor.enabled = false;
             }
         }
 

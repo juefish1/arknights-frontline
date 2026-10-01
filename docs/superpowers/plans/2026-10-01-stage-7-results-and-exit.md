@@ -4,15 +4,15 @@
 
 ## Task 0 当前基线和保护记录
 
-- [ ] 记录 branch/HEAD/status，备份当前脏场景、构建器、ProjectSettings 原字节与受影响资源哈希。
-- [ ] 确认交互式 Unity 关闭，用指定版本顺序跑全 EditMode/PlayMode，解析有效 XML 与所有未通过项。
+- [x] 记录 branch/HEAD/status，备份当前脏场景、构建器、ProjectSettings 原字节与受影响资源哈希。
+- [x] 确认交互式 Unity 关闭，用指定版本顺序跑全 EditMode/PlayMode，解析有效 XML 与所有未通过项（304/304、78/78）。
 - [ ] 记录平台模块；按用户平台选择准备构建，不把平台构建或人工体验未执行称为通过。
 
 ## Task 1 计时与最终结算通知
 
-- [ ] 为超过 900 秒仍比赛、双塔同帧、重复结算与行为冻结写真实 RED。
-- [ ] 扩展 MatchOutcomeController 的确定性计时 API、一次性 MatchResolved；保持旧 Tick 与塔 Died 语义，不添加强制结算。
-- [ ] 冻结玩家命令和移动，聚焦及既有比赛测试 GREEN，独立复审后提交。
+- [x] 为超过 900 秒仍比赛、双塔同帧、重复结算与行为冻结写真实 RED。
+- [x] 扩展 MatchOutcomeController 的确定性计时 API、一次性 MatchResolved；保持旧 Tick 与塔 Died 语义，不添加强制结算。
+- [x] 冻结玩家命令和移动，聚焦及既有比赛测试 GREEN（12/12、命令 9/9），独立复审无阻塞项后提交。
 
 ## Task 2 六槽位统计与不可变结果
 

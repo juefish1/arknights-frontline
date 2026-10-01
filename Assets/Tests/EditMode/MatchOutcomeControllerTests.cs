@@ -8,6 +8,7 @@ using ArknightsFrontline.Movement;
 using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using MatchOutcome = ArknightsFrontline.Common.MatchOutcome;
 
 namespace ArknightsFrontline.Tests.EditMode
@@ -69,6 +70,133 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(match.OutcomeController.IsMatchOver, Is.True);
             Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.Draw));
+        }
+
+        [Test]
+        public void BothTowerDeathsResolveDrawBeforeTheSingleFinalNotification()
+        {
+            MatchFixture match = CreateMatch();
+            int resolvedCount = 0;
+            MatchOutcome observedOutcome = MatchOutcome.None;
+            bool callbackObservedResolvedMatch = false;
+            match.OutcomeController.MatchResolved += () =>
+            {
+                resolvedCount++;
+                observedOutcome = match.OutcomeController.Outcome;
+                callbackObservedResolvedMatch = match.OutcomeController.IsMatchOver;
+            };
+
+            match.BlueTower.TakePhysicalDamage(match.BlueTower.MaxHealth);
+            match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
+            match.OutcomeController.Tick();
+            match.OutcomeController.Tick();
+
+            Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.Draw));
+            Assert.That(resolvedCount, Is.EqualTo(1));
+            Assert.That(callbackObservedResolvedMatch, Is.True);
+            Assert.That(observedOutcome, Is.EqualTo(MatchOutcome.Draw));
+        }
+
+        [Test]
+        public void MatchTimeContinuesPastFifteenMinutesWithoutForcingSettlement()
+        {
+            MatchFixture match = CreateMatch();
+            int resolvedCount = 0;
+            match.OutcomeController.MatchResolved += () => resolvedCount++;
+
+            match.OutcomeController.Tick(901f);
+
+            Assert.That(match.OutcomeController.ElapsedSeconds, Is.EqualTo(901f));
+            Assert.That(match.OutcomeController.IsMatchOver, Is.False);
+            Assert.That(match.OutcomeController.Outcome, Is.EqualTo(MatchOutcome.None));
+            Assert.That(resolvedCount, Is.Zero);
+        }
+
+        [Test]
+        public void MatchTimeIgnoresPausedAndNegativeTimeDeltas()
+        {
+            MatchFixture match = CreateMatch();
+
+            match.OutcomeController.Tick(2.5f);
+            match.OutcomeController.Tick(0f);
+            match.OutcomeController.Tick(-4f);
+            match.OutcomeController.Tick();
+
+            Assert.That(match.OutcomeController.ElapsedSeconds, Is.EqualTo(2.5f));
+            Assert.That(match.OutcomeController.IsMatchOver, Is.False);
+        }
+
+        [Test]
+        public void FinalSettlementFreezesTimeAndNotifiesOnceAfterOutcomeAndProjectileCancellation()
+        {
+            MatchFixture match = CreateMatch();
+            CombatUnit attacker = CreateUnit("ProjectileAttacker", TeamId.Blue, Vector3.zero, 8f);
+            CombatUnit target = CreateUnit("ProjectileTarget", TeamId.Red, Vector3.right, 8f);
+            Projectile projectile = CreateGameObject("InFlightProjectile").AddComponent<Projectile>();
+            projectile.Initialize(attacker, target, 1f, 1f);
+            int resolvedCount = 0;
+            MatchOutcome callbackOutcome = MatchOutcome.None;
+            bool callbackSawResolved = false;
+            bool callbackSawCancelledProjectile = false;
+            match.OutcomeController.MatchResolved += () =>
+            {
+                resolvedCount++;
+                callbackOutcome = match.OutcomeController.Outcome;
+                callbackSawResolved = match.OutcomeController.IsMatchOver;
+                callbackSawCancelledProjectile = projectile.IsFinished;
+            };
+            match.OutcomeController.Tick(41.25f);
+
+            match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
+            match.OutcomeController.Tick(20f);
+            match.OutcomeController.Tick(100f);
+
+            Assert.That(match.OutcomeController.ElapsedSeconds, Is.EqualTo(41.25f));
+            Assert.That(resolvedCount, Is.EqualTo(1));
+            Assert.That(callbackSawResolved, Is.True);
+            Assert.That(callbackOutcome, Is.EqualTo(MatchOutcome.BlueVictory));
+            Assert.That(callbackSawCancelledProjectile, Is.True);
+        }
+
+        [Test]
+        public void SettlementStopsPlayerCommandsAndEveryActiveUnitMotorButKeepsEventSystemEnabled()
+        {
+            MatchFixture match = CreateMatch();
+            GameObject player = CreateGameObject("PlayerOperator");
+            UnitMotor playerMotor = player.AddComponent<UnitMotor>();
+            playerMotor.Configure(5f, ArenaLayout.CreateDefault());
+            PlayerCommandController commands = player.AddComponent<PlayerCommandController>();
+            InvokePrivate(commands, "Awake");
+            var gameplayActions = commands.InputActions.FindActionMap("Gameplay");
+            gameplayActions.Enable();
+            commands.Issue(UnitCommand.Move(Vector3.right * 10f));
+            commands.ArmAttackMove();
+
+            GameObject minion = CreateGameObject("LaneMinion");
+            UnitMotor minionMotor = minion.AddComponent<UnitMotor>();
+            minionMotor.Configure(5f, ArenaLayout.CreateDefault());
+            minionMotor.SetDestination(Vector3.right * 10f);
+            EventSystem eventSystem = CreateGameObject("ResultEventSystem").AddComponent<EventSystem>();
+            Assert.That(gameplayActions.enabled, Is.True);
+
+            match.RedTower.TakePhysicalDamage(match.RedTower.MaxHealth);
+
+            Assert.That(commands.enabled, Is.False);
+            Assert.That(commands.CurrentCommand, Is.Null);
+            Assert.That(commands.CurrentTarget, Is.Null);
+            Assert.That(commands.IsAttackMoveArmed, Is.False);
+            Assert.That(gameplayActions.enabled, Is.False);
+            Assert.That(playerMotor.enabled, Is.False);
+            Assert.That(playerMotor.IsMoving, Is.False);
+            Assert.That(minionMotor.enabled, Is.False);
+            Assert.That(minionMotor.IsMoving, Is.False);
+            Assert.That(eventSystem.enabled, Is.True);
+            Assert.That(commands.IsStoppedForMatch, Is.True);
+
+            commands.Issue(UnitCommand.Move(Vector3.left * 10f));
+
+            Assert.That(commands.CurrentCommand, Is.Null);
+            Assert.That(playerMotor.IsMoving, Is.False);
         }
 
         [Test]
