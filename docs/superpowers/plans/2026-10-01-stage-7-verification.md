@@ -96,4 +96,6 @@ Packages、ProjectSettings、用户材质/渲染配置、MinionLanePlayModeTests
 
 ## 最终状态
 
+实现与场景交付提交：`7902b0d`（dev）；包含获批现有场景改动及阶段 7 新接线。此前阶段提交为 `f23cca0`（设计）、`8a27ca0`（无限计时/冻结）、`656ad54`（全员投票）、`316b2a0`（统计）、`acb4d96`（HUD）。提交后无暂存残留，范围外用户改动继续保留。
+
 阶段 7 实现、独立复审、保存场景升级、自动化回归与 Windows 文件包完成。EditMode 346/346、聚焦 PlayMode 68/68、完整 PlayMode 83/83；完整未通过项无，旧 78 项基线无遗漏。人工验收尚未执行，清单见 `2026-10-01-stage-7-manual-acceptance.md`；真实 Windows 退出、中文视觉、另一台机器兼容性、比赛时长和目标帧率仍待用户记录。
