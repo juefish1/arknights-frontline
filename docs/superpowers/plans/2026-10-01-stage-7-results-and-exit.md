@@ -16,9 +16,9 @@
 
 ## Task 2 六槽位统计与不可变结果
 
-- [ ] 先写 RED：实际致命伤害归属、死亡去重、撤退排除、过量塔扣血、跨再部署累计、重绑/销毁监听、结算快照冻结。
-- [ ] 独立统计组件按 roster Spawned/Departed 与 tower DamageTaken 接线；不改 Projectile 战斗合法性。
-- [ ] 聚焦伤害/槽位/统计 GREEN，独立复审后提交。
+- [x] 先写 RED：实际致命伤害归属、死亡去重、撤退排除、过量塔扣血、跨再部署累计、重绑/销毁监听、结算快照冻结。
+- [x] 独立统计组件按 roster Spawned/Departed 与 tower DamageTaken 接线；不改 Projectile 战斗合法性。
+- [x] 聚焦伤害/槽位/统计 GREEN（29/29），独立复审发现配置契约缺口，经追加 RED→GREEN 修复后无阻塞项，提交。
 
 ## Task 3 HUD、结算和全员退出投票
 

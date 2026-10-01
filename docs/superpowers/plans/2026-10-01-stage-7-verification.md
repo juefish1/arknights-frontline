@@ -23,8 +23,21 @@ Packages、ProjectSettings、用户材质/渲染配置、MinionLanePlayModeTests
 - 恢复接线后的 GREEN：`TestResults/stage7-task1-green.xml`，12/12。
 - 玩家命令聚焦回归：`TestResults/stage7-task1-player-command-green.xml`，9/9。
 - 独立静态复审：`stage7_design_review`，无阻塞项。有限 delta 显式测试与运行时重复 Configure 契约为非阻塞建议；当前配置只在启动时执行。
+- 实现提交：`8a27ca0`。
 
-## 后续状态
+## Task 2：六槽位统计（进行中）
+
+- 最小编译有效的空实现先于行为 RED。
+- 首次默认权限启动遇到 UPM IPC 超时，无 XML，不算 RED；提升权限重跑成功。
+- 有效 RED：`TestResults/stage7-stats-red-elevated.xml`，15/15 未通过、无跳过或不确定项，编译无 CS error。
+- 测试涵盖真实伤害、重入致命命中、过量塔伤害、死亡/撤退/再部署、伪造身份、监听重绑、只读快照，以及真实塔尸体销毁后缓存血量。
+- 初次 GREEN：`TestResults/stage7-stats-green.xml`，14/15；唯一失败 `ArknightsFrontline.Tests.EditMode.MatchStatisticsControllerTests.SnapshotUsesCachedTowerHealthAfterDeathPresenterDestroysTowerInEditMode`。空来源伤害被归属过滤提前排除，导致塔血缓存未更新；已改为所有实际伤害先同步血量，再过滤干员伤害归属。
+- 修复后聚焦 GREEN：`TestResults/stage7-stats-related-green.xml`，26/26（统计 15、CombatUnit 6、OperatorRoster 5），无非通过项。
+- 原始 14/15 XML 保留，未用新结果覆盖。
+- 独立复审发现配置契约缺口：统计未拒绝错误的固定六席/蓝红各三席和塔阵营接线。正常 Builder 数据未损坏，但组件应明确拒绝非法配置。
+- 补充 RED：`TestResults/stage7-stats-validation-red.xml`，18 项中原 15 项通过、新 3 项预期失败。
+- 修复 GREEN：`TestResults/stage7-stats-validation-green.xml`，29/29（统计 18、CombatUnit 6、OperatorRoster 5），无非通过项。
+- 独立复审 `stage7_baseline` 复核配置校验修正，无剩余阻塞项；旧干员 delegate 的销毁/重绑更多依赖代码检查，后续可补针对性测试，非当前缺陷。Unity 已退出，配置原字节恢复，场景哈希未变。
 
 ## Task 3：退出投票核心（HUD 尚未完成）
 
@@ -33,5 +46,9 @@ Packages、ProjectSettings、用户材质/渲染配置、MinionLanePlayModeTests
 - 恢复实现后 GREEN：`vote-green-results.xml`，7/7，无非通过项。
 - 独立静态复审：`stage7_match_impl`，无阻塞项。默认参数自动同意的单独覆盖为非阻塞建议。
 - Unity 进程退出；ProjectSettings.asset 原字节已恢复，场景、Packages 与材质哈希不变。
+- 投票核心提交：`656ad54`。
+- HUD 初始行为 RED：`TestResults/stage7-task3-hud-red.xml`，7/7 失败，编译与夹具正常；覆盖真实 UGUI、非满塔血、六行快照、三个胜负标题及真实 Button 注入退出回调。生产 HUD/Bootstrap 尚未完成。
+
+## 后续状态
 
 统计、HUD、保存场景接线、最终完整测试及 Windows 构建仍在实施；此记录不表示这些步骤已经通过。
