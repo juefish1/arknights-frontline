@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ArknightsFrontline.Arena;
 using ArknightsFrontline.Camera;
@@ -13,6 +14,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace ArknightsFrontline.Editor
 {
@@ -208,9 +210,193 @@ namespace ArknightsFrontline.Editor
                         layout.RedDeployment + Vector3.up * 2f + Vector3.forward * 2f, false)
                 });
 
+            AddMatchPresentation(arenaRoot, canvas, roster, outcome, blueTowerUnit, redTowerUnit);
+
             EditorSceneManager.SaveScene(scene, ScenePath);
             EnsureBuildScene();
             AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Arknights Frontline/Upgrade Stage 7 Presentation")]
+        public static void UpgradeStage7Presentation()
+        {
+            Scene scene = EditorSceneManager.GetSceneByPath(ScenePath);
+            if (!scene.IsValid() || !scene.isLoaded)
+            {
+                scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            }
+
+            if (AddMatchPresentation(scene)
+                && !EditorSceneManager.SaveScene(scene, ScenePath))
+            {
+                throw new InvalidOperationException("Could not save the upgraded Prototype Arena scene.");
+            }
+        }
+
+        private static bool AddMatchPresentation(Scene scene)
+        {
+            if (!scene.IsValid() || !scene.isLoaded)
+            {
+                throw new InvalidOperationException("The Prototype Arena scene is not loaded.");
+            }
+
+            GameObject arenaRoot = null;
+            Canvas canvas = null;
+            foreach (GameObject rootObject in scene.GetRootGameObjects())
+            {
+                if (rootObject.name == "ArenaBootstrap")
+                {
+                    arenaRoot = rootObject;
+                }
+
+                Canvas candidateCanvas = rootObject.GetComponent<Canvas>();
+                if (candidateCanvas != null)
+                {
+                    if (canvas != null)
+                    {
+                        throw new InvalidOperationException("The Prototype Arena scene has multiple root canvases.");
+                    }
+
+                    canvas = candidateCanvas;
+                }
+            }
+
+            if (arenaRoot == null || canvas == null)
+            {
+                throw new InvalidOperationException(
+                    "The Prototype Arena scene requires its existing ArenaBootstrap and Canvas objects.");
+            }
+
+            ArenaBootstrap arena = arenaRoot.GetComponent<ArenaBootstrap>();
+            OperatorRosterController roster = arenaRoot.GetComponent<OperatorRosterController>();
+            ArenaRosterBootstrap rosterBootstrap = arenaRoot.GetComponent<ArenaRosterBootstrap>();
+            MatchOutcomeController match = arenaRoot.GetComponent<MatchOutcomeController>();
+            if (arena == null || roster == null || rosterBootstrap == null || match == null
+                || rosterBootstrap.Roster != roster || arena.BlueTower == null || arena.RedTower == null)
+            {
+                throw new InvalidOperationException(
+                    "The existing ArenaBootstrap must reference its roster and both towers, and include its match bootstraps.");
+            }
+
+            CombatUnit blueTower = arena.BlueTower.GetComponent<CombatUnit>();
+            CombatUnit redTower = arena.RedTower.GetComponent<CombatUnit>();
+            if (blueTower == null || redTower == null)
+            {
+                throw new InvalidOperationException("Both arena towers require CombatUnit components.");
+            }
+
+            return AddMatchPresentation(arenaRoot, canvas, roster, match, blueTower, redTower);
+        }
+
+        private static bool AddMatchPresentation(
+            GameObject arenaRoot,
+            Canvas canvas,
+            OperatorRosterController roster,
+            MatchOutcomeController match,
+            CombatUnit blueTower,
+            CombatUnit redTower)
+        {
+            bool changed = false;
+
+            MatchStatisticsController statistics = arenaRoot.GetComponent<MatchStatisticsController>();
+            if (statistics == null)
+            {
+                statistics = arenaRoot.AddComponent<MatchStatisticsController>();
+                changed = true;
+            }
+
+            TeamExitVoteController votes = arenaRoot.GetComponent<TeamExitVoteController>();
+            if (votes == null)
+            {
+                votes = arenaRoot.AddComponent<TeamExitVoteController>();
+                changed = true;
+            }
+
+            Transform matchHudTransform = canvas.transform.Find("MatchHud");
+            GameObject matchHudObject;
+            if (matchHudTransform == null)
+            {
+                matchHudObject = new GameObject("MatchHud", typeof(RectTransform));
+                matchHudTransform = matchHudObject.transform;
+                matchHudTransform.SetParent(canvas.transform, false);
+                changed = true;
+            }
+            else
+            {
+                matchHudObject = matchHudTransform.gameObject;
+                if (matchHudObject.GetComponent<RectTransform>() == null)
+                {
+                    throw new InvalidOperationException("The existing MatchHud object must use a RectTransform.");
+                }
+            }
+
+            MatchHudPresenter hud = matchHudObject.GetComponent<MatchHudPresenter>();
+            if (hud == null)
+            {
+                hud = matchHudObject.AddComponent<MatchHudPresenter>();
+                changed = true;
+            }
+
+            MatchPresentationBootstrap presentation =
+                arenaRoot.GetComponent<MatchPresentationBootstrap>();
+            if (presentation == null)
+            {
+                presentation = arenaRoot.AddComponent<MatchPresentationBootstrap>();
+                changed = true;
+            }
+
+            if (NeedsPresentationConfiguration(
+                    presentation,
+                    roster,
+                    match,
+                    statistics,
+                    votes,
+                    hud,
+                    blueTower,
+                    redTower,
+                    "Player_Exusiai"))
+            {
+                presentation.Configure(
+                    roster,
+                    match,
+                    statistics,
+                    votes,
+                    hud,
+                    blueTower,
+                    redTower,
+                    "Player_Exusiai");
+                EditorUtility.SetDirty(presentation);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                EditorSceneManager.MarkSceneDirty(arenaRoot.scene);
+            }
+
+            return changed;
+        }
+
+        private static bool NeedsPresentationConfiguration(
+            MatchPresentationBootstrap presentation,
+            OperatorRosterController roster,
+            MatchOutcomeController match,
+            MatchStatisticsController statistics,
+            TeamExitVoteController votes,
+            MatchHudPresenter hud,
+            CombatUnit blueTower,
+            CombatUnit redTower,
+            string playerStableKey)
+        {
+            SerializedObject serialized = new SerializedObject(presentation);
+            return !ReferenceEquals(serialized.FindProperty("roster").objectReferenceValue, roster)
+                || !ReferenceEquals(serialized.FindProperty("match").objectReferenceValue, match)
+                || !ReferenceEquals(serialized.FindProperty("statistics").objectReferenceValue, statistics)
+                || !ReferenceEquals(serialized.FindProperty("votes").objectReferenceValue, votes)
+                || !ReferenceEquals(serialized.FindProperty("hud").objectReferenceValue, hud)
+                || !ReferenceEquals(serialized.FindProperty("blueTower").objectReferenceValue, blueTower)
+                || !ReferenceEquals(serialized.FindProperty("redTower").objectReferenceValue, redTower)
+                || serialized.FindProperty("playerStableKey").stringValue != playerStableKey;
         }
 
         private static void CreateLane(Transform parent, Material material, int groundLayer)

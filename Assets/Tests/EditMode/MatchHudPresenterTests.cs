@@ -137,6 +137,106 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ResultCardFitsSharedCanvasAtCommonResolutionsAndResizesBackToNativeScale()
+        {
+            MatchFixture fixture = CreateFixture("hud-test-responsive-results");
+            RectTransform canvasRect = (RectTransform)fixture.Canvas.transform;
+            fixture.Canvas.renderMode = RenderMode.WorldSpace;
+            canvasRect.position = Vector3.zero;
+            canvasRect.localScale = Vector3.one;
+
+            RectTransform skillHudRect = (RectTransform)fixture.SkillHud.transform;
+            Transform skillHudParent = skillHudRect.parent;
+            Vector2 skillHudAnchorMin = skillHudRect.anchorMin;
+            Vector2 skillHudAnchorMax = skillHudRect.anchorMax;
+            Vector2 skillHudSize = skillHudRect.sizeDelta;
+            Vector2 skillHudPosition = skillHudRect.anchoredPosition;
+            Vector3 skillHudScale = skillHudRect.localScale;
+            int skillHudSiblingIndex = skillHudRect.GetSiblingIndex();
+
+            fixture.Hud.Configure(
+                fixture.Match,
+                fixture.Statistics,
+                fixture.Votes,
+                fixture.BlueTower,
+                fixture.RedTower,
+                BluePlayerKey);
+            fixture.RedTower.TakePhysicalDamage(fixture.RedTower.MaxHealth);
+            fixture.Match.Tick();
+            fixture.Hud.Refresh();
+
+            RectTransform cardRect = fixture.Hud.ResultRowsRoot.parent as RectTransform;
+            Assert.That(cardRect, Is.Not.Null);
+
+            Vector2[] canvasSizes =
+            {
+                new Vector2(640f, 480f),
+                new Vector2(1280f, 720f),
+                new Vector2(1920f, 1080f)
+            };
+            List<string> layoutViolations = new List<string>();
+            foreach (Vector2 canvasSize in canvasSizes)
+            {
+                canvasRect.sizeDelta = canvasSize;
+                Canvas.ForceUpdateCanvases();
+                fixture.Hud.Refresh();
+                Canvas.ForceUpdateCanvases();
+
+                Rect canvasBounds = canvasRect.rect;
+                Vector3[] worldCorners = new Vector3[4];
+                cardRect.GetWorldCorners(worldCorners);
+                for (int cornerIndex = 0; cornerIndex < worldCorners.Length; cornerIndex++)
+                {
+                    Vector3 localCorner = canvasRect.InverseTransformPoint(worldCorners[cornerIndex]);
+                    if (localCorner.x < canvasBounds.xMin + 32f - 0.01f
+                        || localCorner.x > canvasBounds.xMax - 32f + 0.01f
+                        || localCorner.y < canvasBounds.yMin + 32f - 0.01f
+                        || localCorner.y > canvasBounds.yMax - 32f + 0.01f)
+                    {
+                        layoutViolations.Add(
+                            $"Canvas {canvasSize}: card corner {cornerIndex} at {localCorner} "
+                            + $"exceeds 32px inset bounds {canvasBounds}.");
+                    }
+                }
+
+                if (canvasSize.x >= 1280f && !Mathf.Approximately(cardRect.localScale.x, 1f))
+                {
+                    layoutViolations.Add(
+                        $"Canvas {canvasSize}: card should return to native scale 1 after resize, "
+                        + $"but scale was {cardRect.localScale}.");
+                }
+
+                if (canvasRect.sizeDelta != canvasSize
+                    || fixture.Canvas.renderMode != RenderMode.WorldSpace
+                    || canvasRect.position != Vector3.zero
+                    || canvasRect.localScale != Vector3.one)
+                {
+                    layoutViolations.Add(
+                        $"Refreshing at {canvasSize} changed the shared Canvas configuration.");
+                }
+
+                if (skillHudRect.parent != skillHudParent
+                    || skillHudRect.anchorMin != skillHudAnchorMin
+                    || skillHudRect.anchorMax != skillHudAnchorMax
+                    || skillHudRect.sizeDelta != skillHudSize
+                    || skillHudRect.anchoredPosition != skillHudPosition
+                    || skillHudRect.localScale != skillHudScale
+                    || skillHudRect.GetSiblingIndex() != skillHudSiblingIndex)
+                {
+                    layoutViolations.Add(
+                        $"Refreshing at {canvasSize} changed the existing Skill HUD sibling.");
+                }
+            }
+
+            Assert.That(
+                layoutViolations,
+                Is.Empty,
+                "The result card must fit the shared Canvas with a 32px inset and resize without "
+                + "changing the shared Canvas or its existing Skill HUD sibling.\n"
+                + string.Join("\n", layoutViolations));
+        }
+
+        [Test]
         public void ResolvedPanelRendersSixRowsFromSnapshotAfterTowerObjectIsDestroyed()
         {
             MatchFixture fixture = CreateFixture("hud-test-results");

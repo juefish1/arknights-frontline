@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &34941013
+--- !u!1 &5176579
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,48 +127,78 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 34941014}
-  - component: {fileID: 34941015}
+  - component: {fileID: 5176582}
+  - component: {fileID: 5176581}
+  - component: {fileID: 5176580}
   m_Layer: 0
-  m_Name: SkillHud
+  m_Name: EventSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &34941014
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 34941013}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1176194477}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &34941015
+--- !u!114 &5176580
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 34941013}
+  m_GameObject: {fileID: 5176579}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c7b6d8e2f31409ca1b5d7e9f0a12345, type: 3}
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.SkillHudPresenter
-  controller: {fileID: 0}
---- !u!1 &75870199
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
+--- !u!114 &5176581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5176579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
+  m_FirstSelected: {fileID: 0}
+  m_sendNavigationEvents: 1
+  m_DragThreshold: 10
+--- !u!4 &5176582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5176579}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &147891704
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,127 +206,304 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 75870200}
-  - component: {fileID: 75870211}
-  - component: {fileID: 75870210}
-  - component: {fileID: 75870209}
-  - component: {fileID: 75870208}
-  - component: {fileID: 75870207}
-  - component: {fileID: 75870206}
-  - component: {fileID: 75870205}
-  - component: {fileID: 75870204}
-  - component: {fileID: 75870203}
-  - component: {fileID: 75870202}
-  - component: {fileID: 75870201}
-  m_Layer: 9
-  m_Name: Template_Blue_Eyjafjalla
-  m_TagString: Untagged
+  - component: {fileID: 147891707}
+  - component: {fileID: 147891706}
+  - component: {fileID: 147891705}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &75870200
+  m_IsActive: 1
+--- !u!114 &147891705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147891704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b54660a1c28f4af78c63db834491469, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Camera.MobaCameraController
+  cameraOffset: {x: -14, y: 28, z: -14}
+  centeringTarget: {fileID: 568745232}
+--- !u!20 &147891706
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147891704}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 45
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &147891707
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 147891704}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.42470822, y: 0.33985117, z: -0.17591992, w: 0.82047325}
+  m_LocalPosition: {x: -60, y: 28, z: -14}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &568745231
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 568745232}
+  - component: {fileID: 568745250}
+  - component: {fileID: 568745249}
+  - component: {fileID: 568745248}
+  - component: {fileID: 568745247}
+  - component: {fileID: 568745246}
+  - component: {fileID: 568745245}
+  - component: {fileID: 568745244}
+  - component: {fileID: 568745243}
+  - component: {fileID: 568745242}
+  - component: {fileID: 568745241}
+  - component: {fileID: 568745240}
+  - component: {fileID: 568745239}
+  - component: {fileID: 568745238}
+  - component: {fileID: 568745237}
+  - component: {fileID: 568745236}
+  - component: {fileID: 568745235}
+  - component: {fileID: 568745234}
+  - component: {fileID: 568745233}
+  m_Layer: 9
+  m_Name: Player_Exusiai
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &568745232
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -46, y: 2, z: -2}
+  m_LocalPosition: {x: -46, y: 2, z: 0}
   m_LocalScale: {x: 1.6, y: 2, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1734214811}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &75870201
+--- !u!114 &568745233
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
+  m_Script: {fileID: 11500000, guid: b8e3a9c4d1f2470e9a6b5c2d3e4f5678, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
---- !u!114 &75870202
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.ExusiaiSkillIndicator
+--- !u!114 &568745234
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e47c0b5ed6dc42a983a59bc3102569e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.ExusiaiSkillController
+--- !u!114 &568745235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &75870203
+--- !u!114 &568745236
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
-  stableKey: Template_Blue_Eyjafjalla
+  stableKey: Player_Exusiai
   team: 0
-  operatorType: 1
---- !u!114 &75870204
+  operatorType: 0
+--- !u!114 &568745237
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1bcfb723cda4fbebfa6da8f9d512b4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.SkillDashController
+--- !u!114 &568745238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce15fa2673b8f477c82a2a4566442da2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.AttackSequenceExecutor
+--- !u!114 &568745239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6bc66e1ef317409986051649f66e03b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.UnitStatModifiers
+--- !u!114 &568745240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c6d7f06ad7f40d9a31f09625cc4e0e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatCommandResolver
+--- !u!114 &568745241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &75870205
+--- !u!114 &568745242
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e197160b8364485a05c108826d02365, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Commands.CommandFeedbackPresenter
+--- !u!114 &568745243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 75870207}
+  combatUnit: {fileID: 568745245}
   corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
   groundLayer: 8
   corpseScale: {x: 0.15, y: 1, z: 0.15}
   unitKind: 0
---- !u!114 &75870206
+--- !u!114 &568745244
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &75870207
+--- !u!114 &568745245
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
@@ -304,34 +511,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
   team: 0
   altitude: 0
-  maxHealth: 950
-  currentHealth: 950
-  attackPower: 75
-  defense: 10
+  maxHealth: 1000
+  currentHealth: 1000
+  attackPower: 50
+  defense: 2
   attackRange: 6
-  attackInterval: 1.2
+  attackInterval: 0.5
   canAttackGround: 1
   canAttackAir: 1
---- !u!114 &75870208
+--- !u!114 &568745246
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e4fbeb4cccf3465cbbdaa7e9b3d1a7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Commands.PlayerCommandController
+--- !u!114 &568745247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
-  movementSpeed: 4.8
---- !u!23 &75870209
+  movementSpeed: 5
+--- !u!23 &568745248
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -374,13 +593,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &75870210
+--- !u!136 &568745249
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -397,15 +616,15 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &75870211
+--- !u!33 &568745250
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 75870199}
+  m_GameObject: {fileID: 568745231}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &103387359
+--- !u!1 &700187898
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -413,8 +632,706 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 103387361}
-  - component: {fileID: 103387360}
+  - component: {fileID: 700187899}
+  - component: {fileID: 700187904}
+  - component: {fileID: 700187903}
+  - component: {fileID: 700187902}
+  - component: {fileID: 700187901}
+  - component: {fileID: 700187900}
+  - component: {fileID: 700187907}
+  - component: {fileID: 700187906}
+  - component: {fileID: 700187905}
+  m_Layer: 0
+  m_Name: ArenaBootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &700187899
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2128689903}
+  - {fileID: 1269479828}
+  - {fileID: 1033652382}
+  - {fileID: 1896939322}
+  - {fileID: 1213795844}
+  - {fileID: 568745232}
+  - {fileID: 1754632841}
+  - {fileID: 900185300}
+  - {fileID: 938590266}
+  - {fileID: 973299173}
+  - {fileID: 1297221545}
+  - {fileID: 765853243}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &700187900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db6302699fc841c8a2f31d99de790812, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.ArenaRosterBootstrap
+  roster: {fileID: 700187903}
+  blueTower: {fileID: 1269479833}
+  redTower: {fileID: 1033652387}
+  match: {fileID: 700187901}
+  playerDeployment: {fileID: 765853244}
+  skillHud: {fileID: 738821071}
+  cameraController: {fileID: 147891705}
+  slots:
+  - stableKey: Player_Exusiai
+    team: 0
+    operatorType: 0
+    template: {fileID: 568745231}
+    deploymentPosition: {x: -46, y: 2, z: 0}
+    isPlayerControlled: 1
+  - stableKey: Blue_Eyjafjalla
+    team: 0
+    operatorType: 1
+    template: {fileID: 1754632840}
+    deploymentPosition: {x: -46, y: 2, z: -2}
+    isPlayerControlled: 0
+  - stableKey: Blue_SilverAsh
+    team: 0
+    operatorType: 2
+    template: {fileID: 900185299}
+    deploymentPosition: {x: -46, y: 2, z: 2}
+    isPlayerControlled: 0
+  - stableKey: Red_Exusiai
+    team: 1
+    operatorType: 0
+    template: {fileID: 938590265}
+    deploymentPosition: {x: 46, y: 2, z: 0}
+    isPlayerControlled: 0
+  - stableKey: Red_Eyjafjalla
+    team: 1
+    operatorType: 1
+    template: {fileID: 973299172}
+    deploymentPosition: {x: 46, y: 2, z: -2}
+    isPlayerControlled: 0
+  - stableKey: Red_SilverAsh
+    team: 1
+    operatorType: 2
+    template: {fileID: 1297221544}
+    deploymentPosition: {x: 46, y: 2, z: 2}
+    isPlayerControlled: 0
+--- !u!114 &700187901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 325b949692a64f23a731da9724ea9c8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MatchOutcomeController
+  blueTower: {fileID: 1269479833}
+  redTower: {fileID: 1033652387}
+  spawner: {fileID: 700187902}
+--- !u!114 &700187902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f165556eafc4cd1afaded9f7898e63e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MinionWaveSpawner
+  minionParent: {fileID: 700187899}
+  blueTower: {fileID: 1269479833}
+  redTower: {fileID: 1033652387}
+  blueMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  redMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
+  targetableLayer: 9
+  groundLayer: 8
+--- !u!114 &700187903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa905298c8f4bcb95a186232f967f38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRosterController
+--- !u!114 &700187904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f144b6791b7c4183b0e4835a5cbb551, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.ArenaBootstrap
+  blueTower: {fileID: 1269479828}
+  redTower: {fileID: 1033652382}
+--- !u!114 &700187905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ddaba5c7f574b8ba0539825ac5a620b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MatchPresentationBootstrap
+  roster: {fileID: 700187903}
+  match: {fileID: 700187901}
+  statistics: {fileID: 700187907}
+  votes: {fileID: 700187906}
+  hud: {fileID: 745965913}
+  blueTower: {fileID: 1269479833}
+  redTower: {fileID: 1033652387}
+  playerStableKey: Player_Exusiai
+--- !u!114 &700187906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 802675aef9244db399675dd2deb40593, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.TeamExitVoteController
+--- !u!114 &700187907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700187898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ac09f8a21314972bcb89ac4aa2bf047, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MatchStatisticsController
+--- !u!1 &738821069
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 738821070}
+  - component: {fileID: 738821071}
+  m_Layer: 0
+  m_Name: SkillHud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &738821070
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738821069}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 830638662}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &738821071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738821069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c7b6d8e2f31409ca1b5d7e9f0a12345, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.SkillHudPresenter
+  controller: {fileID: 0}
+--- !u!1 &745965911
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 745965912}
+  - component: {fileID: 745965913}
+  m_Layer: 0
+  m_Name: MatchHud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &745965912
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745965911}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 830638662}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &745965913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745965911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7939ec37d834f8d983f3461732c4b8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MatchHudPresenter
+--- !u!1 &765853242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 765853243}
+  - component: {fileID: 765853244}
+  m_Layer: 0
+  m_Name: PlayerDeployment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &765853243
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765853242}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700187899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &765853244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765853242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cceea16cf87491c95fc2283f0149100, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.PlayerDeploymentPresenter
+  roster: {fileID: 0}
+  playerSlotKey: 
+  skillHud: {fileID: 0}
+  cameraController: {fileID: 0}
+  match: {fileID: 0}
+--- !u!1 &830638658
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 830638662}
+  - component: {fileID: 830638661}
+  - component: {fileID: 830638660}
+  - component: {fileID: 830638659}
+  m_Layer: 0
+  m_Name: Canvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &830638659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830638658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &830638660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830638658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!223 &830638661
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830638658}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!224 &830638662
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830638658}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 738821070}
+  - {fileID: 745965912}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
+--- !u!1 &900185299
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 900185300}
+  - component: {fileID: 900185311}
+  - component: {fileID: 900185310}
+  - component: {fileID: 900185309}
+  - component: {fileID: 900185308}
+  - component: {fileID: 900185307}
+  - component: {fileID: 900185306}
+  - component: {fileID: 900185305}
+  - component: {fileID: 900185304}
+  - component: {fileID: 900185303}
+  - component: {fileID: 900185302}
+  - component: {fileID: 900185301}
+  m_Layer: 9
+  m_Name: Template_Blue_SilverAsh
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &900185300
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -46, y: 2, z: 2}
+  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700187899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &900185301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
+--- !u!114 &900185302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
+--- !u!114 &900185303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
+  stableKey: Template_Blue_SilverAsh
+  team: 0
+  operatorType: 2
+--- !u!114 &900185304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
+--- !u!114 &900185305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
+  combatUnit: {fileID: 900185307}
+  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  groundLayer: 8
+  corpseScale: {x: 0.15, y: 1, z: 0.15}
+  unitKind: 0
+--- !u!114 &900185306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
+--- !u!114 &900185307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
+  team: 0
+  altitude: 0
+  maxHealth: 1400
+  currentHealth: 1400
+  attackPower: 85
+  defense: 30
+  attackRange: 2.2
+  attackInterval: 1.1
+  canAttackGround: 1
+  canAttackAir: 0
+--- !u!114 &900185308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
+  movementSpeed: 4.8
+--- !u!23 &900185309
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &900185310
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &900185311
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900185299}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &927221152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 927221154}
+  - component: {fileID: 927221153}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -422,13 +1339,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!108 &103387360
+--- !u!108 &927221153
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 103387359}
+  m_GameObject: {fileID: 927221152}
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 1
@@ -487,13 +1404,13 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!4 &103387361
+--- !u!4 &927221154
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 103387359}
+  m_GameObject: {fileID: 927221152}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821794, y: -0.23456973, z: 0.10938166, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -502,7 +1419,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &894079995
+--- !u!1 &938590265
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -510,18 +1427,255 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 894079996}
-  - component: {fileID: 894080007}
-  - component: {fileID: 894080006}
-  - component: {fileID: 894080005}
-  - component: {fileID: 894080004}
-  - component: {fileID: 894080003}
-  - component: {fileID: 894080002}
-  - component: {fileID: 894080001}
-  - component: {fileID: 894080000}
-  - component: {fileID: 894079999}
-  - component: {fileID: 894079998}
-  - component: {fileID: 894079997}
+  - component: {fileID: 938590266}
+  - component: {fileID: 938590277}
+  - component: {fileID: 938590276}
+  - component: {fileID: 938590275}
+  - component: {fileID: 938590274}
+  - component: {fileID: 938590273}
+  - component: {fileID: 938590272}
+  - component: {fileID: 938590271}
+  - component: {fileID: 938590270}
+  - component: {fileID: 938590269}
+  - component: {fileID: 938590268}
+  - component: {fileID: 938590267}
+  m_Layer: 9
+  m_Name: Template_Red_Exusiai
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &938590266
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 46, y: 2, z: 0}
+  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700187899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &938590267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
+--- !u!114 &938590268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
+--- !u!114 &938590269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
+  stableKey: Template_Red_Exusiai
+  team: 1
+  operatorType: 0
+--- !u!114 &938590270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
+--- !u!114 &938590271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
+  combatUnit: {fileID: 938590273}
+  corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
+  groundLayer: 8
+  corpseScale: {x: 0.15, y: 1, z: 0.15}
+  unitKind: 0
+--- !u!114 &938590272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
+--- !u!114 &938590273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
+  team: 1
+  altitude: 0
+  maxHealth: 1000
+  currentHealth: 1000
+  attackPower: 50
+  defense: 2
+  attackRange: 6
+  attackInterval: 0.5
+  canAttackGround: 1
+  canAttackAir: 1
+--- !u!114 &938590274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
+  movementSpeed: 5
+--- !u!23 &938590275
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &938590276
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &938590277
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938590265}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &973299172
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973299173}
+  - component: {fileID: 973299184}
+  - component: {fileID: 973299183}
+  - component: {fileID: 973299182}
+  - component: {fileID: 973299181}
+  - component: {fileID: 973299180}
+  - component: {fileID: 973299179}
+  - component: {fileID: 973299178}
+  - component: {fileID: 973299177}
+  - component: {fileID: 973299176}
+  - component: {fileID: 973299175}
+  - component: {fileID: 973299174}
   m_Layer: 9
   m_Name: Template_Red_Eyjafjalla
   m_TagString: Untagged
@@ -529,52 +1683,52 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!4 &894079996
+--- !u!4 &973299173
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 46, y: 2, z: -2}
   m_LocalScale: {x: 1.6, y: 2, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1734214811}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &894079997
+--- !u!114 &973299174
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
---- !u!114 &894079998
+--- !u!114 &973299175
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &894079999
+--- !u!114 &973299176
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
@@ -583,54 +1737,54 @@ MonoBehaviour:
   stableKey: Template_Red_Eyjafjalla
   team: 1
   operatorType: 1
---- !u!114 &894080000
+--- !u!114 &973299177
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &894080001
+--- !u!114 &973299178
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 894080003}
+  combatUnit: {fileID: 973299180}
   corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
   groundLayer: 8
   corpseScale: {x: 0.15, y: 1, z: 0.15}
   unitKind: 0
---- !u!114 &894080002
+--- !u!114 &973299179
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &894080003
+--- !u!114 &973299180
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
@@ -646,26 +1800,26 @@ MonoBehaviour:
   attackInterval: 1.2
   canAttackGround: 1
   canAttackAir: 1
---- !u!114 &894080004
+--- !u!114 &973299181
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
   movementSpeed: 4.8
---- !u!23 &894080005
+--- !u!23 &973299182
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -708,13 +1862,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &894080006
+--- !u!136 &973299183
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -731,15 +1885,15 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &894080007
+--- !u!33 &973299184
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 894079995}
+  m_GameObject: {fileID: 973299172}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &933118239
+--- !u!1 &1026912315
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -747,9 +1901,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 933118240}
-  - component: {fileID: 933118242}
-  - component: {fileID: 933118241}
+  - component: {fileID: 1026912316}
+  - component: {fileID: 1026912318}
+  - component: {fileID: 1026912317}
   m_Layer: 9
   m_Name: BlueTowerVisual
   m_TagString: Untagged
@@ -757,28 +1911,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &933118240
+--- !u!4 &1026912316
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 933118239}
+  m_GameObject: {fileID: 1026912315}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 3, y: 6, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1971487379}
+  m_Father: {fileID: 1269479828}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &933118241
+--- !u!23 &1026912317
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 933118239}
+  m_GameObject: {fileID: 1026912315}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -821,15 +1975,15 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &933118242
+--- !u!33 &1026912318
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 933118239}
+  m_GameObject: {fileID: 1026912315}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1140500230
+--- !u!1 &1033652381
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -837,942 +1991,13 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1140500231}
-  - component: {fileID: 1140500249}
-  - component: {fileID: 1140500248}
-  - component: {fileID: 1140500247}
-  - component: {fileID: 1140500246}
-  - component: {fileID: 1140500245}
-  - component: {fileID: 1140500244}
-  - component: {fileID: 1140500243}
-  - component: {fileID: 1140500242}
-  - component: {fileID: 1140500241}
-  - component: {fileID: 1140500240}
-  - component: {fileID: 1140500239}
-  - component: {fileID: 1140500238}
-  - component: {fileID: 1140500237}
-  - component: {fileID: 1140500236}
-  - component: {fileID: 1140500235}
-  - component: {fileID: 1140500234}
-  - component: {fileID: 1140500233}
-  - component: {fileID: 1140500232}
-  m_Layer: 9
-  m_Name: Player_Exusiai
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1140500231
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -46, y: 2, z: 0}
-  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1140500232
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8e3a9c4d1f2470e9a6b5c2d3e4f5678, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.ExusiaiSkillIndicator
---- !u!114 &1140500233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e47c0b5ed6dc42a983a59bc3102569e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.ExusiaiSkillController
---- !u!114 &1140500234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &1140500235
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
-  stableKey: Player_Exusiai
-  team: 0
-  operatorType: 0
---- !u!114 &1140500236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1bcfb723cda4fbebfa6da8f9d512b4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.SkillDashController
---- !u!114 &1140500237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce15fa2673b8f477c82a2a4566442da2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.AttackSequenceExecutor
---- !u!114 &1140500238
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6bc66e1ef317409986051649f66e03b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.UnitStatModifiers
---- !u!114 &1140500239
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c6d7f06ad7f40d9a31f09625cc4e0e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatCommandResolver
---- !u!114 &1140500240
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &1140500241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e197160b8364485a05c108826d02365, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Commands.CommandFeedbackPresenter
---- !u!114 &1140500242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 1140500244}
-  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  groundLayer: 8
-  corpseScale: {x: 0.15, y: 1, z: 0.15}
-  unitKind: 0
---- !u!114 &1140500243
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &1140500244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
-  team: 0
-  altitude: 0
-  maxHealth: 1000
-  currentHealth: 1000
-  attackPower: 50
-  defense: 2
-  attackRange: 6
-  attackInterval: 0.5
-  canAttackGround: 1
-  canAttackAir: 1
---- !u!114 &1140500245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e4fbeb4cccf3465cbbdaa7e9b3d1a7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Commands.PlayerCommandController
---- !u!114 &1140500246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
-  movementSpeed: 5
---- !u!23 &1140500247
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1140500248
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1140500249
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1140500230}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1176194473
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1176194477}
-  - component: {fileID: 1176194476}
-  - component: {fileID: 1176194475}
-  - component: {fileID: 1176194474}
-  m_Layer: 0
-  m_Name: Canvas
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1176194474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1176194473}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
---- !u!114 &1176194475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1176194473}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
---- !u!223 &1176194476
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1176194473}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!224 &1176194477
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1176194473}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 34941014}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
---- !u!1 &1239212100
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1239212101}
-  - component: {fileID: 1239212112}
-  - component: {fileID: 1239212111}
-  - component: {fileID: 1239212110}
-  - component: {fileID: 1239212109}
-  - component: {fileID: 1239212108}
-  - component: {fileID: 1239212107}
-  - component: {fileID: 1239212106}
-  - component: {fileID: 1239212105}
-  - component: {fileID: 1239212104}
-  - component: {fileID: 1239212103}
-  - component: {fileID: 1239212102}
-  m_Layer: 9
-  m_Name: Template_Red_Exusiai
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1239212101
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 46, y: 2, z: 0}
-  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1239212102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
---- !u!114 &1239212103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &1239212104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
-  stableKey: Template_Red_Exusiai
-  team: 1
-  operatorType: 0
---- !u!114 &1239212105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &1239212106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 1239212108}
-  corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
-  groundLayer: 8
-  corpseScale: {x: 0.15, y: 1, z: 0.15}
-  unitKind: 0
---- !u!114 &1239212107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &1239212108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
-  team: 1
-  altitude: 0
-  maxHealth: 1000
-  currentHealth: 1000
-  attackPower: 50
-  defense: 2
-  attackRange: 6
-  attackInterval: 0.5
-  canAttackGround: 1
-  canAttackAir: 1
---- !u!114 &1239212109
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
-  movementSpeed: 5
---- !u!23 &1239212110
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1239212111
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1239212112
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239212100}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1247205257
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1247205260}
-  - component: {fileID: 1247205259}
-  - component: {fileID: 1247205258}
-  m_Layer: 0
-  m_Name: Main Camera
-  m_TagString: MainCamera
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1247205258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1247205257}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b54660a1c28f4af78c63db834491469, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Camera.MobaCameraController
-  cameraOffset: {x: -14, y: 28, z: -14}
-  centeringTarget: {fileID: 1140500231}
---- !u!20 &1247205259
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1247205257}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 45
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!4 &1247205260
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1247205257}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.42470822, y: 0.33985117, z: -0.17591992, w: 0.82047325}
-  m_LocalPosition: {x: -60, y: 28, z: -14}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1262560245
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1262560246}
-  - component: {fileID: 1262560249}
-  - component: {fileID: 1262560248}
-  - component: {fileID: 1262560247}
-  m_Layer: 0
-  m_Name: BlueDeployment
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1262560246
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262560245}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -46, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 0.05, z: 2}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &1262560247
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262560245}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1262560248
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262560245}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1262560249
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262560245}
-  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1455209839
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1455209840}
-  - component: {fileID: 1455209841}
-  m_Layer: 0
-  m_Name: PlayerDeployment
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1455209840
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455209839}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1455209841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1455209839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8cceea16cf87491c95fc2283f0149100, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Skills.PlayerDeploymentPresenter
-  roster: {fileID: 0}
-  playerSlotKey: 
-  skillHud: {fileID: 0}
-  cameraController: {fileID: 0}
-  match: {fileID: 0}
---- !u!1 &1540226088
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1540226089}
-  - component: {fileID: 1540226095}
-  - component: {fileID: 1540226094}
-  - component: {fileID: 1540226093}
-  - component: {fileID: 1540226092}
-  - component: {fileID: 1540226091}
-  - component: {fileID: 1540226090}
+  - component: {fileID: 1033652382}
+  - component: {fileID: 1033652388}
+  - component: {fileID: 1033652387}
+  - component: {fileID: 1033652386}
+  - component: {fileID: 1033652385}
+  - component: {fileID: 1033652384}
+  - component: {fileID: 1033652383}
   m_Layer: 9
   m_Name: RedTower
   m_TagString: Untagged
@@ -1780,84 +2005,84 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1540226089
+--- !u!4 &1033652382
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 38, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1922965404}
-  m_Father: {fileID: 1734214811}
+  - {fileID: 2035909869}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1540226090
+--- !u!114 &1033652383
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7bec69375c92d41dc91b9b23cbc99b9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.TowerCombatController
-  owner: {fileID: 1540226094}
-  attack: {fileID: 1540226091}
---- !u!114 &1540226091
+  owner: {fileID: 1033652387}
+  attack: {fileID: 1033652384}
+--- !u!114 &1033652384
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &1540226092
+--- !u!114 &1033652385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 1540226094}
+  combatUnit: {fileID: 1033652387}
   corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
   groundLayer: 8
   corpseScale: {x: 0.3, y: 1, z: 0.3}
   unitKind: 2
---- !u!114 &1540226093
+--- !u!114 &1033652386
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &1540226094
+--- !u!114 &1033652387
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
@@ -1873,13 +2098,13 @@ MonoBehaviour:
   attackInterval: 1
   canAttackGround: 1
   canAttackAir: 1
---- !u!65 &1540226095
+--- !u!65 &1033652388
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1540226088}
+  m_GameObject: {fileID: 1033652381}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -1894,7 +2119,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3, y: 6, z: 3}
   m_Center: {x: 0, y: 3, z: 0}
---- !u!1 &1563606544
+--- !u!1 &1213795843
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1902,89 +2127,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1563606547}
-  - component: {fileID: 1563606546}
-  - component: {fileID: 1563606545}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1563606545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1563606544}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
-  m_SendPointerHoverToParent: 1
-  m_MoveRepeatDelay: 0.5
-  m_MoveRepeatRate: 0.1
-  m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_DeselectOnBackgroundClick: 1
-  m_PointerBehavior: 0
-  m_CursorLockBehavior: 0
-  m_ScrollDeltaPerTick: 6
---- !u!114 &1563606546
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1563606544}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &1563606547
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1563606544}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1697718743
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1697718744}
-  - component: {fileID: 1697718747}
-  - component: {fileID: 1697718746}
-  - component: {fileID: 1697718745}
+  - component: {fileID: 1213795844}
+  - component: {fileID: 1213795847}
+  - component: {fileID: 1213795846}
+  - component: {fileID: 1213795845}
   m_Layer: 0
   m_Name: RedDeployment
   m_TagString: Untagged
@@ -1992,28 +2138,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1697718744
+--- !u!4 &1213795844
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697718743}
+  m_GameObject: {fileID: 1213795843}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 46, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 0.05, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1734214811}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &1697718745
+--- !u!23 &1213795845
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697718743}
+  m_GameObject: {fileID: 1213795843}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -2056,13 +2202,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1697718746
+--- !u!136 &1213795846
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697718743}
+  m_GameObject: {fileID: 1213795843}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -2079,15 +2225,15 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &1697718747
+--- !u!33 &1213795847
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697718743}
+  m_GameObject: {fileID: 1213795843}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1734214810
+--- !u!1 &1269479827
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2095,163 +2241,135 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1734214811}
-  - component: {fileID: 1734214816}
-  - component: {fileID: 1734214815}
-  - component: {fileID: 1734214814}
-  - component: {fileID: 1734214813}
-  - component: {fileID: 1734214812}
-  m_Layer: 0
-  m_Name: ArenaBootstrap
+  - component: {fileID: 1269479828}
+  - component: {fileID: 1269479834}
+  - component: {fileID: 1269479833}
+  - component: {fileID: 1269479832}
+  - component: {fileID: 1269479831}
+  - component: {fileID: 1269479830}
+  - component: {fileID: 1269479829}
+  m_Layer: 9
+  m_Name: BlueTower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1734214811
+--- !u!4 &1269479828
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -38, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2002925951}
-  - {fileID: 1971487379}
-  - {fileID: 1540226089}
-  - {fileID: 1262560246}
-  - {fileID: 1697718744}
-  - {fileID: 1140500231}
-  - {fileID: 75870200}
-  - {fileID: 2050522070}
-  - {fileID: 1239212101}
-  - {fileID: 894079996}
-  - {fileID: 2109759598}
-  - {fileID: 1455209840}
-  m_Father: {fileID: 0}
+  - {fileID: 1026912316}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1734214812
+--- !u!114 &1269479829
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db6302699fc841c8a2f31d99de790812, type: 3}
+  m_Script: {fileID: 11500000, guid: 7bec69375c92d41dc91b9b23cbc99b9b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.ArenaRosterBootstrap
-  roster: {fileID: 1734214815}
-  blueTower: {fileID: 1971487384}
-  redTower: {fileID: 1540226094}
-  match: {fileID: 1734214813}
-  playerDeployment: {fileID: 1455209841}
-  skillHud: {fileID: 34941015}
-  cameraController: {fileID: 1247205258}
-  slots:
-  - stableKey: Player_Exusiai
-    team: 0
-    operatorType: 0
-    template: {fileID: 1140500230}
-    deploymentPosition: {x: -46, y: 2, z: 0}
-    isPlayerControlled: 1
-  - stableKey: Blue_Eyjafjalla
-    team: 0
-    operatorType: 1
-    template: {fileID: 75870199}
-    deploymentPosition: {x: -46, y: 2, z: -2}
-    isPlayerControlled: 0
-  - stableKey: Blue_SilverAsh
-    team: 0
-    operatorType: 2
-    template: {fileID: 2050522069}
-    deploymentPosition: {x: -46, y: 2, z: 2}
-    isPlayerControlled: 0
-  - stableKey: Red_Exusiai
-    team: 1
-    operatorType: 0
-    template: {fileID: 1239212100}
-    deploymentPosition: {x: 46, y: 2, z: 0}
-    isPlayerControlled: 0
-  - stableKey: Red_Eyjafjalla
-    team: 1
-    operatorType: 1
-    template: {fileID: 894079995}
-    deploymentPosition: {x: 46, y: 2, z: -2}
-    isPlayerControlled: 0
-  - stableKey: Red_SilverAsh
-    team: 1
-    operatorType: 2
-    template: {fileID: 2109759597}
-    deploymentPosition: {x: 46, y: 2, z: 2}
-    isPlayerControlled: 0
---- !u!114 &1734214813
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.TowerCombatController
+  owner: {fileID: 1269479833}
+  attack: {fileID: 1269479830}
+--- !u!114 &1269479830
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 325b949692a64f23a731da9724ea9c8e, type: 3}
+  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MatchOutcomeController
-  blueTower: {fileID: 1971487384}
-  redTower: {fileID: 1540226094}
-  spawner: {fileID: 1734214814}
---- !u!114 &1734214814
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
+--- !u!114 &1269479831
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f165556eafc4cd1afaded9f7898e63e, type: 3}
+  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.MinionWaveSpawner
-  minionParent: {fileID: 1734214811}
-  blueTower: {fileID: 1971487384}
-  redTower: {fileID: 1540226094}
-  blueMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  redMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
-  targetableLayer: 9
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
+  combatUnit: {fileID: 1269479833}
+  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
   groundLayer: 8
---- !u!114 &1734214815
+  corpseScale: {x: 0.3, y: 1, z: 0.3}
+  unitKind: 2
+--- !u!114 &1269479832
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: faa905298c8f4bcb95a186232f967f38, type: 3}
+  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRosterController
---- !u!114 &1734214816
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
+--- !u!114 &1269479833
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1734214810}
+  m_GameObject: {fileID: 1269479827}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f144b6791b7c4183b0e4835a5cbb551, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.ArenaBootstrap
-  blueTower: {fileID: 1971487379}
-  redTower: {fileID: 1540226089}
---- !u!1 &1922965403
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
+  team: 0
+  altitude: 0
+  maxHealth: 500
+  currentHealth: 500
+  attackPower: 20
+  defense: 40
+  attackRange: 9
+  attackInterval: 1
+  canAttackGround: 1
+  canAttackAir: 1
+--- !u!65 &1269479834
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269479827}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3, y: 6, z: 3}
+  m_Center: {x: 0, y: 3, z: 0}
+--- !u!1 &1297221544
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2259,38 +2377,162 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1922965404}
-  - component: {fileID: 1922965406}
-  - component: {fileID: 1922965405}
+  - component: {fileID: 1297221545}
+  - component: {fileID: 1297221556}
+  - component: {fileID: 1297221555}
+  - component: {fileID: 1297221554}
+  - component: {fileID: 1297221553}
+  - component: {fileID: 1297221552}
+  - component: {fileID: 1297221551}
+  - component: {fileID: 1297221550}
+  - component: {fileID: 1297221549}
+  - component: {fileID: 1297221548}
+  - component: {fileID: 1297221547}
+  - component: {fileID: 1297221546}
   m_Layer: 9
-  m_Name: RedTowerVisual
+  m_Name: Template_Red_SilverAsh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1922965404
+  m_IsActive: 0
+--- !u!4 &1297221545
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1922965403}
+  m_GameObject: {fileID: 1297221544}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
-  m_LocalScale: {x: 3, y: 6, z: 3}
+  m_LocalPosition: {x: 46, y: 2, z: 2}
+  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1540226089}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &1922965405
+--- !u!114 &1297221546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
+--- !u!114 &1297221547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
+--- !u!114 &1297221548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
+  stableKey: Template_Red_SilverAsh
+  team: 1
+  operatorType: 2
+--- !u!114 &1297221549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
+--- !u!114 &1297221550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
+  combatUnit: {fileID: 1297221552}
+  corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
+  groundLayer: 8
+  corpseScale: {x: 0.15, y: 1, z: 0.15}
+  unitKind: 0
+--- !u!114 &1297221551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
+--- !u!114 &1297221552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
+  team: 1
+  altitude: 0
+  maxHealth: 1400
+  currentHealth: 1400
+  attackPower: 85
+  defense: 30
+  attackRange: 2.2
+  attackInterval: 1.1
+  canAttackGround: 1
+  canAttackAir: 0
+--- !u!114 &1297221553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
+  movementSpeed: 4.8
+--- !u!23 &1297221554
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1922965403}
+  m_GameObject: {fileID: 1297221544}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -2333,136 +2575,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1922965406
-MeshFilter:
+--- !u!136 &1297221555
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1922965403}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &1971487378
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1971487379}
-  - component: {fileID: 1971487385}
-  - component: {fileID: 1971487384}
-  - component: {fileID: 1971487383}
-  - component: {fileID: 1971487382}
-  - component: {fileID: 1971487381}
-  - component: {fileID: 1971487380}
-  m_Layer: 9
-  m_Name: BlueTower
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1971487379
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -38, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 933118240}
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1971487380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bec69375c92d41dc91b9b23cbc99b9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Arena.TowerCombatController
-  owner: {fileID: 1971487384}
-  attack: {fileID: 1971487381}
---- !u!114 &1971487381
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &1971487382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 1971487384}
-  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  groundLayer: 8
-  corpseScale: {x: 0.3, y: 1, z: 0.3}
-  unitKind: 2
---- !u!114 &1971487383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &1971487384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
-  team: 0
-  altitude: 0
-  maxHealth: 500
-  currentHealth: 500
-  attackPower: 20
-  defense: 40
-  attackRange: 9
-  attackInterval: 1
-  canAttackGround: 1
-  canAttackAir: 1
---- !u!65 &1971487385
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1971487378}
+  m_GameObject: {fileID: 1297221544}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -2474,10 +2593,20 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 3, y: 6, z: 3}
-  m_Center: {x: 0, y: 3, z: 0}
---- !u!1 &2002925950
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &1297221556
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1297221544}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1754632840
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2485,10 +2614,451 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2002925951}
-  - component: {fileID: 2002925954}
-  - component: {fileID: 2002925953}
-  - component: {fileID: 2002925952}
+  - component: {fileID: 1754632841}
+  - component: {fileID: 1754632852}
+  - component: {fileID: 1754632851}
+  - component: {fileID: 1754632850}
+  - component: {fileID: 1754632849}
+  - component: {fileID: 1754632848}
+  - component: {fileID: 1754632847}
+  - component: {fileID: 1754632846}
+  - component: {fileID: 1754632845}
+  - component: {fileID: 1754632844}
+  - component: {fileID: 1754632843}
+  - component: {fileID: 1754632842}
+  m_Layer: 9
+  m_Name: Template_Blue_Eyjafjalla
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1754632841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -46, y: 2, z: -2}
+  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700187899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1754632842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
+--- !u!114 &1754632843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
+--- !u!114 &1754632844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
+  stableKey: Template_Blue_Eyjafjalla
+  team: 0
+  operatorType: 1
+--- !u!114 &1754632845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
+--- !u!114 &1754632846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
+  combatUnit: {fileID: 1754632848}
+  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  groundLayer: 8
+  corpseScale: {x: 0.15, y: 1, z: 0.15}
+  unitKind: 0
+--- !u!114 &1754632847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
+--- !u!114 &1754632848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
+  team: 0
+  altitude: 0
+  maxHealth: 950
+  currentHealth: 950
+  attackPower: 75
+  defense: 10
+  attackRange: 6
+  attackInterval: 1.2
+  canAttackGround: 1
+  canAttackAir: 1
+--- !u!114 &1754632849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
+  movementSpeed: 4.8
+--- !u!23 &1754632850
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &1754632851
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &1754632852
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754632840}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1896939321
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1896939322}
+  - component: {fileID: 1896939325}
+  - component: {fileID: 1896939324}
+  - component: {fileID: 1896939323}
+  m_Layer: 0
+  m_Name: BlueDeployment
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1896939322
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896939321}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -46, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 0.05, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700187899}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &1896939323
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896939321}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &1896939324
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896939321}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &1896939325
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896939321}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2035909868
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2035909869}
+  - component: {fileID: 2035909871}
+  - component: {fileID: 2035909870}
+  m_Layer: 9
+  m_Name: RedTowerVisual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2035909869
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035909868}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 3, y: 6, z: 3}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1033652382}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2035909870
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035909868}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &2035909871
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035909868}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2128689902
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2128689903}
+  - component: {fileID: 2128689906}
+  - component: {fileID: 2128689905}
+  - component: {fileID: 2128689904}
   m_Layer: 8
   m_Name: Lane
   m_TagString: Untagged
@@ -2496,28 +3066,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2002925951
+--- !u!4 &2128689903
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2002925950}
+  m_GameObject: {fileID: 2128689902}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 2.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1734214811}
+  m_Father: {fileID: 700187899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &2002925952
+--- !u!23 &2128689904
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2002925950}
+  m_GameObject: {fileID: 2128689902}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -2560,13 +3130,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &2002925953
+--- !u!64 &2128689905
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2002925950}
+  m_GameObject: {fileID: 2128689902}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -2582,494 +3152,20 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!33 &2002925954
+--- !u!33 &2128689906
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2002925950}
+  m_GameObject: {fileID: 2128689902}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &2050522069
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2050522070}
-  - component: {fileID: 2050522081}
-  - component: {fileID: 2050522080}
-  - component: {fileID: 2050522079}
-  - component: {fileID: 2050522078}
-  - component: {fileID: 2050522077}
-  - component: {fileID: 2050522076}
-  - component: {fileID: 2050522075}
-  - component: {fileID: 2050522074}
-  - component: {fileID: 2050522073}
-  - component: {fileID: 2050522072}
-  - component: {fileID: 2050522071}
-  m_Layer: 9
-  m_Name: Template_Blue_SilverAsh
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &2050522070
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -46, y: 2, z: 2}
-  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2050522071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
---- !u!114 &2050522072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &2050522073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
-  stableKey: Template_Blue_SilverAsh
-  team: 0
-  operatorType: 2
---- !u!114 &2050522074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &2050522075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 2050522077}
-  corpseMaterial: {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  groundLayer: 8
-  corpseScale: {x: 0.15, y: 1, z: 0.15}
-  unitKind: 0
---- !u!114 &2050522076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &2050522077
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
-  team: 0
-  altitude: 0
-  maxHealth: 1400
-  currentHealth: 1400
-  attackPower: 85
-  defense: 30
-  attackRange: 2.2
-  attackInterval: 1.1
-  canAttackGround: 1
-  canAttackAir: 0
---- !u!114 &2050522078
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
-  movementSpeed: 4.8
---- !u!23 &2050522079
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 3bc80ba721f904bd88b7a2f34e7513a3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2050522080
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &2050522081
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2050522069}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &2109759597
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2109759598}
-  - component: {fileID: 2109759609}
-  - component: {fileID: 2109759608}
-  - component: {fileID: 2109759607}
-  - component: {fileID: 2109759606}
-  - component: {fileID: 2109759605}
-  - component: {fileID: 2109759604}
-  - component: {fileID: 2109759603}
-  - component: {fileID: 2109759602}
-  - component: {fileID: 2109759601}
-  - component: {fileID: 2109759600}
-  - component: {fileID: 2109759599}
-  m_Layer: 9
-  m_Name: Template_Red_SilverAsh
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &2109759598
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 46, y: 2, z: 2}
-  m_LocalScale: {x: 1.6, y: 2, z: 1.6}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1734214811}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2109759599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e839d761b0c4a809e5db8d3ff1db2a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.SimpleOperatorAiController
---- !u!114 &2109759600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14ecad65f7784dcf90bb1dabcb440f2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorRetreatController
---- !u!114 &2109759601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 715acd45f91d45ada87d9cb3f18a755d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.OperatorIdentity
-  stableKey: Template_Red_SilverAsh
-  team: 1
-  operatorType: 2
---- !u!114 &2109759602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 209d42de5d1c4e9e88757b1f4ca592a3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.BasicAttackController
---- !u!114 &2109759603
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59750a72315042aeaa543902f2c7874e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.DeathCorpsePresenter
-  combatUnit: {fileID: 2109759605}
-  corpseMaterial: {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
-  groundLayer: 8
-  corpseScale: {x: 0.15, y: 1, z: 0.15}
-  unitKind: 0
---- !u!114 &2109759604
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 365b2fb8550e44c1a0cde87bf22d4b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.HealthBarPresenter
---- !u!114 &2109759605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c35dc3dbe834da0a600d65ee2bdccf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Combat.CombatUnit
-  team: 1
-  altitude: 0
-  maxHealth: 1400
-  currentHealth: 1400
-  attackPower: 85
-  defense: 30
-  attackRange: 2.2
-  attackInterval: 1.1
-  canAttackGround: 1
-  canAttackAir: 0
---- !u!114 &2109759606
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6298b672a063244bcad04c47a85e71b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ArknightsFrontline.Runtime::ArknightsFrontline.Movement.UnitMotor
-  movementSpeed: 4.8
---- !u!23 &2109759607
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 478acb60a119f4556842fb5bd99dcec7, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2109759608
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!33 &2109759609
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109759597}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1734214811}
-  - {fileID: 103387361}
-  - {fileID: 1247205260}
-  - {fileID: 1563606547}
-  - {fileID: 1176194477}
+  - {fileID: 700187899}
+  - {fileID: 927221154}
+  - {fileID: 147891707}
+  - {fileID: 5176582}
+  - {fileID: 830638662}

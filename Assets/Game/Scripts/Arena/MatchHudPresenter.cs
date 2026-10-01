@@ -11,6 +11,9 @@ namespace ArknightsFrontline.Arena
     public sealed class MatchHudPresenter : MonoBehaviour
     {
         private static readonly Vector2 Center = new Vector2(0.5f, 0.5f);
+        private const float ResultCardWidth = 1120f;
+        private const float ResultCardHeight = 640f;
+        private const float ResultCardCanvasInset = 32f;
         private const float ResultRowHeight = 42f;
 
         private MatchOutcomeController match;
@@ -36,6 +39,7 @@ namespace ArknightsFrontline.Arena
         private Text resultSummaryText;
         private Text exitVoteLabel;
         private Button exitButton;
+        private RectTransform resultCardRect;
         private Font displayFont;
         private MatchResultSnapshot renderedSnapshot;
 
@@ -185,6 +189,7 @@ namespace ArknightsFrontline.Arena
             IsResultVisible = true;
             liveBar.SetActive(false);
             resultOverlay.SetActive(true);
+            FitResultCardToCanvas();
 
             ResultTitle = GetResultTitle(snapshot.Outcome);
             ResultElapsedText = FormatElapsed(snapshot.ElapsedSeconds);
@@ -202,6 +207,28 @@ namespace ArknightsFrontline.Arena
             RenderRows(snapshot);
             RefreshVoteLabel();
             exitButton.interactable = votes != null && votes.IsConfigured && !votes.IsExitApproved;
+        }
+
+        private void FitResultCardToCanvas()
+        {
+            if (resultCardRect == null || Canvas == null)
+            {
+                return;
+            }
+
+            RectTransform canvasRect = Canvas.transform as RectTransform;
+            if (canvasRect == null)
+            {
+                return;
+            }
+
+            Rect bounds = canvasRect.rect;
+            float availableWidth = Mathf.Max(0f, bounds.width - ResultCardCanvasInset * 2f);
+            float availableHeight = Mathf.Max(0f, bounds.height - ResultCardCanvasInset * 2f);
+            float scale = Mathf.Min(
+                1f,
+                Mathf.Min(availableWidth / ResultCardWidth, availableHeight / ResultCardHeight));
+            resultCardRect.localScale = new Vector3(scale, scale, 1f);
         }
 
         private void RenderRows(MatchResultSnapshot snapshot)
@@ -378,12 +405,12 @@ namespace ArknightsFrontline.Arena
                 resultOverlay.transform,
                 new Color(0.055f, 0.075f, 0.10f, 0.99f),
                 raycastTarget: true);
-            RectTransform cardRect = (RectTransform)card.transform;
-            cardRect.anchorMin = Center;
-            cardRect.anchorMax = Center;
-            cardRect.pivot = Center;
-            cardRect.sizeDelta = new Vector2(1120f, 640f);
-            cardRect.anchoredPosition = Vector2.zero;
+            resultCardRect = (RectTransform)card.transform;
+            resultCardRect.anchorMin = Center;
+            resultCardRect.anchorMax = Center;
+            resultCardRect.pivot = Center;
+            resultCardRect.sizeDelta = new Vector2(ResultCardWidth, ResultCardHeight);
+            resultCardRect.anchoredPosition = Vector2.zero;
 
             resultTitleText = CreateText(
                 "ResultTitle",
