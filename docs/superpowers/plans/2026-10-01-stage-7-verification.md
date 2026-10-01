@@ -26,4 +26,12 @@ Packages、ProjectSettings、用户材质/渲染配置、MinionLanePlayModeTests
 
 ## 后续状态
 
-统计、HUD/退出、保存场景接线、最终完整测试及 Windows 构建仍在实施；此记录不表示这些步骤已经通过。
+## Task 3：退出投票核心（HUD 尚未完成）
+
+- 初次实施先写了完整投票实现，未遵守先 RED 顺序；已纠正：备份本任务实现，将 RequestExit/CastVote 改为编译有效的失败入口，再运行真实行为测试。
+- RED：执行目录 `vote-red-results.xml`，7 项中 5 项失败；失败为三席表态、死队友自动同意、结算前拒绝/结算后接受、两票不足、全票仅一次等预期行为断言。
+- 恢复实现后 GREEN：`vote-green-results.xml`，7/7，无非通过项。
+- 独立静态复审：`stage7_match_impl`，无阻塞项。默认参数自动同意的单独覆盖为非阻塞建议。
+- Unity 进程退出；ProjectSettings.asset 原字节已恢复，场景、Packages 与材质哈希不变。
+
+统计、HUD、保存场景接线、最终完整测试及 Windows 构建仍在实施；此记录不表示这些步骤已经通过。
