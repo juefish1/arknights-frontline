@@ -24,3 +24,11 @@ Recordings/
 *.svd
 *.pdb
 
+# Generated editor solutions and diagnostic logs
+*.slnx
+*.log
+
+# Local brainstorm server credentials and runtime state
+.superpowers/brainstorm/.last-*
+.superpowers/brainstorm/**/state/
+

@@ -11,6 +11,20 @@ namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class MinionLanePlayModeTests
     {
+        [UnityTearDown]
+        public IEnumerator UnloadArena()
+        {
+            Scene arena = SceneManager.GetSceneByName("PrototypeArena");
+            if (!arena.isLoaded)
+            {
+                yield break;
+            }
+
+            Scene cleanup = SceneManager.CreateScene("MinionLaneCleanup");
+            SceneManager.SetActiveScene(cleanup);
+            yield return SceneManager.UnloadSceneAsync(arena);
+        }
+
         [UnityTest]
         public IEnumerator PrototypeArenaSpawnsBalancedWaveThatAdvances()
         {
