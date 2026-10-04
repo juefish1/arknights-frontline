@@ -1,6 +1,6 @@
 # 阶段 7 实施计划
 
-权威设计：`docs/superpowers/specs/2026-10-01-stage-7-results-and-exit-design.md`。基准 dev `ff87582`，Unity 6000.6.2f1，直接 D 盘工作区。用户已要求继续实施，并确认 Windows、取消 15 分钟强制结算、同队三人全部同意后退出（两名电脑自动同意）。沿用子代理 TDD 与独立复审；不增加实现前确认轮次。
+权威设计：`docs/superpowers/specs/2026-10-01-stage-7-results-and-exit-design.md`。本历史计划的基准为 dev `ff87582`、Unity 6000.6.2f1 和 D 盘工作区；当前 `dev` 已改用 Unity 6000.3.25f1，旧版测试及构建结果不能作为新版本的验证结果。用户当时确认 Windows、取消 15 分钟强制结算、同队三人全部同意后退出（两名电脑自动同意）。沿用子代理 TDD 与独立复审；不增加实现前确认轮次。
 
 ## Task 0 当前基线和保护记录
 

@@ -1,6 +1,6 @@
 # 阶段 7 验证账本
 
-工作区 `D:\arknights-frontline`，分支 `dev`，Unity `6000.6.2f1`。本阶段人工验收待执行；阶段 6 的“全部通过”不代替本阶段验收。
+本账本记录原工作区 `D:\arknights-frontline`、`dev` 分支在 Unity `6000.6.2f1` 下的阶段 7 验证。当前 `dev` 已改用 Unity `6000.3.25f1`；以下测试和构建结果为历史证据，不代表当前版本已通过相同验证。阶段 6 的“全部通过”不代替本阶段验收。
 
 ## 范围与保护
 
@@ -88,7 +88,7 @@ Packages、ProjectSettings、用户材质/渲染配置、MinionLanePlayModeTests
 - 按 fullname 比较开始基线 78 项：旧项全部存在并通过，无遗漏或新增回归；新增 5 项（字体销毁、保存场景计时/HUD、统计快照、真实点击、重载归零）全部通过。完整 PlayMode 所有未通过项：**无**。此前聚焦失败及修正证据已保留于上文。
 - 完整测试后 Unity 已退出，场景 SHA-256 仍为 `3222FE4FE7EE9E52F1D3B8F4DC39B4154276CB1270F6DD180AB415ECAC491A59`，ProjectSettings.asset 恢复为 `1B6C58EDD8C67A49E8E015818C9D0F09E9DE4F9E426803C9C63B53011A9E7BBA`；开始 Windows x64 构建。产物与启动检查结果待补。
 
-- Windows x64 构建于 2026-10-02 完成，Unity 6000.6.2f1，进程退出码 0；`TestResults/stage7-windows-build.log` 的 BuildReport 为 Success，助手报告总大小 132846674 bytes。输出路径中的 `20261001` 是阶段开始日期，不是构建完成日期。
+- 历史 Windows x64 构建于 2026-10-02 使用 Unity 6000.6.2f1 完成，进程退出码 0；`TestResults/stage7-windows-build.log` 的 BuildReport 为 Success，助手报告总大小 132846674 bytes。输出路径中的 `20261001` 是阶段开始日期，不是构建完成日期。
 - 文件版启动检查：隐藏启动本次构建 exe，`-batchmode -nographics` 持续 15 秒后仍存活；`TestResults/stage7-windows-player-smoke.log` 无 Exception/NullReference/加载失败。仅在核对本次 PID、可执行路径和专用日志参数后关闭本次进程；当前无遗留 Unity/游戏进程。无图形启动不证明中文视觉、实际结算退出或性能通过。
 - 新 ZIP：`Builds/arknights-frontline-windows-x64-stage7-20261001.zip`，51238799 bytes，199 个条目；SHA-256 `8601C889F3FED2928B79E26DB6FDBDEEEB7499B831F9EFEFA950A09734A9BE22`。exe、UnityPlayer、CrashHandler、场景 globalgamemanagers、自有 Runtime DLL、Mono 运行库和试玩说明均已核对存在。首次核对误用了默认 Assembly-CSharp.dll 文件名，本项目使用 asmdef；按实际 `ArknightsFrontline.Runtime.dll` 重新核对通过，未改构建产物。旧试玩包保留。
 - 构建结束后 ProjectSettings.asset 恢复原字节；场景、Packages manifest/lock 哈希仍与前述一致。只读保存比较再次确认旧 158 块全部保留、新增 6 块，无差异缺失。未提交 Packages、ProjectSettings、材质、渲染设置、其他用户测试及未跟踪用户文件。

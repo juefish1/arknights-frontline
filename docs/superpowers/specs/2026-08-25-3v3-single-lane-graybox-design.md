@@ -16,7 +16,7 @@
 
 ## 3. 技术与平台约束
 
-- 游戏引擎：当前 Windows 项目使用 Unity 6000.6.2f1。
+- 游戏引擎：当前 `dev` 项目使用 Unity 6000.3.25f1；历史 Windows 试玩包的验证记录见阶段 7 验证账本。
 - 编程语言：C#。
 - 渲染管线：Universal Render Pipeline（URP）。
 - 输入：Unity Input System；所有动作通过输入配置绑定，角色代码不得直接依赖物理按键。

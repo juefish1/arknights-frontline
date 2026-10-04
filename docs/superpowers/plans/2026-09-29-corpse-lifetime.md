@@ -6,13 +6,15 @@
 
 **Architecture:** 新增挂在尸体对象上的 `CorpseLifetimeController`，由它独立计时并维护按干员 key 索引的静态登记；`DeathCorpsePresenter` 只负责把序列化的 `UnitKind` 和原对象名称传给控制器。小兵生成器与确定性场景构建器显式配置类别，保存场景通过现有构建入口重建。
 
-**Tech Stack:** Unity 6000.6.2f1、C#、NUnit、Unity Test Framework、EditMode/PlayMode tests、Git。
+**Tech Stack:** Unity 6000.3.25f1、C#、NUnit、Unity Test Framework、EditMode/PlayMode tests、Git。
 
 **Spec:** `docs/superpowers/specs/2026-09-29-corpse-lifetime-design.md`
 
+**版本说明（2026-10-04）：**当前 `dev` 使用 Unity 6000.3.25f1。下方 Task 0 的编译错误和旧测试结果是迁移前的历史证据；若重新执行本计划，应在当前版本重新建立 EditMode/PlayMode 基线，不把旧 XML 当作当前版本的通过记录。Windows 命令示例也须按实际安装路径调整。
+
 ## Global Constraints
 
-- 直接在 `D:\arknights-frontline` 的 `dev` 分支工作，不创建工作树。
+- 在仓库根目录的 `dev` 分支工作；下方 `D:\arknights-frontline` 为原 Windows 命令示例，执行时按实际路径调整。
 - 执行采用子代理实施、独立复审、TDD；子代理模型最高 `gpt-6-luna`，推理强度最高 `xhigh`，超出限制时请求人工审核。
 - 小兵生命周期固定为从尸体创建起 5 秒，包含空中尸体 0.3 秒坠落；达到 5 秒直接销毁，不淡出。
 - 干员尸体不自动计时；未来再部署在生成新干员前以稳定 `ownerKey` 调用显式清理入口。
@@ -34,7 +36,7 @@
 
 ---
 
-### Task 0: Unity 6000.6 test API compatibility prerequisite
+### Task 0: 历史测试 API 迁移记录与当前版本基线
 
 **Files:**
 - Modify: `Assets/Tests/EditMode/DeathCorpsePresenterTests.cs`
@@ -42,12 +44,12 @@
 - Modify: `Assets/Tests/PlayMode/PlayerCommandInputPlayModeTests.cs`
 
 **Interfaces:**
-- Consumes: Unity 6000.6.2f1 `UnityEngine.Object.GetEntityId()` and `UnityEngine.EntityId`.
-- Produces: existing test fixtures compile under Unity 6000.6.2f1 while preserving their identity tracking and stable tie-break intent.
+- Consumes: 现有测试采用的 `UnityEngine.Object.GetEntityId()` 和 `UnityEngine.EntityId`。
+- Produces: 在 Unity 6000.3.25f1 下重新确认测试夹具可编译，同时保留身份追踪和稳定同分排序语义。
 
 - [ ] **Step 1: Preserve compiler RED evidence**
 
-Use `TestResults/corpse-lifetime-baseline-playmode-retry.log`: Unity 6000.6.2f1 failed before tests with nine CS0619 errors because `GetInstanceID()` is obsolete-as-error. The failed compile is the red signal for this compatibility task.
+历史证据 `TestResults/corpse-lifetime-baseline-playmode-retry.log` 记录：迁移前使用 Unity 6000.6.2f1 时，`GetInstanceID()` 因 obsolete-as-error 产生九个 CS0619 错误，测试尚未开始。该错误只说明当时的迁移原因；当前版本应以新运行结果为准。
 
 - [ ] **Step 2: Make the minimal test-only API migration**
 
@@ -55,7 +57,7 @@ Replace only the reported `GetInstanceID()` calls with `GetEntityId()`. Change t
 
 - [ ] **Step 3: Run complete EditMode and PlayMode baselines**
 
-Run both platforms under Unity 6000.6.2f1 and require valid XML. Record total, passed, failed, skipped, inconclusive, and every non-passing test fullname. The EditMode and PlayMode XMLs from this point are the feature's pre-change baseline.
+在 Unity 6000.3.25f1 下运行 EditMode 和 PlayMode，并要求有效 XML。记录 total、passed、failed、skipped、inconclusive 和每个未通过测试的 fullname；以本次 XML 作为当前版本基线。
 
 - [ ] **Step 4: Independent review and commit**
 
@@ -118,7 +120,7 @@ TowerPersistsWithoutRegistryEntryOrTimer()
 - [ ] **Step 3: 运行聚焦测试并确认 RED**
 
 ```powershell
-& 'C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -runTests -testPlatform EditMode -testFilter 'ArknightsFrontline.Tests.EditMode.CorpseLifetimeControllerTests' -testResults 'D:\arknights-frontline\TestResults\corpse-lifetime-task1-red.xml' -logFile 'D:\arknights-frontline\TestResults\corpse-lifetime-task1-red.log' -quit
+& 'C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -runTests -testPlatform EditMode -testFilter 'ArknightsFrontline.Tests.EditMode.CorpseLifetimeControllerTests' -testResults 'D:\arknights-frontline\TestResults\corpse-lifetime-task1-red.xml' -logFile 'D:\arknights-frontline\TestResults\corpse-lifetime-task1-red.log' -quit
 ```
 
 Expected: FAIL/编译失败，因为 `CorpseLifetimeController` 尚不存在。确认失败原因与缺失接口一致；无有效 XML 时去掉 `-quit` 重跑。
@@ -233,7 +235,7 @@ Expected: FAIL，实际类别为旧重载默认的 `Operator`。
 运行新增单测，确认因小兵仍被配置为 `Operator` 而超过 5 秒仍存在：
 
 ```powershell
-& 'C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -runTests -testPlatform PlayMode -testFilter 'ArknightsFrontline.Tests.PlayMode.DeathCorpsePresentationPlayModeTests' -testResults 'D:\arknights-frontline\TestResults\corpse-lifetime-task2-playmode.xml' -logFile 'D:\arknights-frontline\TestResults\corpse-lifetime-task2-playmode.log' -quit
+& 'C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -runTests -testPlatform PlayMode -testFilter 'ArknightsFrontline.Tests.PlayMode.DeathCorpsePresentationPlayModeTests' -testResults 'D:\arknights-frontline\TestResults\corpse-lifetime-task2-playmode.xml' -logFile 'D:\arknights-frontline\TestResults\corpse-lifetime-task2-playmode.log' -quit
 ```
 
 Expected: FAIL，两个尸体超过 5 秒仍存在；XML 有效。
@@ -297,7 +299,7 @@ Expected: 保存场景中的旧 presenter 配置仍默认为 `Operator`，至少
 - [ ] **Step 4: 关闭交互式 Unity，确定性重建并核对场景 diff**
 
 ```powershell
-& 'C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -executeMethod ArknightsFrontline.Editor.PrototypeSceneBuilder.Build -logFile 'D:\arknights-frontline\build-corpse-lifetime-scene.log' -quit
+& 'C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe' -batchmode -nographics -projectPath 'D:\arknights-frontline' -executeMethod ArknightsFrontline.Editor.PrototypeSceneBuilder.Build -logFile 'D:\arknights-frontline\build-corpse-lifetime-scene.log' -quit
 ```
 
 Expected: 退出码 0；日志包含场景保存完成且无编译异常；`PrototypeArena.unity` 仅出现新脚本引用/类别序列化以及构建器当前确定性输出所需变化。确认 Packages、ProjectSettings 和其他用户文件未被暂存。
@@ -361,7 +363,7 @@ Expected: 聚焦测试全部 PASS；尸体原有落地、材质、缩放、碰�
 
 - [ ] **Step 5: 交付人工验收清单，不宣称已通过**
 
-请用户在 Unity 6000.6.2f1 打开 `PrototypeArena` 并进入 Play Mode：
+请用户在 Unity 6000.3.25f1 打开 `PrototypeArena` 并进入 Play Mode：
 
 1. 击杀一个地面小兵，确认尸体立即出现、约 5 秒时直接消失。
 2. 击杀一个空中小兵，确认先在约 0.3 秒内落地，且总寿命仍从死亡时起约 5 秒，不是落地后再等 5 秒。

@@ -4,12 +4,14 @@
 
 **权威规格：**`docs/superpowers/specs/2026-09-30-stage-6-ai-and-redeployment-design.md`。本计划不替代该规格；若实现中发现规格歧义，应先记录并请求用户决定，不通过测试名称悄悄改规则。
 
-**实施方式：**直接在 `D:\arknights-frontline` 的 `dev` 分支工作，不创建工作树。沿用子代理实施、独立复审、TDD；任何子代理模型不得高于 `gpt-6-luna`，推理强度不得高于 `xhigh`，超出能力限制时请求人工审核。每个任务先写真实行为测试并取得预期 RED，再做最小实现、取得 GREEN、独立复审，最后只提交本任务文件或 hunk。阶段 6 人工验收在用户实际执行前始终标为待验收。
+**版本说明（2026-10-04）：**当前 `dev` 使用 Unity 6000.3.25f1。下文记录的 260/260、62/62 等迁移前测试结果仅作历史对照；重新执行任务时先在当前版本取得有效 XML 基线。Windows 工作区和编辑器路径按实际环境调整。
+
+**实施方式：**在仓库根目录的 `dev` 分支工作，不创建工作树；原计划的 `D:\arknights-frontline` 为 Windows 工作区示例。沿用子代理实施、独立复审、TDD；任何子代理模型不得高于 `gpt-6-luna`，推理强度不得高于 `xhigh`，超出能力限制时请求人工审核。每个任务先写真实行为测试并取得预期 RED，再做最小实现、取得 GREEN、独立复审，最后只提交本任务文件或 hunk。阶段 6 人工验收在用户实际执行前始终标为待验收。
 
 ## 全局边界与证据
 
-- 当前计划基准为 `dev` 的 `3a86bbe`。阶段 5 后的最后一次有效全套 XML 为 `TestResults/exusiai-e-final-verify-editmode.xml` 260/260 和 `TestResults/exusiai-e-final-verify-playmode.xml` 62/62；Task 0 要重跑当前基线，不能仅引用旧结果。
-- Unity Windows 编辑器为 `C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe`。每次测试等 Unity 进程结束并解析有效 XML；批处理启动的返回码、空日志或尚在写入的 XML 不能替代结果。若 `-quit` 产生无效 XML，去掉 `-quit` 重试；优先沿用此前成功的不带 `-quit` 命令。
+- 原计划基准为 `dev` 的 `3a86bbe`。阶段 5 后当时的有效全套 XML 为 `TestResults/exusiai-e-final-verify-editmode.xml` 260/260 和 `TestResults/exusiai-e-final-verify-playmode.xml` 62/62；Task 0 要重跑当前版本基线，不能仅引用旧结果。
+- Unity Windows 编辑器路径示例为 `C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe`。每次测试等 Unity 进程结束并解析有效 XML；批处理启动的返回码、空日志或尚在写入的 XML 不能替代结果。若 `-quit` 产生无效 XML，去掉 `-quit` 重试；优先沿用此前成功的不带 `-quit` 命令。
 - 开始前记录 `git branch --show-current`、`git rev-parse HEAD`、`git status --short`、暂存区和受影响文件差异。保留 Packages、ProjectSettings、`.superpowers/brainstorm/`、日志、无关文档及所有其他用户改动。任何新的 `.cs` 或测试文件都需相应 `.meta`。
 - `Assets/Game/Editor/PrototypeSceneBuilder.cs` 已有用户摄像机改动；`Assets/Game/Scenes/PrototypeArena.unity` 已有用户重建结果，现有差异约 843 行增删且包含大量 Unity fileID 变化。Task 6 前必须备份这两个文件的字节内容到本任务忽略的执行记录目录，记录 SHA-256，并逐项核对用户摄像机行为。只允许暂存阶段 6 的构建器 hunk。若生成场景无法在不夹带用户旧改动的情况下安全暂存，停止场景提交并请用户决定是否先单独提交其场景/摄像机改动；不得自行重置、覆盖或打包提交。
 - Unity 可能迁移用户已有的 ProjectSettings 或渲染资产。测试/构建前后记录受影响文件 hash 和 `git status`；任何非任务资产变化均保持未暂存，不自动恢复无备份内容。场景构建前确认交互式 Unity 已关闭。
@@ -34,8 +36,8 @@ Task 1 修改的伤害事件由 Task 3 撤退和 Task 4 电脑仇恨共同消费
 
 **文件：**只读项目文件；XML、日志和工作记录写入忽略的 `TestResults/` 与 `.superpowers/sdd/2026-10-01-stage-6-ai-and-redeployment/`。
 
-- [ ] 确认实际工作目录是 `D:\arknights-frontline`、分支是 `dev`，记录 HEAD、完整 status、暂存区与受影响文件差异。重点保存构建器和场景的当前 hash、用户摄像机 hunk，以及 `PlayerCommandInputPlayModeTests.cs` 的既有摄像机测试 hunk。
-- [ ] 确认交互式 Unity 已关闭，使用 Unity 6000.6.2f1 顺序运行完整 EditMode、完整 PlayMode，写 `TestResults/stage6-baseline-editmode.xml` 和 `TestResults/stage6-baseline-playmode.xml`。解析 total/passed/failed/skipped/inconclusive 与全部未通过 fullname；若与 260/260、62/62 不同，先查清原因，不在不明基线上写功能代码。
+- [ ] 确认实际工作目录是仓库根目录、分支是 `dev`，记录 HEAD、完整 status、暂存区与受影响文件差异。重点保存构建器和场景的当前 hash、用户摄像机 hunk，以及 `PlayerCommandInputPlayModeTests.cs` 的既有摄像机测试 hunk。
+- [ ] 确认交互式 Unity 已关闭，使用 Unity 6000.3.25f1 顺序运行完整 EditMode、完整 PlayMode，写 `TestResults/stage6-baseline-editmode.xml` 和 `TestResults/stage6-baseline-playmode.xml`。解析 total/passed/failed/skipped/inconclusive 与全部未通过 fullname；与历史 260/260、62/62 不同时先查清原因，不在不明基线上写功能代码。
 - [ ] 记录创建、死亡、尸体、技能 HUD、镜头及保存场景的现有生命周期调用顺序。确认 Task 1–6 的新增接口不会要求保存对已销毁 `CombatUnit` 的强引用。
 
 ## Task 1 伤害来源与事件

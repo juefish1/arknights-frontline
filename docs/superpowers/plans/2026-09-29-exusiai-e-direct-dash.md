@@ -6,18 +6,20 @@
 
 **Architecture:** 保留 `SkillDashController` 的路径解析、距离限制和完成事件；`ExusiaiSkillController` 在左键确认时启动冲刺并锁定连射参数，在 `DashCompleted` 回调中选敌并启动现有 `AttackSequenceExecutor`。指示器改为选择阶段预览冲刺落点，HUD 移除旧的第二段输入提示。
 
-**Tech Stack:** Unity 6000.6.2f1、C#、NUnit EditMode/PlayMode、PowerShell、Git `dev` 分支。
+**Tech Stack:** Unity 6000.3.25f1、C#、NUnit EditMode/PlayMode、PowerShell、Git `dev` 分支。
 
 **Spec:** `docs/superpowers/specs/2026-09-29-exusiai-e-direct-dash-design.md`；技能原始文本/Rank III 数值在 `docs/operator-profile/能天使.md`。
 
+**版本说明（2026-10-04）：**原计划的测试结果属于迁移前基线。重新执行时须用 Unity 6000.3.25f1 生成新的有效 XML；下方 Windows 路径仅是命令示例，应按实际安装位置调整。
+
 ## Global Constraints
 
-- 直接在 `D:\arknights-frontline` 的 `dev` 分支实施；不建 worktree。
+- 在仓库根目录的 `dev` 分支实施；下方 Windows 路径按实际工作区调整。
 - 子代理模型最多 `gpt-6-luna`、推理强度最多 `xhigh`；实施、独立复审、TDD。
 - 只动本功能代码、测试、设计/计划/执行记录；保留用户拥有的 Packages、ProjectSettings、场景、材质、日志、未跟踪文档及已有脏改动，不覆盖或暂存无关内容。
 - E 最大冲刺距离 7 米、速度 28 米/秒、E 冷却 20 秒；成功冲刺后才从真实落点选最近合法敌人。Rank III 每发 125% 攻击力、命中减速 30% 持续 2 秒，普通 4 发，确认时 R 生效则 5 发，发间隔 0.05 秒。
 - 旧的「攻击点确认后 0.25 秒右键移动」流程和 `E MOVE!` 收缩条全部废止；有效冲刺启动即消耗 E。视觉残影最长 0.15 秒。
-- Unity 可执行文件：`C:\Program Files\Unity\Hub\Editor\6000.6.2f1\Editor\Unity.exe`。测试结果以 XML 为准；若 `-quit` 不生成有效 XML，去掉 `-quit` 重试。
+- Unity 可执行文件示例：`C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe`。测试结果以 XML 为准；若 `-quit` 不生成有效 XML，去掉 `-quit` 重试。
 - 不重建 `PrototypeArena.unity`：本次只改已挂载组件逻辑，无场景序列化字段/构建器调整。若代码验证证明场景必须变更，先核对场景已有用户改动再决定。
 
 ## Review Focus
