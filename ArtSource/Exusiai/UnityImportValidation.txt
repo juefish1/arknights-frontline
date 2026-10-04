@@ -1,0 +1,10 @@
+IMPORT_OK
+Unity 6000.5.9f1
+Renderers: 33
+Triangles: 121068
+Renderer bounds: (0.93, 1.75, 0.35)
+Geometry height: 1.728695 m
+Forward: +Z
+Feet: grounded by actual mesh vertices
+Materials: 23
+Prefab: Assets/Game/Characters/Exusiai/Prefabs/Exusiai_Visual.prefab

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "bones": 253,
+  "constraints_evaluated": 64,
+  "max_bone_position_m": 7.339862122535123e-07,
+  "max_bone_angle_degrees": 0.11190582380822714,
+  "max_same_vertex_error_m": 8.606710366620973e-07,
+  "worst_vertex": {
+    "frame": 33,
+    "vertex": 1314
+  },
+  "hierarchy_rest_geometry_weights_shapes_preserved": true
+}

@@ -1,0 +1,430 @@
+{
+  "materials": [
+    {
+      "name": "EXM_00",
+      "label": "肌",
+      "texture": "body.png"
+    },
+    {
+      "name": "EXM_01",
+      "label": "手套",
+      "texture": "body-2.png"
+    },
+    {
+      "name": "EXM_02",
+      "label": "脸",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_03",
+      "label": "眼白",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_04",
+      "label": "眉毛",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_05",
+      "label": "瞳孔",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_06",
+      "label": "高光",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_07",
+      "label": "睫毛",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_08",
+      "label": "口",
+      "texture": "face.png"
+    },
+    {
+      "name": "EXM_09",
+      "label": "左髪",
+      "texture": "hair.png"
+    },
+    {
+      "name": "EXM_10",
+      "label": "右髮",
+      "texture": "hair.png"
+    },
+    {
+      "name": "EXM_11",
+      "label": "後髮",
+      "texture": "hair.png"
+    },
+    {
+      "name": "EXM_12",
+      "label": "衣服",
+      "texture": "coat.png"
+    },
+    {
+      "name": "EXM_13",
+      "label": "袖子",
+      "texture": "coat.png"
+    },
+    {
+      "name": "EXM_14",
+      "label": "领子",
+      "texture": "scarf.png"
+    },
+    {
+      "name": "EXM_15",
+      "label": "领带扣子",
+      "texture": "scarf.png"
+    },
+    {
+      "name": "EXM_16",
+      "label": "名片",
+      "texture": "scarf.png"
+    },
+    {
+      "name": "EXM_17",
+      "label": "衬衫",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_18",
+      "label": "裙子",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_19",
+      "label": "腰带",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_20",
+      "label": "扣子",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_21",
+      "label": "包",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_22",
+      "label": "裤子",
+      "texture": "pant.png"
+    },
+    {
+      "name": "EXM_23",
+      "label": "鞋子",
+      "texture": "skirt.png"
+    },
+    {
+      "name": "EXM_24",
+      "label": "天使特征",
+      "texture": "wing.png"
+    }
+  ],
+  "humanBones": [
+    {
+      "humanName": "Hips",
+      "boneName": "Hips"
+    },
+    {
+      "humanName": "Spine",
+      "boneName": "Spine"
+    },
+    {
+      "humanName": "Chest",
+      "boneName": "Chest"
+    },
+    {
+      "humanName": "Neck",
+      "boneName": "Neck"
+    },
+    {
+      "humanName": "Head",
+      "boneName": "Head"
+    },
+    {
+      "humanName": "LeftShoulder",
+      "boneName": "LeftShoulder"
+    },
+    {
+      "humanName": "LeftUpperArm",
+      "boneName": "LeftUpperArm"
+    },
+    {
+      "humanName": "LeftLowerArm",
+      "boneName": "LeftLowerArm"
+    },
+    {
+      "humanName": "LeftHand",
+      "boneName": "LeftHand"
+    },
+    {
+      "humanName": "LeftUpperLeg",
+      "boneName": "LeftUpperLeg"
+    },
+    {
+      "humanName": "LeftLowerLeg",
+      "boneName": "LeftLowerLeg"
+    },
+    {
+      "humanName": "LeftFoot",
+      "boneName": "LeftFoot"
+    },
+    {
+      "humanName": "LeftToes",
+      "boneName": "LeftToes"
+    },
+    {
+      "humanName": "RightShoulder",
+      "boneName": "RightShoulder"
+    },
+    {
+      "humanName": "RightUpperArm",
+      "boneName": "RightUpperArm"
+    },
+    {
+      "humanName": "RightLowerArm",
+      "boneName": "RightLowerArm"
+    },
+    {
+      "humanName": "RightHand",
+      "boneName": "RightHand"
+    },
+    {
+      "humanName": "RightUpperLeg",
+      "boneName": "RightUpperLeg"
+    },
+    {
+      "humanName": "RightLowerLeg",
+      "boneName": "RightLowerLeg"
+    },
+    {
+      "humanName": "RightFoot",
+      "boneName": "RightFoot"
+    },
+    {
+      "humanName": "RightToes",
+      "boneName": "RightToes"
+    }
+  ],
+  "bone_names": {
+    "全ての親": "Bone_000",
+    "センター": "Bone_001",
+    "グルーブ": "Bone_002",
+    "腰": "Hips",
+    "上半身": "Spine",
+    "上半身2": "Chest",
+    "首": "Neck",
+    "頭": "Head",
+    "左目": "Bone_008",
+    "左目戻": "Bone_009",
+    "右目": "Bone_010",
+    "右目戻": "Bone_011",
+    "両目": "Bone_012",
+    "舌１": "Bone_013",
+    "舌２": "Bone_014",
+    "舌３": "Bone_015",
+    "メガネ": "Bone_016",
+    "左髮_0_1": "Bone_017",
+    "左髮_1_1": "Bone_018",
+    "左髮_2_1": "Bone_019",
+    "右髮_0_1": "Bone_020",
+    "右髮_1_1": "Bone_021",
+    "右髮_2_1": "Bone_022",
+    "右肩P": "Bone_023",
+    "右肩": "RightShoulder",
+    "右肩C": "Bone_025",
+    "右腕": "RightUpperArm",
+    "右腕捩": "Bone_027",
+    "右ひじ": "RightLowerArm",
+    "右手捩": "Bone_029",
+    "右手首": "RightHand",
+    "右ダミー": "Bone_031",
+    "右手先": "Bone_032",
+    "右親指０": "Bone_033",
+    "右親指１": "Bone_034",
+    "右親指２": "Bone_035",
+    "右親指先": "Bone_036",
+    "右小指１": "Bone_037",
+    "右小指２": "Bone_038",
+    "右小指３": "Bone_039",
+    "右小指先": "Bone_040",
+    "右薬指１": "Bone_041",
+    "右薬指２": "Bone_042",
+    "右薬指３": "Bone_043",
+    "右薬指先": "Bone_044",
+    "右中指１": "Bone_045",
+    "右中指２": "Bone_046",
+    "右中指３": "Bone_047",
+    "右中指先": "Bone_048",
+    "右人指１": "Bone_049",
+    "右人指２": "Bone_050",
+    "右人指３": "Bone_051",
+    "右人指先": "Bone_052",
+    "右手捩1": "Bone_053",
+    "右手捩2": "Bone_054",
+    "右手捩3": "Bone_055",
+    "右ひじ補助": "Bone_056",
+    "+右ひじ補助": "Bone_057",
+    "右腕捩1": "Bone_058",
+    "右腕捩2": "Bone_059",
+    "右腕捩3": "Bone_060",
+    "左肩P": "Bone_061",
+    "左肩": "LeftShoulder",
+    "左肩C": "Bone_063",
+    "左腕": "LeftUpperArm",
+    "左腕捩": "Bone_065",
+    "左ひじ": "LeftLowerArm",
+    "左手捩": "Bone_067",
+    "左手首": "LeftHand",
+    "左ダミー": "Bone_069",
+    "左手先": "Bone_070",
+    "左親指０": "Bone_071",
+    "左親指１": "Bone_072",
+    "左親指２": "Bone_073",
+    "左親指先": "Bone_074",
+    "左小指１": "Bone_075",
+    "左小指２": "Bone_076",
+    "左小指３": "Bone_077",
+    "左小指先": "Bone_078",
+    "左薬指１": "Bone_079",
+    "左薬指２": "Bone_080",
+    "左薬指３": "Bone_081",
+    "左薬指先": "Bone_082",
+    "左中指１": "Bone_083",
+    "左中指２": "Bone_084",
+    "左中指３": "Bone_085",
+    "左中指先": "Bone_086",
+    "左人指１": "Bone_087",
+    "左人指２": "Bone_088",
+    "左人指３": "Bone_089",
+    "左人指先": "Bone_090",
+    "左手捩1": "Bone_091",
+    "左手捩2": "Bone_092",
+    "左手捩3": "Bone_093",
+    "左ひじ補助": "Bone_094",
+    "+左ひじ補助": "Bone_095",
+    "左腕捩1": "Bone_096",
+    "左腕捩2": "Bone_097",
+    "左腕捩3": "Bone_098",
+    "右翅膀1": "Bone_099",
+    "右翅膀2": "Bone_100",
+    "左翅膀1": "Bone_101",
+    "左翅膀2": "Bone_102",
+    "下半身": "Bone_103",
+    "腰キャンセル右": "Bone_104",
+    "右足D": "Bone_105",
+    "右ひざD": "Bone_106",
+    "右足首D": "Bone_107",
+    "右足補": "Bone_108",
+    "腰キャンセル左": "Bone_109",
+    "左足D": "Bone_110",
+    "左ひざD": "Bone_111",
+    "左足首D": "Bone_112",
+    "左足補": "Bone_113",
+    "下擺_0_0": "Bone_114",
+    "下擺_1_0": "Bone_115",
+    "下擺_2_0": "Bone_116",
+    "下擺_3_0": "Bone_117",
+    "下擺_4_0": "Bone_118",
+    "下擺_5_0": "Bone_119",
+    "下擺_0_1": "Bone_120",
+    "下擺_1_1": "Bone_121",
+    "下擺_2_1": "Bone_122",
+    "下擺_3_1": "Bone_123",
+    "下擺_4_1": "Bone_124",
+    "下擺_5_1": "Bone_125",
+    "下擺_0_2": "Bone_126",
+    "下擺_1_2": "Bone_127",
+    "下擺_2_2": "Bone_128",
+    "下擺_3_2": "Bone_129",
+    "下擺_4_2": "Bone_130",
+    "下擺_5_2": "Bone_131",
+    "下擺_0_3": "Bone_132",
+    "下擺_1_3": "Bone_133",
+    "下擺_2_3": "Bone_134",
+    "下擺_3_3": "Bone_135",
+    "下擺_4_3": "Bone_136",
+    "下擺_5_3": "Bone_137",
+    "下擺_0_4": "Bone_138",
+    "下擺_1_4": "Bone_139",
+    "下擺_2_4": "Bone_140",
+    "下擺_3_4": "Bone_141",
+    "下擺_4_4": "Bone_142",
+    "下擺_5_4": "Bone_143",
+    "下擺_0_5": "Bone_144",
+    "下擺_1_5": "Bone_145",
+    "下擺_2_5": "Bone_146",
+    "下擺_3_5": "Bone_147",
+    "下擺_4_5": "Bone_148",
+    "下擺_5_5": "Bone_149",
+    "下擺_0_6": "Bone_150",
+    "下擺_1_6": "Bone_151",
+    "下擺_2_6": "Bone_152",
+    "下擺_3_6": "Bone_153",
+    "下擺_4_6": "Bone_154",
+    "下擺_5_6": "Bone_155",
+    "下擺_0_7": "Bone_156",
+    "下擺_1_7": "Bone_157",
+    "下擺_2_7": "Bone_158",
+    "下擺_3_7": "Bone_159",
+    "下擺_4_7": "Bone_160",
+    "下擺_5_7": "Bone_161",
+    "下擺_0_8": "Bone_162",
+    "下擺_1_8": "Bone_163",
+    "下擺_2_8": "Bone_164",
+    "下擺_3_8": "Bone_165",
+    "下擺_4_8": "Bone_166",
+    "下擺_5_8": "Bone_167",
+    "下擺_0_9": "Bone_168",
+    "下擺_1_9": "Bone_169",
+    "下擺_2_9": "Bone_170",
+    "下擺_3_9": "Bone_171",
+    "下擺_4_9": "Bone_172",
+    "下擺_5_9": "Bone_173",
+    "下擺_0_10": "Bone_174",
+    "下擺_1_10": "Bone_175",
+    "下擺_2_10": "Bone_176",
+    "下擺_3_10": "Bone_177",
+    "下擺_4_10": "Bone_178",
+    "下擺_5_10": "Bone_179",
+    "下擺_0_11": "Bone_180",
+    "下擺_1_11": "Bone_181",
+    "下擺_2_11": "Bone_182",
+    "下擺_3_11": "Bone_183",
+    "下擺_4_11": "Bone_184",
+    "下擺_5_11": "Bone_185",
+    "右足": "RightUpperLeg",
+    "右ひざ": "RightLowerLeg",
+    "右足首": "RightFoot",
+    "右つま先": "Bone_189",
+    "右足先": "Bone_190",
+    "右足先EX": "RightToes",
+    "左足": "LeftUpperLeg",
+    "左ひざ": "LeftLowerLeg",
+    "左足首": "LeftFoot",
+    "左つま先": "Bone_195",
+    "左足先": "Bone_196",
+    "左足先EX": "LeftToes",
+    "右足IK親": "Bone_198",
+    "右足ＩＫ": "Bone_199",
+    "右つま先ＩＫ": "Bone_200",
+    "左足IK親": "Bone_201",
+    "左足ＩＫ": "Bone_202",
+    "左つま先ＩＫ": "Bone_203",
+    "default": "Bone_204"
+  },
+  "bodyHeight": 1.65,
+  "sourceScale": 0.9799894069594999,
+  "sourceGround": 0.0052859303541481495,
+  "vertices": 58275,
+  "triangles": 94556,
+  "blendshapes": 53,
+  "bones": 205,
+  "animation": "Exusiai_RigCheck — generated validation only"
+}

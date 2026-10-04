@@ -1,0 +1,11 @@
+{
+  "different_fields": [
+    "bones",
+    "weights_sha256",
+    "geometry_sha256",
+    "shapes",
+    "constraints"
+  ],
+  "original_constraints": 64,
+  "old_constraints": 0
+}

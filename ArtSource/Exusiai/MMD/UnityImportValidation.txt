@@ -1,0 +1,11 @@
+IMPORT_OK
+Unity: 6000.5.9f1
+Humanoid avatar: valid / human
+Skinned renderers: 1
+Materials: 25
+Blendshapes: 53
+Geometry height including halo: 1.682671 m
+Ground offset: -7.450581E-08 m
+Animation: Exusiai_RigCheck (generated test only), 3 s
+Animated mesh max displacement: 0.215798 m
+Blink max displacement: 0.0298556 m
