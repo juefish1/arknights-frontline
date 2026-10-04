@@ -12,7 +12,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
         private readonly List<Material> materials = new List<Material>();
-        private readonly HashSet<int> initialCorpseIds = new HashSet<int>();
+        private readonly HashSet<EntityId> initialCorpseIds = new HashSet<EntityId>();
 
         [SetUp]
         public void SetUp()
@@ -20,7 +20,7 @@ namespace ArknightsFrontline.Tests.EditMode
             initialCorpseIds.Clear();
             foreach (GameObject corpse in FindCorpses())
             {
-                initialCorpseIds.Add(corpse.GetInstanceID());
+                initialCorpseIds.Add(corpse.GetEntityId());
             }
         }
 
@@ -106,6 +106,81 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void ConfiguredUnitKindIsCopiedToCreatedCorpseLifetime()
+        {
+            CreateGround();
+            CombatUnit unit = CreateUnit("BlueMinion", Altitude.Ground, Vector3.zero);
+            DeathCorpsePresenter presenter = unit.gameObject.AddComponent<DeathCorpsePresenter>();
+            presenter.Configure(unit, CreateMaterial(Color.blue), GroundLayer, UnitKind.Minion);
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+
+            CorpseLifetimeController lifetime = FindAndTrackNewCorpse("BlueMinion_Corpse")
+                .GetComponent<CorpseLifetimeController>();
+            Assert.That(lifetime, Is.Not.Null);
+            Assert.That(lifetime.UnitKind, Is.EqualTo(UnitKind.Minion));
+            Assert.That(lifetime.OwnerKey, Is.EqualTo("BlueMinion"));
+        }
+
+        [Test]
+        public void AirMinionLifetimeStartsBeforeFallCompletes()
+        {
+            CreateGround();
+            CombatUnit unit = CreateUnit("RedAirMinion", Altitude.Air, new Vector3(0f, 5f, 0f));
+            unit.gameObject.AddComponent<DeathCorpsePresenter>().Configure(
+                unit,
+                CreateMaterial(Color.red),
+                GroundLayer,
+                UnitKind.Minion);
+
+            unit.TakePhysicalDamage(unit.MaxHealth);
+
+            GameObject corpse = FindAndTrackNewCorpse("RedAirMinion_Corpse");
+            CorpseLifetimeController lifetime = corpse.GetComponent<CorpseLifetimeController>();
+            CorpseFallController fall = corpse.GetComponent<CorpseFallController>();
+            Assert.That(lifetime, Is.Not.Null);
+            Assert.That(fall, Is.Not.Null);
+            Assert.That(fall.HasLanded, Is.False);
+
+            lifetime.Tick(5f);
+
+            Assert.That(corpse == null, Is.True);
+        }
+
+        [Test]
+        public void LegacyConfigureOverloadsDefaultToOperator()
+        {
+            CreateGround();
+            CombatUnit defaultScaleUnit = CreateUnit("LegacyDefaultCorpse", Altitude.Ground, Vector3.zero);
+            DeathCorpsePresenter defaultScalePresenter = defaultScaleUnit.gameObject.AddComponent<DeathCorpsePresenter>();
+            defaultScalePresenter.Configure(defaultScaleUnit, CreateMaterial(Color.white), GroundLayer);
+            Assert.That(defaultScalePresenter.UnitKind, Is.EqualTo(UnitKind.Operator));
+
+            defaultScaleUnit.TakePhysicalDamage(defaultScaleUnit.MaxHealth);
+
+            CorpseLifetimeController defaultScaleLifetime = FindAndTrackNewCorpse("LegacyDefaultCorpse_Corpse")
+                .GetComponent<CorpseLifetimeController>();
+            Assert.That(defaultScaleLifetime.UnitKind, Is.EqualTo(UnitKind.Operator));
+            Assert.That(defaultScaleLifetime.OwnerKey, Is.EqualTo("LegacyDefaultCorpse"));
+
+            CombatUnit customScaleUnit = CreateUnit("LegacyScaleCorpse", Altitude.Ground, new Vector3(2f, 0f, 0f));
+            DeathCorpsePresenter customScalePresenter = customScaleUnit.gameObject.AddComponent<DeathCorpsePresenter>();
+            customScalePresenter.Configure(
+                customScaleUnit,
+                CreateMaterial(Color.gray),
+                GroundLayer,
+                new Vector3(0.3f, 1f, 0.3f));
+            Assert.That(customScalePresenter.UnitKind, Is.EqualTo(UnitKind.Operator));
+
+            customScaleUnit.TakePhysicalDamage(customScaleUnit.MaxHealth);
+
+            CorpseLifetimeController customScaleLifetime = FindAndTrackNewCorpse("LegacyScaleCorpse_Corpse")
+                .GetComponent<CorpseLifetimeController>();
+            Assert.That(customScaleLifetime.UnitKind, Is.EqualTo(UnitKind.Operator));
+            Assert.That(customScaleLifetime.OwnerKey, Is.EqualTo("LegacyScaleCorpse"));
+        }
+
+        [Test]
         public void UnitDeathDestroysSourceImmediatelyInEditMode()
         {
             CreateGround();
@@ -161,7 +236,7 @@ namespace ArknightsFrontline.Tests.EditMode
             GameObject corpse = null;
             foreach (GameObject candidate in FindCorpses())
             {
-                if (candidate.name == name && !initialCorpseIds.Contains(candidate.GetInstanceID()))
+                if (candidate.name == name && !initialCorpseIds.Contains(candidate.GetEntityId()))
                 {
                     corpse = candidate;
                     break;
@@ -180,12 +255,12 @@ namespace ArknightsFrontline.Tests.EditMode
                 gameObject => gameObject.name.EndsWith("_Corpse"));
         }
 
-        private static HashSet<int> GetCorpseIds()
+        private static HashSet<EntityId> GetCorpseIds()
         {
-            HashSet<int> corpseIds = new HashSet<int>();
+            HashSet<EntityId> corpseIds = new HashSet<EntityId>();
             foreach (GameObject corpse in FindCorpses())
             {
-                corpseIds.Add(corpse.GetInstanceID());
+                corpseIds.Add(corpse.GetEntityId());
             }
 
             return corpseIds;

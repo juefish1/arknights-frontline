@@ -19,6 +19,8 @@ namespace ArknightsFrontline.Tests.EditMode
         private SkillDashController dash;
         private ExusiaiSkillIndicator indicator;
         private PlayerCommandController commands;
+        private GameObject cameraObject;
+        private GameObject groundObject;
 
         [SetUp]
         public void SetUp()
@@ -59,12 +61,11 @@ namespace ArknightsFrontline.Tests.EditMode
             indicator.Refresh();
             Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.None));
             Assert.That(indicator.RangePointCount, Is.EqualTo(65));
-            Assert.That(indicator.MarkerPointCount, Is.EqualTo(33));
 
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             indicator.Refresh();
             Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.ChargeTargeting));
-            Assert.That(indicator.RangeRadius, Is.EqualTo(6f));
+            Assert.That(indicator.RangeRadius, Is.EqualTo(7f));
 
             GameObject targetObject = Track(new GameObject("Target"));
             CombatUnit target = targetObject.AddComponent<CombatUnit>();
@@ -72,8 +73,9 @@ namespace ArknightsFrontline.Tests.EditMode
             targetObject.transform.position = new Vector3(2f, 0f, 0f);
             Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
             indicator.Refresh();
-            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.DashWindow));
+            Assert.That(indicator.IsVisible, Is.True);
             Assert.That(indicator.RangeRadius, Is.EqualTo(7f));
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(dash.Destination));
         }
 
         [Test]
@@ -95,65 +97,124 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void CachedPointerDrawsClosedBlueOrRedTargetingAndClampedDashGeometry()
+        public void TargetingPreviewsResolvedDashEndpointAndSevenMeterRange()
         {
-            SetCachedPointer(new Vector3(3f, 0f, 0f));
+            SetCachedPointer(new Vector3(20f, 0f, 0f));
             Assert.That(skills.BeginChargeTargeting(), Is.True);
+
             indicator.Refresh();
+
+            Assert.That(indicator.Mode, Is.EqualTo(ExusiaiSkillIndicatorMode.ChargeTargeting));
+            Assert.That(indicator.RangeRadius, Is.EqualTo(7f));
+            Assert.That(Vector3.Distance(indicator.DisplayedEndpoint, new Vector3(7f, 0f, 0f)), Is.LessThan(0.001f));
             LineRenderer range = GetRenderer("rangeRenderer");
-            LineRenderer marker = GetRenderer("markerRenderer");
             Assert.That(range.startColor, Is.EqualTo(Color.blue));
             Assert.That(Vector3.Distance(range.GetPosition(0), range.GetPosition(64)), Is.LessThan(0.001f));
-            Assert.That(Vector3.Distance(marker.GetPosition(0), marker.GetPosition(32)), Is.LessThan(0.001f));
-
-            SetCachedPointer(new Vector3(8f, 0f, 0f));
-            indicator.Refresh();
-            Assert.That(range.startColor, Is.EqualTo(Color.red));
-
-            Assert.That(skills.CancelChargeTargeting(), Is.True);
-            Assert.That(skills.BeginChargeTargeting(), Is.True);
-            GameObject targetObject = Track(new GameObject("Locked Target"));
-            CombatUnit target = targetObject.AddComponent<CombatUnit>();
-            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
-            targetObject.transform.position = new Vector3(2f, 0f, 0f);
-            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
-            SetCachedPointer(new Vector3(20f, 0f, 0f));
-            indicator.Refresh();
-            LineRenderer arrow = GetRenderer("arrowRenderer");
-            Assert.That(Vector3.Distance(owner.transform.position, indicator.DisplayedEndpoint), Is.EqualTo(7f).Within(0.001f));
-            Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(7f, 0.05f, 0f)));
-            Assert.That(Vector3.Distance(MarkerCenter(marker), new Vector3(2f, 0.05f, 0f)), Is.LessThan(0.001f));
-
-            SetCachedPointer(Vector3.zero);
-            indicator.Refresh();
-            Assert.That(arrow.startColor, Is.EqualTo(Color.red));
-            InvokePrivate(indicator, "OnDisable");
-            Assert.That(range.enabled, Is.False);
-            Assert.That(arrow.enabled, Is.False);
-            Assert.That(marker.enabled, Is.False);
-        }
-
-        [Test]
-        public void DashFadeHidesArrowNoLaterThanPointOneFiveSecondsAfterWindowCloses()
-        {
-            SetCachedPointer(new Vector3(7f, 0f, 0f));
-            Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(Vector3.zero, null), Is.True);
-            indicator.Refresh();
+            Assert.That(Vector3.Distance(range.GetPosition(0), new Vector3(0f, 0.05f, 0f)), Is.EqualTo(7f).Within(0.001f));
             LineRenderer arrow = GetRenderer("arrowRenderer");
             Assert.That(arrow.enabled, Is.True);
+            Assert.That(Vector3.Distance(arrow.GetPosition(1), new Vector3(7f, 0.05f, 0f)), Is.LessThan(0.001f));
+        }
 
-            skills.Tick(0.25f);
-            InvokePrivate(indicator, "RefreshWithDelta", 0.151f);
+        [Test]
+        public void TargetingDoesNotLockClickedEnemyBeforeArrival()
+        {
+            GameObject targetObject = Track(GameObject.CreatePrimitive(PrimitiveType.Cube));
+            CombatUnit target = targetObject.AddComponent<CombatUnit>();
+            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
+            targetObject.transform.position = Vector3.right * 4f;
+            Physics.SyncTransforms();
+            SetCachedPointer(target.transform.position);
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            indicator.Refresh();
 
+            Assert.That(skills.SelectedChargeTarget, Is.Null);
+            Assert.That(EnabledLoopRendererCount(), Is.EqualTo(1));
+            Assert.That(skills.TryConfirmCharge(target.transform.position, target), Is.True);
+            dash.Tick(0.05f);
+            indicator.Refresh();
+
+            Assert.That(skills.SelectedChargeTarget, Is.Null);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(EnabledLoopRendererCount(), Is.Zero);
+        }
+
+        [Test]
+        public void InvalidPreviewIsRedAndDoesNotEnableDash()
+        {
+            SetCachedPointer(Vector3.zero);
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            indicator.Refresh();
+
+            LineRenderer range = GetRenderer("rangeRenderer");
+            LineRenderer arrow = GetRenderer("arrowRenderer");
+            Assert.That(range.startColor, Is.EqualTo(Color.red));
+            Assert.That(arrow.startColor, Is.EqualTo(Color.red));
+            Assert.That(arrow.enabled, Is.True);
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(owner.transform.position));
+            Assert.That(skills.TryConfirmCharge(Vector3.zero, null), Is.False);
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Assert.That(dash.IsDashing, Is.False);
+        }
+
+        [Test]
+        public void ConfirmedDashShowsPathThenFadesInPointOneFiveSeconds()
+        {
+            SetCachedPointer(new Vector3(20f, 0f, 0f));
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            indicator.Refresh();
+
+            Assert.That(skills.TryConfirmCharge(new Vector3(20f, 0f, 0f), null), Is.True);
+            Vector3 destination = dash.Destination;
+            SetCachedPointer(new Vector3(0f, 0f, 4f));
+            indicator.Refresh();
+
+            LineRenderer arrow = GetRenderer("arrowRenderer");
+            Assert.That(arrow.enabled, Is.True);
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(destination));
+            Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(7f, 0.05f, 0f)));
+
+            dash.Tick(0.25f);
+            InvokePrivate(indicator, "RefreshWithDelta", 0f);
+            Assert.That(arrow.enabled, Is.True);
+
+            InvokePrivate(indicator, "RefreshWithDelta", 0.149f);
+            Assert.That(arrow.enabled, Is.True);
+            InvokePrivate(indicator, "RefreshWithDelta", 0.002f);
             Assert.That(arrow.enabled, Is.False);
         }
 
         [Test]
-        public void RefreshWithoutPointerKeepsDashPreviewSafeAndDisableHidesRenderers()
+        public void ShortDashCompletedBeforeIndicatorRefreshStillShowsArrivalTrail()
+        {
+            Vector3 previewPoint = Vector3.right * 0.08f;
+            Vector3 clickedPoint = Vector3.right * 0.12f;
+            SetCachedPointer(previewPoint);
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            indicator.Refresh();
+            Assert.That(GetRenderer("arrowRenderer").enabled, Is.True);
+            Assert.That(Vector3.Distance(indicator.DisplayedEndpoint, previewPoint), Is.LessThan(0.001f));
+
+            Assert.That(skills.TryConfirmCharge(clickedPoint, null), Is.True);
+            dash.Tick(0.1f);
+            Assert.That(dash.IsDashing, Is.False);
+
+            InvokePrivate(indicator, "RefreshWithDelta", 0.2f);
+
+            LineRenderer arrow = GetRenderer("arrowRenderer");
+            Assert.That(arrow.enabled, Is.True);
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(new Vector3(0.12f, 0f, 0f)));
+            Assert.That(arrow.GetPosition(0), Is.EqualTo(new Vector3(0f, 0.05f, 0f)));
+            Assert.That(arrow.GetPosition(1), Is.EqualTo(new Vector3(0.12f, 0.05f, 0f)));
+
+            InvokePrivate(indicator, "RefreshWithDelta", 0.15f);
+            Assert.That(arrow.enabled, Is.False);
+        }
+
+        [Test]
+        public void RefreshWithoutPointerKeepsTargetingHiddenAndDisableHidesRenderers()
         {
             Assert.That(skills.BeginChargeTargeting(), Is.True);
-            Assert.That(skills.TryConfirmCharge(Vector3.zero, null), Is.True);
             indicator.Refresh();
 
             Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(Vector3.zero));
@@ -177,23 +238,76 @@ namespace ArknightsFrontline.Tests.EditMode
                 .GetValue(indicator);
         }
 
-        private static Vector3 MarkerCenter(LineRenderer marker)
+        private int EnabledLoopRendererCount()
         {
-            return (marker.GetPosition(0) + marker.GetPosition(16)) * 0.5f;
+            int count = 0;
+            foreach (LineRenderer renderer in owner.GetComponentsInChildren<LineRenderer>())
+            {
+                if (renderer.enabled && renderer.loop) count++;
+            }
+            return count;
         }
 
         private void SetCachedPointer(Vector3 point)
         {
+            EnsurePointerProjectionFixture();
             GameObject hitObject = Track(GameObject.CreatePrimitive(PrimitiveType.Cube));
             hitObject.transform.position = point;
             Physics.SyncTransforms();
-            Assert.That(Physics.Raycast(point + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 10f), Is.True);
+            UnityEngine.Camera camera = cameraObject.GetComponent<UnityEngine.Camera>();
+            Vector3 groundPosition = new Vector3(point.x, 0f, point.z);
+            Vector2 actualPointerPosition = commands.InputActions.FindAction("PointerPosition").ReadValue<Vector2>();
+            Ray pointerRay = camera.ScreenPointToRay(actualPointerPosition);
+            float groundDistance = (groundPosition.y - pointerRay.origin.y) / pointerRay.direction.y;
+            Vector3 currentGroundPoint = pointerRay.GetPoint(groundDistance);
+            Vector3 cameraShift = groundPosition - currentGroundPoint;
+            cameraShift.y = 0f;
+            cameraObject.transform.position += cameraShift;
+            Physics.SyncTransforms();
+
+            pointerRay = camera.ScreenPointToRay(actualPointerPosition);
+            Assert.That(Physics.Raycast(pointerRay, out RaycastHit hit, Mathf.Infinity), Is.True);
+            Assert.That(hit.collider.gameObject, Is.SameAs(hitObject));
+            int groundMask = 1 << LayerMask.NameToLayer("Ground");
+            Assert.That(Physics.Raycast(pointerRay, out RaycastHit groundHit, Mathf.Infinity, groundMask), Is.True);
+            Assert.That(Vector3.Distance(groundHit.point, groundPosition), Is.LessThan(0.001f),
+                "The actual pointer ray should independently project to the requested ground point.");
+            typeof(PlayerCommandController)
+                .GetField("cachedPointerRay", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(commands, pointerRay);
+            typeof(PlayerCommandController)
+                .GetField("hasCachedPointerRay", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(commands, true);
+            Assert.That(commands.TryGetPointerGroundPoint(out Vector3 projectedGroundPoint), Is.True);
+            Assert.That(Vector3.Distance(projectedGroundPoint, groundHit.point), Is.LessThan(0.001f));
             typeof(PlayerCommandController)
                 .GetField("cachedPointerHit", BindingFlags.Instance | BindingFlags.NonPublic)
                 .SetValue(commands, hit);
             typeof(PlayerCommandController)
                 .GetField("hasCachedPointerHit", BindingFlags.Instance | BindingFlags.NonPublic)
                 .SetValue(commands, true);
+        }
+
+        private void EnsurePointerProjectionFixture()
+        {
+            if (cameraObject == null)
+            {
+                cameraObject = Track(new GameObject("Main Camera"));
+                cameraObject.tag = "MainCamera";
+                cameraObject.transform.SetPositionAndRotation(
+                    new Vector3(0f, 30f, 0f),
+                    Quaternion.LookRotation(Vector3.down, Vector3.forward));
+                UnityEngine.Camera camera = cameraObject.AddComponent<UnityEngine.Camera>();
+                camera.orthographic = true;
+                camera.orthographicSize = 30f;
+                camera.farClipPlane = 100f;
+            }
+            if (groundObject == null)
+            {
+                groundObject = Track(GameObject.CreatePrimitive(PrimitiveType.Plane));
+                groundObject.layer = LayerMask.NameToLayer("Ground");
+                groundObject.transform.localScale = Vector3.one * 10f;
+            }
         }
 
         private static void InvokePrivate(object instance, string methodName)

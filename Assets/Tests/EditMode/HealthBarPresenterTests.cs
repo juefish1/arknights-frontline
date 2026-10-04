@@ -113,6 +113,44 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void TickKeepsHealthBarAboveOwningRendererWhenChildLineRendererMoves()
+        {
+            GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            gameObjects.Add(player);
+            player.transform.position = new Vector3(3f, 1f, -2f);
+            CombatUnit unit = player.AddComponent<CombatUnit>();
+            unit.Configure(TeamId.Blue, Altitude.Ground, 100f, 0f, 0f, 0f, 0f, false, false);
+
+            GameObject skillPreview = new GameObject("SkillPreview");
+            gameObjects.Add(skillPreview);
+            skillPreview.transform.SetParent(player.transform, false);
+            skillPreview.transform.localPosition = new Vector3(100f, 20f, -75f);
+            LineRenderer lineRenderer = skillPreview.AddComponent<LineRenderer>();
+            lineRenderer.useWorldSpace = false;
+            lineRenderer.widthMultiplier = 0.1f;
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, Vector3.zero);
+            lineRenderer.SetPosition(1, new Vector3(2f, 4f, 0f));
+
+            HealthBarPresenter presenter = unit.gameObject.AddComponent<HealthBarPresenter>();
+            presenter.Configure(unit);
+            presenter.Tick();
+
+            Bounds owningBounds = player.GetComponent<Renderer>().bounds;
+            Vector3 expectedPosition = new Vector3(
+                owningBounds.center.x,
+                owningBounds.max.y + 0.35f,
+                owningBounds.center.z);
+            Transform bar = unit.transform.Find("HealthBar");
+            Assert.That(Vector3.Distance(bar.position, expectedPosition), Is.LessThan(0.0001f));
+
+            skillPreview.transform.localPosition += new Vector3(-350f, 90f, 225f);
+            presenter.Tick();
+
+            Assert.That(Vector3.Distance(bar.position, expectedPosition), Is.LessThan(0.0001f));
+        }
+
+        [Test]
         public void TickPlacesHealthBarAboveChildRendererWhenRootHasNoRenderer()
         {
             GameObject tower = new GameObject("Tower");

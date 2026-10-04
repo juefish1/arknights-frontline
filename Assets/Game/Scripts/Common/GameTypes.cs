@@ -19,6 +19,13 @@ namespace ArknightsFrontline.Common
         Tower = 2
     }
 
+    public enum OperatorType
+    {
+        Exusiai = 0,
+        Eyjafjalla = 1,
+        SilverAsh = 2
+    }
+
     public enum MatchState
     {
         Preparing = 0,

@@ -1,0 +1,136 @@
+<style>
+  #stage5-hud-layouts .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #stage5-hud-layouts .arena {
+    position: relative;
+    min-height: 250px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--muted) 55%, var(--background));
+  }
+  #stage5-hud-layouts .lane {
+    position: absolute;
+    left: 7%; right: 7%; top: 43%; height: 22%;
+    background: color-mix(in srgb, var(--foreground) 14%, transparent);
+    transform: perspective(260px) rotateX(48deg);
+  }
+  #stage5-hud-layouts .unit {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--blue);
+    left: 46%; top: 42%;
+  }
+  #stage5-hud-layouts .enemy {
+    position: absolute;
+    width: 13px; height: 13px;
+    background: var(--red);
+    right: 25%; top: 47%;
+  }
+  #stage5-hud-layouts .hud {
+    position: absolute;
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  #stage5-hud-layouts .hud.center { left: 50%; bottom: 10px; transform: translateX(-50%); }
+  #stage5-hud-layouts .hud.left { left: 10px; bottom: 10px; }
+  #stage5-hud-layouts .hud.wide { left: 10px; right: 10px; bottom: 10px; justify-content: center; }
+  #stage5-hud-layouts .slot {
+    display: grid;
+    place-items: center;
+    width: 52px; height: 52px;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  #stage5-hud-layouts .wide .slot { width: 72px; }
+  #stage5-hud-layouts .key { font-weight: 500; }
+  #stage5-hud-layouts .state {
+    position: absolute;
+    left: 3px; right: 3px; bottom: 3px;
+    font-size: 11px;
+    text-align: center;
+    color: var(--muted-foreground);
+  }
+  #stage5-hud-layouts .health {
+    width: 98px; height: 8px;
+    background: color-mix(in srgb, var(--foreground) 15%, transparent);
+  }
+  #stage5-hud-layouts .health::after {
+    content: ""; display: block; width: 76%; height: 100%; background: var(--green);
+  }
+  #stage5-hud-layouts .portrait {
+    width: 42px; height: 42px; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--blue) 25%, var(--card));
+    color: var(--card-foreground);
+  }
+  #stage5-hud-layouts .wide-panel {
+    display: flex; gap: 8px; align-items: center;
+    padding: 6px 10px;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 820px) {
+    #stage5-hud-layouts .cards { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div id="stage5-hud-layouts">
+  <h2>阶段 5：技能 HUD 放在哪里？</h2>
+  <p class="subtitle">三种方案都统一显示：W 自动扫射充能、E 冲锋冷却、R 过载冷却/持续时间。</p>
+
+  <div class="cards">
+    <div class="card" data-choice="a" onclick="toggleSelect(this)">
+      <div class="card-image arena" aria-label="方案 A：底部居中的三个紧凑技能槽">
+        <div class="lane"></div><div class="unit"></div><div class="enemy"></div>
+        <div class="hud center">
+          <div class="slot"><span class="key">W</span><span class="state">2 / 3</span></div>
+          <div class="slot"><span class="key">E</span><span class="state">READY</span></div>
+          <div class="slot"><span class="key">R</span><span class="state">18s</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>A · 底部居中（推荐）</h3>
+        <p>最接近经典 MOBA；视线移动短，技能状态清晰，灰盒阶段实现量适中。</p>
+      </div>
+    </div>
+
+    <div class="card" data-choice="b" onclick="toggleSelect(this)">
+      <div class="card-image arena" aria-label="方案 B：技能槽与角色状态组合在左下角">
+        <div class="lane"></div><div class="unit"></div><div class="enemy"></div>
+        <div class="hud left">
+          <div class="portrait">EX</div>
+          <div>
+            <div class="health"></div>
+            <div style="display:flex;gap:4px;margin-top:5px">
+              <div class="slot"><span class="key">W</span><span class="state">2 / 3</span></div>
+              <div class="slot"><span class="key">E</span><span class="state">READY</span></div>
+              <div class="slot"><span class="key">R</span><span class="state">18s</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>B · 左下角色面板</h3>
+        <p>生命与技能集中，但操作时需要频繁看向屏幕角落；更适合后期完整角色 HUD。</p>
+      </div>
+    </div>
+
+    <div class="card" data-choice="c" onclick="toggleSelect(this)">
+      <div class="card-image arena" aria-label="方案 C：底部横向信息条，显示更多技能说明">
+        <div class="lane"></div><div class="unit"></div><div class="enemy"></div>
+        <div class="hud wide">
+          <div class="wide-panel">
+            <div class="slot"><span class="key">W</span><span class="state">扫射 2/3</span></div>
+            <div class="slot"><span class="key">E</span><span class="state">冲锋 READY</span></div>
+            <div class="slot"><span class="key">R</span><span class="state">过载 18s</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>C · 底部宽信息条</h3>
+        <p>文字最完整、测试直观，但占用战场画面最多，后续还需压缩。</p>
+      </div>
+    </div>
+  </div>
+</div>

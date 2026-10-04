@@ -56,19 +56,15 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
-        public void RefreshPrioritizesTargetingDashWindowAndActiveOverloadText()
+        public void RefreshPrioritizesDestinationTargetingAndActiveOverloadText()
         {
             Assert.That(skills.BeginChargeTargeting(), Is.True);
             hud.Refresh();
-            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT TARGET"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
 
-            GameObject targetObject = Track(new GameObject("Target"));
-            CombatUnit target = targetObject.AddComponent<CombatUnit>();
-            target.Configure(TeamId.Red, Altitude.Ground, 100f, 1f, 0f, 1f, 1f, false, false);
-            targetObject.transform.position = new Vector3(2f, 0f, 0f);
-            Assert.That(skills.TryConfirmCharge(targetObject.transform.position, target), Is.True);
+            Assert.That(skills.TryConfirmCharge(Vector3.right * 2f, null), Is.True);
             hud.Refresh();
-            Assert.That(hud.ELabel, Is.EqualTo("E  MOVE!"));
+            Assert.That(hud.ELabel, Is.EqualTo("E  20.0"));
 
             skills.Tick(0.25f);
             hud.Refresh();
@@ -78,6 +74,23 @@ namespace ArknightsFrontline.Tests.EditMode
             Assert.That(skills.TryActivateOverload(), Is.True);
             hud.Refresh();
             Assert.That(hud.RLabel, Is.EqualTo("R  ACTIVE 10.0"));
+        }
+
+        [Test]
+        public void HudPromptsForDestinationWithoutSecondClickBar()
+        {
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            hud.Refresh();
+
+            Transform barTransform = hud.transform.Find("E/DashWindowPromptTrack/DashWindowPromptBar");
+            Assert.That(hud.ELabel, Is.EqualTo("E  SELECT DEST"));
+            Assert.That(barTransform, Is.Null);
+            Assert.That(hud.transform.Find("E/DashWindowPromptTrack"), Is.Null);
+
+            Assert.That(skills.TryConfirmCharge(Vector3.right * 4f, null), Is.True);
+            hud.Refresh();
+            Assert.That(hud.ELabel, Is.EqualTo("E  20.0"));
+            Assert.That(hud.transform.Find("E/DashWindowPromptTrack"), Is.Null);
         }
 
         [Test]
@@ -105,6 +118,17 @@ namespace ArknightsFrontline.Tests.EditMode
             hud.enabled = true;
             hud.Refresh();
             Assert.That(hud.IsVisible, Is.True);
+        }
+
+        [Test]
+        public void ClearingTheLiveSkillControllerImmediatelyHidesSkillControls()
+        {
+            Assert.That(hud.IsVisible, Is.True);
+
+            hud.ConfigureControllerReference(null);
+
+            Assert.That(hud.IsVisible, Is.False,
+                "A departed player must not leave skill operation feedback visible while no life is deployed.");
         }
 
         private void AssertSlotGeometry()

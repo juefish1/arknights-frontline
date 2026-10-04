@@ -53,6 +53,104 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void DamageTakenReportsAttackerAndActualHealthLossBeforeDeathNotification()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Altitude.Ground, false, false);
+            CombatUnit unit = CreateUnit("Target", TeamId.Red, Altitude.Ground, false, false, 10f);
+            var notifications = new System.Collections.Generic.List<string>();
+            var reportedAttackers = new System.Collections.Generic.List<CombatUnit>();
+            var reportedDamage = new System.Collections.Generic.List<float>();
+            var deadStatesWhenDamageReported = new System.Collections.Generic.List<bool>();
+            int deathCount = 0;
+            unit.Died += _ =>
+            {
+                deathCount++;
+                notifications.Add("Died");
+                Assert.That(unit.IsDead, Is.True);
+            };
+            unit.DamageTaken += (source, amount) =>
+            {
+                notifications.Add("DamageTaken");
+                reportedAttackers.Add(source);
+                reportedDamage.Add(amount);
+                deadStatesWhenDamageReported.Add(unit.IsDead);
+            };
+
+            unit.TakePhysicalDamage(3f, attacker);
+            unit.TakePhysicalDamage(100f, attacker);
+            unit.TakePhysicalDamage(100f, attacker);
+
+            Assert.That(reportedAttackers, Is.EqualTo(new[] { attacker, attacker }));
+            Assert.That(reportedDamage, Is.EqualTo(new[] { 3f, 7f }));
+            Assert.That(notifications, Is.EqualTo(new[] { "DamageTaken", "DamageTaken", "Died" }));
+            Assert.That(deadStatesWhenDamageReported, Is.EqualTo(new[] { false, true }));
+            Assert.That(deathCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void NonLethalDamageCallbackCanApplyLethalDamageAndDeathIsNotifiedOnce()
+        {
+            CombatUnit attacker = CreateUnit("Attacker", TeamId.Blue, Altitude.Ground, false, false);
+            CombatUnit unit = CreateUnit("Target", TeamId.Red, Altitude.Ground, false, false, 10f);
+            var reportedDamage = new System.Collections.Generic.List<float>();
+            var notifications = new System.Collections.Generic.List<string>();
+            bool nestedHitStarted = false;
+            bool deadWhenLethalDamageWasReported = false;
+            int deathCount = 0;
+            unit.DamageTaken += (_, amount) =>
+            {
+                notifications.Add("DamageTaken");
+                reportedDamage.Add(amount);
+                if (!nestedHitStarted)
+                {
+                    nestedHitStarted = true;
+                    unit.TakePhysicalDamage(100f, attacker);
+                }
+                else
+                {
+                    deadWhenLethalDamageWasReported = unit.IsDead;
+                }
+            };
+            unit.Died += _ =>
+            {
+                notifications.Add("Died");
+                deathCount++;
+            };
+
+            unit.TakePhysicalDamage(3f, attacker);
+
+            Assert.That(unit.CurrentHealth, Is.EqualTo(0f));
+            Assert.That(reportedDamage, Is.EqualTo(new[] { 3f, 7f }));
+            Assert.That(deadWhenLethalDamageWasReported, Is.True);
+            Assert.That(notifications, Is.EqualTo(new[] { "DamageTaken", "DamageTaken", "Died" }));
+            Assert.That(deathCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void NonPositiveDamageDoesNotNotifyAndLegacyDamageReportsNoAttacker()
+        {
+            CombatUnit unit = CreateUnit("Target", TeamId.Red, Altitude.Ground, false, false, 10f);
+            int damageEventCount = 0;
+            CombatUnit reportedAttacker = unit;
+            float reportedDamage = 0f;
+            unit.DamageTaken += (attacker, damage) =>
+            {
+                damageEventCount++;
+                reportedAttacker = attacker;
+                reportedDamage = damage;
+            };
+
+            unit.TakePhysicalDamage(0f, null);
+            unit.TakePhysicalDamage(-2f, null);
+            unit.TakePhysicalDamage(2f);
+
+            Assert.That(unit.CurrentHealth, Is.EqualTo(8f));
+            Assert.That(damageEventCount, Is.EqualTo(1));
+            Assert.That(reportedAttacker, Is.Null);
+            Assert.That(reportedDamage, Is.EqualTo(2f));
+        }
+
+        [Test]
         public void StatModifiersPreserveBaseAttackValuesAndApplyEffectiveValues()
         {
             CombatUnit unit = CreateUnit("Exusiai", TeamId.Blue, Altitude.Ground, true, true, 10f, 0f, 50f, 1f, 0.5f);

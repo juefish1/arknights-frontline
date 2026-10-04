@@ -5,6 +5,7 @@ using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
 using ArknightsFrontline.Movement;
+using ArknightsFrontline.Skills;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -48,8 +49,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             CombatUnit playerUnit = player.GetComponent<CombatUnit>();
             Assert.That(playerUnit, Is.Not.Null);
             Assert.That(playerUnit.Team, Is.EqualTo(TeamId.Blue));
-            Assert.That(playerUnit.MaxHealth, Is.EqualTo(100f));
-            Assert.That(playerUnit.CurrentHealth, Is.EqualTo(100f));
+            Assert.That(playerUnit.MaxHealth, Is.EqualTo(1000f));
+            Assert.That(playerUnit.CurrentHealth, Is.EqualTo(1000f));
             Assert.That(playerUnit.IsDead, Is.False);
             Assert.That(player.GetComponent<CombatCommandResolver>(), Is.Not.Null);
             Assert.That(player.GetComponent<BasicAttackController>(), Is.Not.Null);
@@ -58,22 +59,26 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator PrototypeArenaContainsRedGroundTrainingDummy()
+        public IEnumerator PrototypeArenaContainsRedGroundOperator()
         {
             SceneManager.LoadScene("PrototypeArena");
             yield return null;
 
-            GameObject dummy = GameObject.Find("TrainingDummy_Red");
-            Assert.That(dummy, Is.Not.Null);
-            CombatUnit unit = dummy.GetComponent<CombatUnit>();
+            GameObject redOperator = GameObject.Find("Red_Exusiai");
+            Assert.That(redOperator, Is.Not.Null);
+            Assert.That(GameObject.Find("TrainingDummy_Red"), Is.Null);
+            CombatUnit unit = redOperator.GetComponent<CombatUnit>();
             Assert.That(unit, Is.Not.Null);
             Assert.That(unit.Team, Is.EqualTo(TeamId.Red));
             Assert.That(unit.Altitude, Is.EqualTo(Altitude.Ground));
             Assert.That(unit.MaxHealth, Is.EqualTo(1000f));
             Assert.That(unit.CurrentHealth, Is.EqualTo(1000f));
             Assert.That(unit.IsDead, Is.False);
-            Assert.That(dummy.GetComponent<Collider>(), Is.Not.Null);
-            Assert.That(dummy.layer, Is.EqualTo(LayerMask.NameToLayer("Targetable")));
+            Assert.That(redOperator.GetComponent<Collider>(), Is.Not.Null);
+            Assert.That(redOperator.layer, Is.EqualTo(LayerMask.NameToLayer("Targetable")));
+            Assert.That(redOperator.GetComponent<OperatorIdentity>().OperatorType, Is.EqualTo(OperatorType.Exusiai));
+            Assert.That(redOperator.GetComponent<SimpleOperatorAiController>(), Is.Not.Null);
+            Assert.That(redOperator.GetComponent<ExusiaiSkillController>(), Is.Null);
         }
     }
 }

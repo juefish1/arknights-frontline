@@ -26,9 +26,13 @@ namespace ArknightsFrontline.Commands
         private InputControl pendingMoveControl;
         private bool isAttackMoveHeld;
         private IPlayerSkillInputHandler skillInputHandler;
+        private OperatorRetreatController retreat;
+        private Ray cachedPointerRay;
+        private bool hasCachedPointerRay;
         private RaycastHit cachedPointerHit;
         private bool hasCachedPointerHit;
         private int cachedPointerFrame = -1;
+        private bool stoppedForMatch;
 
         public GameObject CurrentTarget => currentTarget;
 
@@ -40,6 +44,10 @@ namespace ArknightsFrontline.Commands
 
         public bool IsAttackMoveHeld => isAttackMoveHeld;
 
+        public bool IsRetreatGuiding => retreat != null && retreat.IsGuiding;
+
+        public bool IsStoppedForMatch => stoppedForMatch;
+
         public InputActionAsset InputActions => input.Asset;
 
         private void Awake()
@@ -50,6 +58,12 @@ namespace ArknightsFrontline.Commands
             }
 
             motor = GetComponent<UnitMotor>();
+            retreat = GetComponent<OperatorRetreatController>();
+            if (retreat == null)
+            {
+                retreat = gameObject.AddComponent<OperatorRetreatController>();
+            }
+            retreat.Configure();
             input = new GameInputActions();
             InputBindingStore.Load(input.Asset);
             input.MoveClick.performed += OnMoveClick;
@@ -60,12 +74,16 @@ namespace ArknightsFrontline.Commands
             input.Cancel.performed += OnCancel;
             input.Skill2.performed += OnSkill2;
             input.Skill3.performed += OnSkill3;
+            input.Retreat.performed += OnRetreat;
             input.CenterCamera.performed += OnCenterCamera;
         }
 
         private void OnEnable()
         {
-            input?.Gameplay.Enable();
+            if (!stoppedForMatch)
+            {
+                input?.Gameplay.Enable();
+            }
         }
 
         private void OnDisable()
@@ -94,17 +112,33 @@ namespace ArknightsFrontline.Commands
             input.Cancel.performed -= OnCancel;
             input.Skill2.performed -= OnSkill2;
             input.Skill3.performed -= OnSkill3;
+            input.Retreat.performed -= OnRetreat;
             input.CenterCamera.performed -= OnCenterCamera;
             input.Dispose();
         }
 
         public void SetSkillInputHandler(IPlayerSkillInputHandler handler)
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
             skillInputHandler = handler;
         }
 
         public void Issue(UnitCommand command)
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             CombatUnit combatUnit = GetComponent<CombatUnit>();
             if (combatUnit != null && combatUnit.IsDead)
             {
@@ -136,19 +170,66 @@ namespace ArknightsFrontline.Commands
 
         public void CancelCurrentCommand()
         {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
             CurrentCommand = null;
             currentTarget = null;
             motor.Stop();
             CommandRevision++;
         }
 
+        public void StopForMatch()
+        {
+            if (stoppedForMatch)
+            {
+                return;
+            }
+
+            CurrentCommand = null;
+            currentTarget = null;
+            motor?.Stop();
+            CommandRevision++;
+            CancelAttackMove();
+            hasPendingMoveClick = false;
+            pendingMoveClickWasArmed = false;
+            pendingMoveControl = null;
+            ClearPointerHitCache();
+            skillInputHandler = null;
+            stoppedForMatch = true;
+            input?.Gameplay.Disable();
+            enabled = false;
+        }
+
         public void ArmAttackMove()
         {
+            if (stoppedForMatch || IsRetreatGuiding)
+            {
+                return;
+            }
+
             attackMoveState.Arm();
+        }
+
+        public void CancelForRetreat()
+        {
+            CancelAttackMove();
+            hasPendingMoveClick = false;
+            pendingMoveClickWasArmed = false;
+            pendingMoveControl = null;
+            ClearPointerHitCache();
+            CancelCurrentCommand();
         }
 
         public void HandleMoveClick()
         {
+            if (stoppedForMatch || IsRetreatGuiding)
+            {
+                return;
+            }
+
             if (attackMoveState.IsArmed)
             {
                 CancelAttackMove();
@@ -165,11 +246,21 @@ namespace ArknightsFrontline.Commands
 
         private void OnMoveClick(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             QueueMoveClick(context.control);
         }
 
         private void OnAttackMove(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             if (skillInputHandler != null && skillInputHandler.BlocksAttackMove)
             {
                 return;
@@ -186,13 +277,22 @@ namespace ArknightsFrontline.Commands
 
         private void OnConfirm(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             if (skillInputHandler == null && (!IsAttackMoveArmed || !IsAttackMoveHeld))
             {
                 return;
             }
 
             bool hasHit = TryGetPointerHit(out RaycastHit hit);
-            Vector3 worldPoint = hasHit ? hit.point : default;
+            Vector3 worldPoint = transform.position;
+            if (hasHit && TryGetPointerGroundPoint(out Vector3 groundPoint))
+            {
+                worldPoint = groundPoint;
+            }
             GameObject hitObject = hasHit ? hit.collider.gameObject : null;
             if (skillInputHandler != null && skillInputHandler.TryHandleConfirm(worldPoint, hitObject))
             {
@@ -224,6 +324,11 @@ namespace ArknightsFrontline.Commands
 
         private void OnStop(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             skillInputHandler?.HandleStop();
             CancelAttackMove();
             Issue(UnitCommand.Stop());
@@ -231,6 +336,11 @@ namespace ArknightsFrontline.Commands
 
         private void OnCancel(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             if (skillInputHandler != null && skillInputHandler.TryHandleCancel())
             {
                 CancelAttackMove();
@@ -249,17 +359,43 @@ namespace ArknightsFrontline.Commands
 
         private void OnSkill2(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             skillInputHandler?.HandleSkill2();
         }
 
         private void OnSkill3(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
+            if (IsRetreatGuiding)
+            {
+                return;
+            }
+
             skillInputHandler?.HandleSkill3();
+        }
+
+        private void OnRetreat(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            if (!IsRetreatGuiding)
+            {
+                retreat?.TryBegin();
+            }
         }
 
         private void Update()
         {
             RefreshPointerHitCache();
+            if (IsRetreatGuiding)
+            {
+                hasPendingMoveClick = false;
+                pendingMoveClickWasArmed = false;
+                pendingMoveControl = null;
+                return;
+            }
+
             if (!hasPendingMoveClick)
             {
                 return;
@@ -346,6 +482,8 @@ namespace ArknightsFrontline.Commands
             }
 
             cachedPointerFrame = Time.frameCount;
+            cachedPointerRay = default;
+            hasCachedPointerRay = false;
             cachedPointerHit = default;
             hasCachedPointerHit = false;
             UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
@@ -355,12 +493,38 @@ namespace ArknightsFrontline.Commands
             }
 
             Ray ray = mainCamera.ScreenPointToRay(input.PointerPosition.ReadValue<Vector2>());
+            cachedPointerRay = ray;
+            hasCachedPointerRay = true;
             hasCachedPointerHit = Physics.Raycast(
                 ray, out cachedPointerHit, Mathf.Infinity, Physics.DefaultRaycastLayers);
         }
 
+        public bool TryGetPointerGroundPoint(out Vector3 groundPoint)
+        {
+            groundPoint = transform.position;
+            int groundLayer = LayerMask.NameToLayer("Ground");
+            if (groundLayer < 0 || !hasCachedPointerRay)
+            {
+                return false;
+            }
+
+            if (!Physics.Raycast(
+                    cachedPointerRay,
+                    out RaycastHit groundHit,
+                    Mathf.Infinity,
+                    1 << groundLayer))
+            {
+                return false;
+            }
+
+            groundPoint = groundHit.point;
+            return true;
+        }
+
         private void ClearPointerHitCache()
         {
+            cachedPointerRay = default;
+            hasCachedPointerRay = false;
             cachedPointerHit = default;
             hasCachedPointerHit = false;
             cachedPointerFrame = -1;

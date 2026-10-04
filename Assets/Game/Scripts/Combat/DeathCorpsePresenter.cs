@@ -12,7 +12,10 @@ namespace ArknightsFrontline.Combat
         [SerializeField] private Material corpseMaterial;
         [SerializeField] private int groundLayer = -1;
         [SerializeField] private Vector3 corpseScale = new Vector3(0.15f, 1f, 0.15f);
+        [SerializeField] private UnitKind unitKind = ArknightsFrontline.Common.UnitKind.Operator;
         private bool hasSpawnedCorpse;
+
+        public UnitKind UnitKind => unitKind;
 
         private void Awake()
         {
@@ -32,7 +35,21 @@ namespace ArknightsFrontline.Combat
 
         public void Configure(CombatUnit combatUnit, Material corpseMaterial, int groundLayer)
         {
-            Configure(combatUnit, corpseMaterial, groundLayer, DefaultCorpseScale);
+            Configure(
+                combatUnit,
+                corpseMaterial,
+                groundLayer,
+                DefaultCorpseScale,
+                ArknightsFrontline.Common.UnitKind.Operator);
+        }
+
+        public void Configure(
+            CombatUnit combatUnit,
+            Material corpseMaterial,
+            int groundLayer,
+            UnitKind unitKind)
+        {
+            Configure(combatUnit, corpseMaterial, groundLayer, DefaultCorpseScale, unitKind);
         }
 
         public void Configure(
@@ -40,6 +57,21 @@ namespace ArknightsFrontline.Combat
             Material corpseMaterial,
             int groundLayer,
             Vector3 corpseScale)
+        {
+            Configure(
+                combatUnit,
+                corpseMaterial,
+                groundLayer,
+                corpseScale,
+                ArknightsFrontline.Common.UnitKind.Operator);
+        }
+
+        public void Configure(
+            CombatUnit combatUnit,
+            Material corpseMaterial,
+            int groundLayer,
+            Vector3 corpseScale,
+            UnitKind unitKind)
         {
             if (combatUnit == null)
             {
@@ -56,6 +88,29 @@ namespace ArknightsFrontline.Combat
             this.corpseMaterial = corpseMaterial;
             this.groundLayer = groundLayer;
             this.corpseScale = corpseScale;
+            this.unitKind = unitKind;
+            SubscribeToDeath();
+        }
+
+        public void ConfigureFromTemplate(DeathCorpsePresenter templatePresenter, CombatUnit liveCombatUnit)
+        {
+            if (templatePresenter == null)
+            {
+                throw new ArgumentNullException(nameof(templatePresenter));
+            }
+
+            if (liveCombatUnit == null)
+            {
+                throw new ArgumentNullException(nameof(liveCombatUnit));
+            }
+
+            UnsubscribeFromDeath();
+            corpseMaterial = templatePresenter.corpseMaterial;
+            groundLayer = templatePresenter.groundLayer;
+            corpseScale = templatePresenter.corpseScale;
+            unitKind = templatePresenter.unitKind;
+            combatUnit = liveCombatUnit;
+            hasSpawnedCorpse = false;
             SubscribeToDeath();
         }
 
@@ -90,6 +145,7 @@ namespace ArknightsFrontline.Combat
             GameObject corpse = GameObject.CreatePrimitive(PrimitiveType.Plane);
             corpse.name = gameObject.name + "_Corpse";
             corpse.layer = 0;
+            corpse.AddComponent<CorpseLifetimeController>().Configure(unitKind, combatUnit.gameObject.name);
             corpse.transform.position = transform.position;
             corpse.transform.localScale = corpseScale;
             corpse.GetComponent<Renderer>().sharedMaterial = corpseMaterial;

@@ -23,6 +23,7 @@ namespace ArknightsFrontline.Skills
             bool isSweepReady,
             ExusiaiChargePhase chargePhase,
             bool isChargeReady,
+            float dashWindowRemaining,
             float chargeCooldown,
             bool isOverloadActive,
             float overloadDuration,
@@ -32,6 +33,7 @@ namespace ArknightsFrontline.Skills
             IsSweepReady = isSweepReady;
             ChargePhase = chargePhase;
             IsChargeReady = isChargeReady;
+            DashWindowRemaining = dashWindowRemaining;
             ChargeCooldown = chargeCooldown;
             IsOverloadActive = isOverloadActive;
             OverloadDuration = overloadDuration;
@@ -42,6 +44,7 @@ namespace ArknightsFrontline.Skills
         public bool IsSweepReady { get; }
         public ExusiaiChargePhase ChargePhase { get; }
         public bool IsChargeReady { get; }
+        public float DashWindowRemaining { get; }
         public float ChargeCooldown { get; }
         public bool IsOverloadActive { get; }
         public float OverloadDuration { get; }
@@ -51,11 +54,12 @@ namespace ArknightsFrontline.Skills
     [DisallowMultipleComponent]
     public sealed class ExusiaiSkillController : MonoBehaviour, IPlayerSkillInputHandler
     {
+        // TagManager remains user-owned; Stage 5 reserves numeric layer 10 without naming it.
+        public const int ReservedObstacleLayerIndex = 10;
         private const int SweepRequiredAttacks = 3;
         private const float SweepDamageMultiplier = 1.45f;
         private const float SweepMissingHealthRatio = 0.08f;
         private const float ChargeCooldownDuration = 20f;
-        private const float ChargeDashWindowDuration = 0.25f;
         private const float ChargeDamageMultiplier = 1.25f;
         private const float ChargeSlowMultiplier = 0.70f;
         private const float ChargeSlowDuration = 2f;
@@ -69,7 +73,6 @@ namespace ArknightsFrontline.Skills
         private const string OverloadModifierSource = "Exusiai.R";
 
         private readonly SkillCountdown chargeCooldown = new SkillCountdown();
-        private readonly SkillCountdown dashWindow = new SkillCountdown();
         private readonly SkillCountdown overloadCooldown = new SkillCountdown();
         private readonly SkillCountdown overloadDuration = new SkillCountdown();
 
@@ -79,36 +82,45 @@ namespace ArknightsFrontline.Skills
         private AttackSequenceExecutor sequenceExecutor;
         private UnitStatModifiers modifiers;
         private SkillDashController dash;
+        private OperatorRetreatController retreat;
+        private AttackSequencePlan pendingChargePlan;
         private int sweepProgress;
         private bool selectingChargeTarget;
-        private bool dashWindowOpen;
         private bool overloadActive;
         private bool configured;
         private bool stopped;
         private bool missingDependencyLogged;
+        private bool hasFrozenSnapshot;
+        private ExusiaiSkillSnapshot frozenSnapshot;
 
         public bool IsSelectingChargeTarget => selectingChargeTarget;
 
-        public bool IsDashWindowOpen => configured && !stopped && dashWindowOpen && dashWindow.Remaining > 0f;
+        public bool IsStopped => stopped;
+
+        // Retained for existing HUD and indicator consumers until their migration is complete.
+        public bool IsDashWindowOpen => false;
 
         public bool IsOverloadActive => overloadActive;
 
         public CombatUnit SelectedChargeTarget { get; private set; }
 
         public bool BlocksAttackMove => CanRun()
-            && (selectingChargeTarget || IsDashWindowOpen || dash.IsDashing);
+            && (selectingChargeTarget || dash.IsDashing);
 
         public bool BlocksNormalCommands => CanRun() && dash.IsDashing;
 
-        public ExusiaiSkillSnapshot Snapshot => new ExusiaiSkillSnapshot(
-            sweepProgress,
-            sweepProgress >= SweepRequiredAttacks,
-            GetChargePhase(),
-            IsChargeReady(),
-            chargeCooldown.Remaining,
-            overloadActive,
-            overloadActive ? overloadDuration.Remaining : 0f,
-            overloadCooldown.Remaining);
+        public ExusiaiSkillSnapshot Snapshot => hasFrozenSnapshot
+            ? frozenSnapshot
+            : new ExusiaiSkillSnapshot(
+                sweepProgress,
+                sweepProgress >= SweepRequiredAttacks,
+                GetChargePhase(),
+                IsChargeReady(),
+                0f,
+                chargeCooldown.Remaining,
+                overloadActive,
+                overloadActive ? overloadDuration.Remaining : 0f,
+                overloadCooldown.Remaining);
 
         private void Awake()
         {
@@ -145,7 +157,8 @@ namespace ArknightsFrontline.Skills
             if (!dashController.IsConfiguredFor(unitMotor))
             {
                 dashController.Configure(
-                    unitMotor, ArenaLayout.CreateDefault(), LayerMask.GetMask("Obstacle"));
+                    unitMotor, ArenaLayout.CreateDefault(),
+                    1 << ReservedObstacleLayerIndex);
             }
 
             ConfigureCore(combatOwner, commandController, basicAttackController,
@@ -220,6 +233,10 @@ namespace ArknightsFrontline.Skills
             this.sequenceExecutor = sequenceExecutor;
             modifiers = statModifiers;
             dash = dashController;
+            retreat = GetComponent<OperatorRetreatController>();
+            commands.SetSkillInputHandler(this);
+            CommandFeedbackPresenter feedback = GetComponent<CommandFeedbackPresenter>();
+            if (feedback != null) feedback.ConfigureSkillController(this);
             owner.Died += OnOwnerDied;
             this.sequenceExecutor.SequenceFinished += OnSequenceFinished;
             basicAttacks.SetPlanProvider(CreateNextBasicAttackPlan);
@@ -242,11 +259,6 @@ namespace ArknightsFrontline.Skills
 
             chargeCooldown.Tick(deltaTime);
             overloadCooldown.Tick(deltaTime);
-            if (dashWindowOpen)
-            {
-                dashWindow.Tick(deltaTime);
-                if (dashWindow.IsReady) dashWindowOpen = false;
-            }
 
             if (!overloadActive) return;
             overloadDuration.Tick(deltaTime);
@@ -255,7 +267,7 @@ namespace ArknightsFrontline.Skills
 
         public bool BeginChargeTargeting()
         {
-            if (!CanRun() || !IsChargeReady()) return false;
+            if (!CanAcceptSkillInput() || !IsChargeReady()) return false;
             selectingChargeTarget = true;
             SelectedChargeTarget = null;
             return true;
@@ -263,47 +275,35 @@ namespace ArknightsFrontline.Skills
 
         public bool TryConfirmCharge(Vector3 point, CombatUnit directTarget)
         {
-            if (!CanRun() || !selectingChargeTarget || !IsPointInAttackRange(point)) return false;
+            if (!CanAcceptSkillInput() || !selectingChargeTarget || !dash.TryStart(point)) return false;
 
-            CombatUnit selected = IsLegalTargetInAttackRange(directTarget)
-                ? directTarget
-                : TargetSelector.FindNearestInRangeFromPoint(owner, point);
             selectingChargeTarget = false;
-            SelectedChargeTarget = selected;
+            SelectedChargeTarget = null;
 
             commands.CancelCurrentCommand();
             basicAttacks.ClearTarget();
             sequenceExecutor.Cancel();
 
             chargeCooldown.Start(ChargeCooldownDuration);
-            dashWindow.Start(ChargeDashWindowDuration);
-            dashWindowOpen = true;
-
-            if (selected != null)
-            {
-                AttackSequencePlan plan = new AttackSequencePlan(
-                    AttackSequenceKind.Charge,
-                    overloadActive ? 5 : 4,
-                    MultiShotInterval,
-                    owner.AttackPower,
-                    ChargeDamageMultiplier,
-                    0f,
-                    ChargeSlowMultiplier,
-                    ChargeSlowDuration,
-                    false,
-                    true);
-                sequenceExecutor.TryStart(plan, selected);
-            }
+            pendingChargePlan = new AttackSequencePlan(
+                AttackSequenceKind.Charge,
+                overloadActive ? 5 : 4,
+                MultiShotInterval,
+                owner.AttackPower,
+                ChargeDamageMultiplier,
+                0f,
+                ChargeSlowMultiplier,
+                ChargeSlowDuration,
+                false,
+                true);
+            dash.DashCompleted += OnDashCompleted;
 
             return true;
         }
 
         public bool TryConsumeDashMove(Vector3 point)
         {
-            if (!CanRun() || !IsDashWindowOpen) return false;
-            dashWindowOpen = false;
-            dashWindow.Reset(0f);
-            return dash.TryStart(point);
+            return false;
         }
 
         public bool CancelChargeTargeting()
@@ -316,7 +316,7 @@ namespace ArknightsFrontline.Skills
 
         public bool TryActivateOverload()
         {
-            if (!CanRun() || overloadActive || !overloadCooldown.IsReady) return false;
+            if (!CanAcceptSkillInput() || overloadActive || !overloadCooldown.IsReady) return false;
             overloadActive = true;
             overloadDuration.Start(OverloadDuration);
             overloadCooldown.Start(OverloadCooldownDuration);
@@ -328,7 +328,7 @@ namespace ArknightsFrontline.Skills
 
         public void HandleSkill2()
         {
-            if (!CanRun())
+            if (!CanAcceptSkillInput())
             {
                 return;
             }
@@ -344,6 +344,11 @@ namespace ArknightsFrontline.Skills
 
         public void HandleSkill3()
         {
+            if (!CanAcceptSkillInput())
+            {
+                return;
+            }
+
             TryActivateOverload();
         }
 
@@ -354,23 +359,18 @@ namespace ArknightsFrontline.Skills
                 return false;
             }
 
-            if (IsDashWindowOpen || dash.IsDashing)
+            if (IsRetreatGuiding)
+            {
+                return true;
+            }
+
+            if (dash.IsDashing)
             {
                 return true;
             }
 
             bool wasSelectingChargeTarget = selectingChargeTarget;
-
-            CombatUnit directTarget = null;
-            if (hitObject != null
-                && hitObject.layer == LayerMask.NameToLayer("Targetable")
-                && hitObject.TryGetComponent(out CombatUnit hitUnit)
-                && TargetRules.IsLegal(owner, hitUnit))
-            {
-                directTarget = hitUnit;
-            }
-
-            bool confirmed = TryConfirmCharge(worldPoint, directTarget);
+            bool confirmed = TryConfirmCharge(worldPoint, null);
             return wasSelectingChargeTarget || confirmed;
         }
 
@@ -381,9 +381,8 @@ namespace ArknightsFrontline.Skills
                 return false;
             }
 
-            if (IsDashWindowOpen)
+            if (IsRetreatGuiding)
             {
-                TryConsumeDashMove(worldPoint);
                 return true;
             }
 
@@ -392,22 +391,27 @@ namespace ArknightsFrontline.Skills
 
         public bool TryHandleCancel()
         {
+            if (IsRetreatGuiding)
+            {
+                return false;
+            }
+
             return CancelChargeTargeting();
         }
 
         public void HandleStop()
         {
-            if (!CanRun())
+            if (!CanRun() || IsRetreatGuiding)
             {
                 return;
             }
 
             CancelChargeTargeting();
-            dashWindowOpen = false;
-            dashWindow.Reset(0f);
+            ClearPendingChargePlan();
             SelectedChargeTarget = null;
             basicAttacks.ClearTarget();
             sequenceExecutor.Cancel();
+            dash.Cancel();
         }
 
         public void ResetForDeployment()
@@ -418,12 +422,24 @@ namespace ArknightsFrontline.Skills
             InitializeSkillState();
         }
 
+        public void CancelPendingTargetingForRetreat()
+        {
+            if (!CanRun())
+            {
+                return;
+            }
+
+            CancelChargeTargeting();
+            ClearPendingChargePlan();
+            SelectedChargeTarget = null;
+        }
+
         private void InitializeSkillState()
         {
+            hasFrozenSnapshot = false;
             selectingChargeTarget = false;
-            dashWindowOpen = false;
+            ClearPendingChargePlan();
             SelectedChargeTarget = null;
-            dashWindow.Reset(0f);
             EndOverload();
             sweepProgress = 0;
             chargeCooldown.Reset(0f);
@@ -433,7 +449,40 @@ namespace ArknightsFrontline.Skills
 
         public void StopForMatch()
         {
+            Stop(true);
+        }
+
+        private void Stop(bool preserveSnapshot)
+        {
             if (!configured) return;
+            if (preserveSnapshot && !hasFrozenSnapshot)
+            {
+                ExusiaiSkillSnapshot snapshot = Snapshot;
+                bool hasTemporaryChargePhase = snapshot.ChargePhase == ExusiaiChargePhase.Targeting;
+                if (hasTemporaryChargePhase)
+                {
+                    bool chargeReady = chargeCooldown.IsReady;
+                    frozenSnapshot = new ExusiaiSkillSnapshot(
+                        snapshot.SweepProgress,
+                        snapshot.IsSweepReady,
+                        chargeReady ? ExusiaiChargePhase.Ready : ExusiaiChargePhase.Cooldown,
+                        chargeReady,
+                        0f,
+                        snapshot.ChargeCooldown,
+                        snapshot.IsOverloadActive,
+                        snapshot.OverloadDuration,
+                        snapshot.OverloadCooldown);
+                }
+                else
+                {
+                    frozenSnapshot = snapshot;
+                }
+                hasFrozenSnapshot = true;
+            }
+            else if (!preserveSnapshot)
+            {
+                hasFrozenSnapshot = false;
+            }
             ClearRuntimeState(true);
             stopped = true;
             sweepProgress = 0;
@@ -474,7 +523,28 @@ namespace ArknightsFrontline.Skills
 
         private void OnOwnerDied(CombatUnit _)
         {
-            StopForMatch();
+            Stop(false);
+        }
+
+        private void OnDashCompleted()
+        {
+            dash.DashCompleted -= OnDashCompleted;
+            AttackSequencePlan plan = pendingChargePlan;
+            pendingChargePlan = null;
+            if (plan == null || !CanRun()) return;
+
+            CombatUnit selected = TargetSelector.FindNearestInRange(owner);
+            if (selected == null)
+            {
+                SelectedChargeTarget = null;
+                return;
+            }
+
+            SelectedChargeTarget = selected;
+            if (!sequenceExecutor.TryStart(plan, selected))
+            {
+                SelectedChargeTarget = null;
+            }
         }
 
         private bool CanRun()
@@ -482,9 +552,16 @@ namespace ArknightsFrontline.Skills
             return configured && isActiveAndEnabled && !stopped && owner != null && !owner.IsDead;
         }
 
+        private bool CanAcceptSkillInput()
+        {
+            return CanRun() && !IsRetreatGuiding;
+        }
+
+        private bool IsRetreatGuiding => retreat != null && retreat.IsGuiding;
+
         private bool IsChargeReady()
         {
-            return CanRun() && chargeCooldown.IsReady && !selectingChargeTarget && !IsDashWindowOpen;
+            return CanRun() && chargeCooldown.IsReady && !selectingChargeTarget;
         }
 
         private ExusiaiChargePhase GetChargePhase()
@@ -494,34 +571,25 @@ namespace ArknightsFrontline.Skills
                 return ExusiaiChargePhase.Inactive;
             }
             if (selectingChargeTarget) return ExusiaiChargePhase.Targeting;
-            if (IsDashWindowOpen) return ExusiaiChargePhase.DashWindow;
             return chargeCooldown.IsReady ? ExusiaiChargePhase.Ready : ExusiaiChargePhase.Cooldown;
-        }
-
-        private bool IsPointInAttackRange(Vector3 point)
-        {
-            Vector3 offset = point - owner.transform.position;
-            return new Vector2(offset.x, offset.z).magnitude <= owner.AttackRange;
-        }
-
-        private bool IsLegalTargetInAttackRange(CombatUnit candidate)
-        {
-            if (!TargetRules.IsLegal(owner, candidate)) return false;
-            Vector3 offset = candidate.transform.position - owner.transform.position;
-            return new Vector2(offset.x, offset.z).magnitude <= owner.AttackRange;
         }
 
         private void ClearRuntimeState(bool clearCommand)
         {
             selectingChargeTarget = false;
-            dashWindowOpen = false;
+            ClearPendingChargePlan();
             SelectedChargeTarget = null;
-            dashWindow.Reset(0f);
             if (clearCommand) commands?.CancelCurrentCommand();
             basicAttacks?.ClearTarget();
             sequenceExecutor?.Cancel();
             dash?.Cancel();
             EndOverload();
+        }
+
+        private void ClearPendingChargePlan()
+        {
+            if (dash != null) dash.DashCompleted -= OnDashCompleted;
+            pendingChargePlan = null;
         }
 
         private void EndOverload()
@@ -535,6 +603,7 @@ namespace ArknightsFrontline.Skills
         {
             if (owner != null) owner.Died -= OnOwnerDied;
             if (sequenceExecutor != null) sequenceExecutor.SequenceFinished -= OnSequenceFinished;
+            if (dash != null) dash.DashCompleted -= OnDashCompleted;
             if (basicAttacks != null) basicAttacks.SetPlanProvider(null);
         }
 

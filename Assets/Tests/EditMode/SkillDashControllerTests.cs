@@ -48,8 +48,33 @@ namespace ArknightsFrontline.Tests.EditMode
 
             dash.Tick(0.25f);
 
-            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(3.5f, 0f, 0f)));
+            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(7f, 0f, 0f)));
             Assert.That(motor.MovementSpeed, Is.EqualTo(0.25f).Within(0.001f));
+        }
+
+        [Test]
+        public void DashTravelsSevenMetersInQuarterSecondAndCompletesOnce()
+        {
+            int completions = 0;
+            dash.DashCompleted += () => completions++;
+            Assert.That(dash.TryStart(new Vector3(7f, 0f, 0f)), Is.True);
+
+            dash.Tick(0.125f);
+
+            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(3.5f, 0f, 0f)));
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(completions, Is.Zero);
+
+            dash.Tick(0.125f);
+
+            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(7f, 0f, 0f)));
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(completions, Is.EqualTo(1));
+
+            dash.Tick(0.125f);
+
+            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(7f, 0f, 0f)));
+            Assert.That(completions, Is.EqualTo(1));
         }
 
         [Test]
@@ -124,7 +149,7 @@ namespace ArknightsFrontline.Tests.EditMode
 
             Assert.That(owner.transform.position, Is.EqualTo(new Vector3(0f, 2f, 0f)));
             dash.Tick(0.25f);
-            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(3.5f, 2f, 0f)));
+            Assert.That(owner.transform.position, Is.EqualTo(new Vector3(7f, 2f, 0f)));
         }
 
         [Test]

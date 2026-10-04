@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ArknightsFrontline.Arena;
+using ArknightsFrontline.Camera;
 using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
@@ -17,8 +18,28 @@ namespace ArknightsFrontline.Tests.PlayMode
 {
     public sealed class PlayerCommandInputPlayModeTests : InputTestFixture
     {
-        private readonly HashSet<int> baselineRootIds = new HashSet<int>();
+        private readonly HashSet<EntityId> baselineRootIds = new HashSet<EntityId>();
         private Scene cleanupScene;
+
+        [Test]
+        public void MiddleMouseDragMovesCameraOppositeScreenRightWithoutVerticalMovement()
+        {
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            GameObject cameraObject = CreateMainCamera();
+            cameraObject.transform.position = MobaCameraController.DefaultOffset;
+            MobaCameraController controller = cameraObject.AddComponent<MobaCameraController>();
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            Press(mouse.middleButton);
+            Set(mouse.delta, new Vector2(100f, 0f));
+            Vector3 before = cameraObject.transform.position;
+
+            controller.SendMessage("Update");
+
+            Vector3 displacement = cameraObject.transform.position - before;
+            Assert.That(Vector3.Dot(displacement, cameraObject.transform.right), Is.EqualTo(-3f).Within(0.001f));
+            Assert.That(displacement.y, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(displacement.magnitude, Is.EqualTo(3f).Within(0.001f));
+        }
 
         public override void Setup()
         {
@@ -33,7 +54,7 @@ namespace ArknightsFrontline.Tests.PlayMode
 
             foreach (GameObject root in cleanupScene.GetRootGameObjects())
             {
-                baselineRootIds.Add(root.GetInstanceID());
+                baselineRootIds.Add(root.GetEntityId());
             }
         }
 
@@ -241,7 +262,7 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator ExusiaiSelectingChargeConsumesOutOfRangeTargetAndGroundConfirmsBeforeAttackMove()
+        public IEnumerator ExusiaiSingleLeftClickStartsDashAndRightClickOnlyCancelsSelectionBeforeConfirmation()
         {
             PlayerPrefs.DeleteKey("af.input.bindings.v1");
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
@@ -249,18 +270,100 @@ namespace ArknightsFrontline.Tests.PlayMode
             PlayerCommandController controller = CreateControllerAt(
                 new Vector3(-10f, 0f, 0f), out _, out GameObject player);
             ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            AttackSequenceExecutor sequence = player.GetComponent<AttackSequenceExecutor>();
             GameObject cameraObject = CreateMainCamera();
             GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.layer = LayerMask.NameToLayer("Ground");
-            GameObject target = CreateTargetableCube(TeamId.Red);
+            GameObject clickedTarget = CreateTargetableCube(TeamId.Red);
+            CombatUnit clickedUnit = clickedTarget.GetComponent<CombatUnit>();
+            clickedUnit.Configure(TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
+            GameObject nearestTarget = CreateTargetableCube(TeamId.Red);
+            nearestTarget.transform.position = new Vector3(-3f, 0f, 0f);
+            nearestTarget.GetComponent<CombatUnit>().Configure(
+                TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
             controller.Issue(UnitCommand.Move(Vector3.zero));
             int originalRevision = controller.CommandRevision;
             Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-
-            Press(keyboard.aKey);
+            Physics.SyncTransforms();
             yield return null;
-            Assert.That(controller.IsAttackMoveArmed, Is.True);
 
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.False,
+                "Right click before confirmation should cancel E selection.");
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
+            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
+            Assert.That(dash.IsDashing, Is.False);
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Press(mouse.leftButton);
+            yield return null;
+            Release(mouse.leftButton);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.False);
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.InRange(19.8f, 20f),
+                "The one-click E cooldown should start immediately and remain near its full duration.");
+            Assert.That(dash.IsDashing, Is.True,
+                "One valid left click should immediately start the dash.");
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "The click target must not be selected before the owner reaches the landing point.");
+            Assert.That(sequence.IsRunning, Is.False,
+                "The E volley must wait until the dash arrives.");
+            Assert.That(controller.CurrentCommand.HasValue, Is.False);
+            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision + 1));
+            Vector3 confirmedDestination = dash.Destination;
+
+            Press(mouse.rightButton);
+            yield return null;
+            Release(mouse.rightButton);
+            yield return null;
+            Assert.That(dash.IsDashing, Is.True,
+                "Right click after confirmation must not cancel an initiated dash.");
+            Assert.That(dash.Destination, Is.EqualTo(confirmedDestination),
+                "Right click after confirmation must not rewrite the selected landing point.");
+            Assert.That(controller.CurrentCommand.HasValue, Is.False,
+                "Right click during the dash must not become a normal move command.");
+
+            dash.Tick(1f);
+            Assert.That(dash.IsDashing, Is.False);
+            Assert.That(skills.SelectedChargeTarget, Is.SameAs(nearestTarget.GetComponent<CombatUnit>()),
+                "Arrival must select the nearest legal enemy at the landing point, not the clicked enemy.");
+            Assert.That(sequence.IsRunning, Is.True,
+                "The E volley should begin once the dash arrives and selects a target.");
+        }
+
+        [UnityTest]
+        public IEnumerator ExusiaiConfirmWithoutPointerHitKeepsTargetingFromNonOriginPlayer()
+        {
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(
+                new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            GameObject cameraObject = CreateMainCamera();
+            cameraObject.transform.SetPositionAndRotation(
+                new Vector3(0f, 10f, 0f), Quaternion.LookRotation(Vector3.up, Vector3.forward));
+            Set(mouse.position, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+            yield return null;
+
+            Assert.That(controller.TryGetCachedPointerHit(out _), Is.False,
+                "The centered pointer ray should have no collider hit in this fixture.");
             Press(keyboard.eKey);
             yield return null;
             Release(keyboard.eKey);
@@ -271,27 +374,73 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
             Release(mouse.leftButton);
             yield return null;
-            Assert.That(skills.IsSelectingChargeTarget, Is.True);
-            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
 
-            Object.Destroy(target);
+            Assert.That(skills.IsSelectingChargeTarget, Is.True,
+                "A no-hit click must not confirm E with the default world origin.");
+            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero,
+                "A no-hit click must not consume E's cooldown.");
+            Assert.That(dash.IsDashing, Is.False,
+                "A no-hit click must not start a dash from the non-origin player.");
+            Object.Destroy(player);
+            Object.Destroy(cameraObject);
+        }
+
+        [UnityTest]
+        public IEnumerator ExusiaiTargetablePreviewAndConfirmationUseSameGroundProjectedEndpoint()
+        {
+            PlayerPrefs.DeleteKey("af.input.bindings.v1");
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            Mouse mouse = InputSystem.AddDevice<Mouse>();
+            PlayerCommandController controller = CreateControllerAt(
+                new Vector3(-10f, 0f, 0f), out _, out GameObject player);
+            ExusiaiSkillController skills = ConfigureExusiaiSkillPipeline(player, controller);
+            SkillDashController dash = player.GetComponent<SkillDashController>();
+            ExusiaiSkillIndicator indicator = player.AddComponent<ExusiaiSkillIndicator>();
+            GameObject cameraObject = CreateMainCamera();
+            GameObject ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            ground.layer = LayerMask.NameToLayer("Ground");
+            GameObject clickedTarget = CreateTargetableCube(TeamId.Red);
+            clickedTarget.GetComponent<CombatUnit>().Configure(
+                TeamId.Red, Altitude.Ground, 1000f, 0f, 0f, 0f, 0f, false, false);
+            Vector2 pointer = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Set(mouse.position, pointer);
+            Physics.SyncTransforms();
             yield return null;
 
+            Assert.That(controller.TryGetCachedPointerHit(out RaycastHit pointerHit), Is.True);
+            Assert.That(pointerHit.collider.gameObject, Is.SameAs(clickedTarget),
+                "The real pointer hit must be the Targetable enemy, not the ground behind it.");
+            Ray pointerRay = cameraObject.GetComponent<UnityEngine.Camera>().ScreenPointToRay(pointer);
+            int groundMask = 1 << LayerMask.NameToLayer("Ground");
+            Assert.That(Physics.Raycast(pointerRay, out RaycastHit groundHit, Mathf.Infinity, groundMask), Is.True,
+                "The pointer ray must also intersect the ground when Targetable colliders are ignored.");
+            Assert.That(Vector3.Distance(groundHit.point, Vector3.zero), Is.LessThan(0.001f),
+                "The independently ground-projected landing point should be the arena origin.");
+
+            Press(keyboard.eKey);
+            yield return null;
+            Release(keyboard.eKey);
+            yield return null;
+            Assert.That(skills.IsSelectingChargeTarget, Is.True);
+            Assert.That(Vector3.Distance(indicator.DisplayedEndpoint, new Vector3(-3f, 0f, 0f)), Is.LessThan(0.001f),
+                "The selection preview should use the independently ground-projected origin, clamped seven meters from the player.");
             Press(mouse.leftButton);
             yield return null;
             Release(mouse.leftButton);
-            Release(keyboard.aKey);
             yield return null;
-            Assert.That(skills.IsSelectingChargeTarget, Is.True);
-            Assert.That(skills.Snapshot.ChargeCooldown, Is.Zero);
-            Assert.That(controller.CommandRevision, Is.EqualTo(originalRevision));
-            Assert.That(controller.CurrentCommand.Value.Kind, Is.EqualTo(UnitCommandKind.Move));
 
+            Assert.That(skills.IsSelectingChargeTarget, Is.False);
+            Assert.That(dash.IsDashing, Is.True);
+            Assert.That(skills.SelectedChargeTarget, Is.Null,
+                "Clicking an enemy supplies a destination only; selection waits until dash arrival.");
+            Assert.That(Vector3.Distance(dash.Destination, new Vector3(-3f, 0f, 0f)), Is.LessThan(0.001f),
+                "The landing should clamp seven meters from the player toward the ground-projected origin.");
+            Assert.That(indicator.DisplayedEndpoint, Is.EqualTo(dash.Destination),
+                "After confirmation, the displayed endpoint should remain the actual dash destination.");
             Object.Destroy(player);
             Object.Destroy(cameraObject);
             Object.Destroy(ground);
+            Object.Destroy(clickedTarget);
         }
 
         [UnityTest]
@@ -784,7 +933,7 @@ namespace ArknightsFrontline.Tests.PlayMode
                 {
                     foreach (GameObject root in cleanupScene.GetRootGameObjects())
                     {
-                        if (!baselineRootIds.Contains(root.GetInstanceID()))
+                        if (!baselineRootIds.Contains(root.GetEntityId()))
                         {
                             Object.Destroy(root);
                         }

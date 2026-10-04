@@ -7,7 +7,7 @@ namespace ArknightsFrontline.Skills
 {
     public sealed class SkillDashController : MonoBehaviour
     {
-        private const float DashSpeed = 14f;
+        private const float DashSpeed = 28f;
         private const float MaximumDistance = 7f;
         private const float ObstacleClearance = 0.25f;
         private const float DestinationTolerance = 0.001f;

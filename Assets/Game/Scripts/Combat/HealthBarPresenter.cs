@@ -95,15 +95,34 @@ namespace ArknightsFrontline.Combat
 
         private void PositionAboveUnit()
         {
-            Renderer[] renderers = combatUnit.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length > 0)
-            {
-                Bounds bounds = renderers[0].bounds;
-                for (int i = 1; i < renderers.Length; i++)
-                {
-                    bounds.Encapsulate(renderers[i].bounds);
-                }
+            Renderer owningRenderer = combatUnit.GetComponent<Renderer>();
+            bool hasPhysicalBounds = IsPhysicalRenderer(owningRenderer);
+            Bounds bounds = hasPhysicalBounds ? owningRenderer.bounds : default;
 
+            if (!hasPhysicalBounds)
+            {
+                Renderer[] renderers = combatUnit.GetComponentsInChildren<Renderer>(true);
+                foreach (Renderer renderer in renderers)
+                {
+                    if (!IsPhysicalRenderer(renderer))
+                    {
+                        continue;
+                    }
+
+                    if (!hasPhysicalBounds)
+                    {
+                        bounds = renderer.bounds;
+                        hasPhysicalBounds = true;
+                    }
+                    else
+                    {
+                        bounds.Encapsulate(renderer.bounds);
+                    }
+                }
+            }
+
+            if (hasPhysicalBounds)
+            {
                 barTransform.position = new Vector3(
                     bounds.center.x,
                     bounds.max.y + HeadOffset,
@@ -112,6 +131,13 @@ namespace ArknightsFrontline.Combat
             }
 
             barTransform.position = combatUnit.transform.position + Vector3.up * 1.5f;
+        }
+
+        private static bool IsPhysicalRenderer(Renderer renderer)
+        {
+            return renderer != null
+                && !(renderer is LineRenderer)
+                && !(renderer is TrailRenderer);
         }
 
         private void FaceMainCamera()

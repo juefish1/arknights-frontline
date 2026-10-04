@@ -18,6 +18,7 @@ namespace ArknightsFrontline.Combat
         [SerializeField] private bool canAttackAir;
 
         private UnitStatModifiers modifiers;
+        private bool deathNotified;
 
         public TeamId Team => team;
 
@@ -47,6 +48,8 @@ namespace ArknightsFrontline.Combat
 
         public event Action<CombatUnit> Died;
 
+        public event Action<CombatUnit, float> DamageTaken;
+
         private UnitStatModifiers Modifiers => modifiers == null ? modifiers = GetComponent<UnitStatModifiers>() : modifiers;
 
         private void Awake()
@@ -69,6 +72,7 @@ namespace ArknightsFrontline.Combat
             this.altitude = altitude;
             this.maxHealth = Mathf.Max(1f, maxHealth);
             currentHealth = this.maxHealth;
+            deathNotified = false;
             this.attackPower = attackPower;
             this.defense = Mathf.Max(0f, defense);
             this.attackRange = Mathf.Max(0f, attackRange);
@@ -79,14 +83,29 @@ namespace ArknightsFrontline.Combat
 
         public void TakePhysicalDamage(float damage)
         {
+            TakePhysicalDamage(damage, null);
+        }
+
+        public void TakePhysicalDamage(float damage, CombatUnit attacker)
+        {
             if (IsDead)
             {
                 return;
             }
 
+            float previousHealth = currentHealth;
             currentHealth = Mathf.Max(0f, currentHealth - Mathf.Max(0f, damage));
-            if (IsDead)
+            float actualDamage = previousHealth - currentHealth;
+            if (actualDamage <= 0f)
             {
+                return;
+            }
+
+            DamageTaken?.Invoke(attacker, actualDamage);
+
+            if (IsDead && !deathNotified)
+            {
+                deathNotified = true;
                 Died?.Invoke(this);
             }
         }

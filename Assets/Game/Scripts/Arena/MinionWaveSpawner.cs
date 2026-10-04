@@ -201,7 +201,7 @@ namespace ArknightsFrontline.Arena
             ConfigureCombatUnit(combatUnit, team, altitude);
             minionObject.AddComponent<HealthBarPresenter>();
             DeathCorpsePresenter presenter = minionObject.AddComponent<DeathCorpsePresenter>();
-            presenter.Configure(combatUnit, material, groundLayer);
+            presenter.Configure(combatUnit, material, groundLayer, UnitKind.Minion);
 
             UnitMotor motor = minionObject.AddComponent<UnitMotor>();
             motor.Configure(altitude == Altitude.Ground ? 3f : 3.2f, layout);

@@ -43,6 +43,28 @@ namespace ArknightsFrontline.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator DeferredDestroyOfReplacedOperatorLeavesNewRegistrationClearable()
+        {
+            CorpseLifetimeController first = CreateGameObject("FirstOperatorCorpse")
+                .AddComponent<CorpseLifetimeController>();
+            first.Configure(UnitKind.Operator, "shared-owner");
+
+            CorpseLifetimeController second = CreateGameObject("SecondOperatorCorpse")
+                .AddComponent<CorpseLifetimeController>();
+            second.Configure(UnitKind.Operator, "shared-owner");
+
+            yield return null;
+
+            Assert.That(first == null, Is.True, "The replaced corpse should finish deferred destruction.");
+            Assert.That(second == null, Is.False, "The replacement should survive the old corpse's OnDestroy callback.");
+
+            CorpseLifetimeController.ClearOperatorCorpse("shared-owner");
+            yield return null;
+
+            Assert.That(second == null, Is.True, "The key should still clear the replacement after the old callback.");
+        }
+
+        [UnityTest]
         public IEnumerator ConfiguredPresentersCreateCorpsesWhileUnconfiguredUnitsDoNot()
         {
             CreateGround();
@@ -109,6 +131,68 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
 
             Assert.That(FindCorpses().Length, Is.EqualTo(corpseCountBeforeUnconfiguredDeath));
+        }
+
+        [UnityTest]
+        public IEnumerator SpawnedGroundAndAirMinionCorpsesExpireFiveSecondsAfterCreation()
+        {
+            CreateGround();
+            GameObject ground = gameObjects.Single(gameObject => gameObject.name == "Ground");
+            ground.transform.localScale = new Vector3(20f, 1f, 20f);
+
+            ArenaLayout layout = ArenaLayout.CreateDefault();
+            CombatUnit blueTower = CreateUnit("BlueTower", TeamId.Blue, Altitude.Ground, layout.BlueTower, 1000f);
+            CombatUnit redTower = CreateUnit("RedTower", TeamId.Red, Altitude.Ground, layout.RedTower, 1000f);
+            Material blueMaterial = CreateMaterial(Color.blue);
+            Material redMaterial = CreateMaterial(Color.red);
+            GameObject minionParent = CreateGameObject("MinionParent");
+            MinionWaveSpawner spawner = CreateGameObject("MinionWaveSpawner").AddComponent<MinionWaveSpawner>();
+            spawner.Configure(
+                minionParent.transform,
+                layout,
+                blueTower,
+                redTower,
+                blueMaterial,
+                redMaterial,
+                9,
+                GroundLayer);
+            spawner.enabled = false;
+            spawner.SpawnWaveNow();
+
+            CombatUnit groundMinion = FindMinion(minionParent.transform, TeamId.Blue, Altitude.Ground);
+            CombatUnit airMinion = FindMinion(minionParent.transform, TeamId.Red, Altitude.Air);
+            string groundCorpseName = groundMinion.name + "_Corpse";
+            string airCorpseName = airMinion.name + "_Corpse";
+            float deathTime = Time.time;
+            groundMinion.TakePhysicalDamage(groundMinion.MaxHealth);
+            airMinion.TakePhysicalDamage(airMinion.MaxHealth);
+
+            yield return null;
+
+            GameObject groundCorpse = TrackCorpse(groundCorpseName);
+            GameObject airCorpse = TrackCorpse(airCorpseName);
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 0.35f - Time.time));
+
+            Assert.That(airCorpse.GetComponent<CorpseFallController>().HasLanded, Is.True);
+            Assert.That(
+                groundCorpse != null && airCorpse != null,
+                Is.True,
+                "Both spawned minion corpses should remain through the air fall.");
+
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 4.8f - Time.time));
+
+            Assert.That(
+                groundCorpse != null && airCorpse != null,
+                Is.True,
+                "Both spawned minion corpses should remain shortly before five seconds.");
+
+            yield return new WaitForSeconds(Mathf.Max(0f, deathTime + 5.2f - Time.time));
+            yield return null;
+
+            Assert.That(
+                groundCorpse == null && airCorpse == null,
+                Is.True,
+                $"Both spawned minion corpses should be destroyed after five seconds. Ground destroyed: {groundCorpse == null}; air destroyed: {airCorpse == null}.");
         }
 
         [UnityTest]
@@ -180,7 +264,10 @@ namespace ArknightsFrontline.Tests.PlayMode
             source.TakePhysicalDamage(source.MaxHealth);
             yield return null;
 
-            TrackCorpse("SerializedSource_Corpse");
+            Assert.That(
+                FindCorpses().Any(candidate => candidate.name == "SerializedSource_Corpse"),
+                Is.False,
+                "The earlier same-key corpse should be replaced by the rehydrated presenter's corpse.");
             GameObject corpse = TrackCorpse("RehydratedPresenter_Corpse");
             Assert.That(corpse.GetComponent<Renderer>().sharedMaterial, Is.SameAs(configuredMaterial));
             Assert.That(corpse.transform.position, Is.EqualTo(new Vector3(4f, 3.01f, 0f)));
