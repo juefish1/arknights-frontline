@@ -26,6 +26,7 @@ public sealed class ExusiaiSecondaryMotion : MonoBehaviour
     private Transform motionRoot;
     private Vector3[] colliderPreviousStart, colliderPreviousEnd, colliderFrameStart, colliderFrameEnd;
     private float substepFraction;
+    private float WorldScale => Mathf.Max(0.001f, Mathf.Abs(transform.lossyScale.x));
 
     public void Configure(Chain[] definitions, Capsule[] capsules, ExusiaiSecondaryMotionProfile settings)
     {
@@ -107,7 +108,7 @@ public sealed class ExusiaiSecondaryMotion : MonoBehaviour
     {
         if (!profile || states.Length == 0) return;
         if (!float.IsFinite(deltaTime) || deltaTime < 0 || deltaTime > profile.fixedStep * profile.maxSubsteps ||
-            Vector3.Distance(lastPosition, motionRoot.position) > profile.teleportDistance ||
+            Vector3.Distance(lastPosition, motionRoot.position) > profile.teleportDistance * WorldScale ||
             Quaternion.Angle(lastRotation, motionRoot.rotation) > profile.teleportAngle)
         { ResetSimulation(); return; }
         lastPosition = motionRoot ? motionRoot.position : transform.position; lastRotation = motionRoot ? motionRoot.rotation : transform.rotation;
@@ -133,7 +134,7 @@ public sealed class ExusiaiSecondaryMotion : MonoBehaviour
                 var spring = state.chain.hair ? profile.hair : profile.skirt;
                 Vector3 carried = state.rest[0] - state.lastAnchor;
                 Vector3 velocity = Vector3.Lerp(state.lastAnchorVelocity, carried / step, 1 - Mathf.Exp(-20 * step));
-                state.acceleration = Vector3.ClampMagnitude((velocity - state.lastAnchorVelocity) / step, 60);
+                state.acceleration = Vector3.ClampMagnitude((velocity - state.lastAnchorVelocity) / step, 60 * WorldScale);
                 state.lastAnchorVelocity = velocity;
                 for (int i = 1; i < state.current.Length; i++) { state.current[i] += carried; state.previous[i] += carried; }
                 state.lastAnchor = state.rest[0];
@@ -191,7 +192,7 @@ public sealed class ExusiaiSecondaryMotion : MonoBehaviour
                     if (!capsule.start || !capsule.end) continue;
                     Vector3 before = state.current[i];
                     state.current[i] = OutsideCapsule(state.current[i], Vector3.Lerp(colliderPreviousStart[col], colliderFrameStart[col], substepFraction), Vector3.Lerp(colliderPreviousEnd[col], colliderFrameEnd[col], substepFraction),
-                        capsule.radius + spring.radius, restDirection);
+                        (capsule.radius + spring.radius) * WorldScale, restDirection);
                     if (state.current[i] != before)
                     {
                         // Contact does not inject the projection jump as spring velocity.
