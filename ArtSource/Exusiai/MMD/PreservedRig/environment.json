@@ -1,7 +1,0 @@
-{
-  "plugin_url": "https://codeload.github.com/MMD-Blender/blender_mmd_tools/zip/refs/tags/v4.5.14",
-  "sha256": "5b982ad123834f56805ac14a3b1f369c246d8ccba752658146b047de820f24bb",
-  "plugin_path": "/private/tmp/exusiai-preserved-rig/plugin/blender_mmd_tools-4.5.14",
-  "opencc_path": "/private/tmp/exusiai-preserved-rig/deps",
-  "bpy": "4.5.3 LTS"
-}
