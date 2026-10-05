@@ -136,6 +136,8 @@ namespace ArknightsFrontline.Combat
         private static bool IsPhysicalRenderer(Renderer renderer)
         {
             return renderer != null
+                && renderer.enabled
+                && renderer.gameObject.activeInHierarchy
                 && !(renderer is LineRenderer)
                 && !(renderer is TrailRenderer);
         }

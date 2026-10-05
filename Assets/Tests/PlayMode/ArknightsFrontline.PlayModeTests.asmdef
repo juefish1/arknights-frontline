@@ -3,6 +3,7 @@
   "rootNamespace": "ArknightsFrontline.Tests.PlayMode",
   "references": [
     "ArknightsFrontline.Runtime",
+    "ArknightsFrontline.Model.Runtime",
     "Unity.InputSystem",
     "Unity.InputSystem.TestFramework"
   ],

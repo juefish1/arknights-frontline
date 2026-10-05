@@ -2,7 +2,8 @@
   "name": "ArknightsFrontline.Runtime",
   "rootNamespace": "ArknightsFrontline",
   "references": [
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "ArknightsFrontline.Model.Runtime"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -3,6 +3,7 @@
   "rootNamespace": "ArknightsFrontline.Tests.EditMode",
   "references": [
     "ArknightsFrontline.Runtime",
+    "ArknightsFrontline.Model.Runtime",
     "Unity.InputSystem"
   ],
   "includePlatforms": [
