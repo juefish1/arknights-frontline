@@ -35,6 +35,7 @@ namespace ArknightsFrontline.Editor
             {
                 if (PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(existing.gameObject) != PrefabPath)
                     throw new InvalidOperationException("ExusiaiVisual is not the delivered formal prefab.");
+                ConnectPresentation(operatorRoot, existing.gameObject);
                 return existing.gameObject;
             }
 
@@ -93,9 +94,23 @@ namespace ArknightsFrontline.Editor
                 foreach (var skin in visual.GetComponentsInChildren<SkinnedMeshRenderer>(true))
                     PrefabUtility.RecordPrefabInstancePropertyModifications(skin);
                 PrefabUtility.RecordPrefabInstancePropertyModifications(visual.transform);
+                ConnectPresentation(operatorRoot, visual);
                 return visual;
             }
             catch { Object.DestroyImmediate(visual); throw; }
+        }
+
+        private static void ConnectPresentation(GameObject root, GameObject visual)
+        {
+            bool active = root.activeSelf;
+            root.SetActive(false);
+            try
+            {
+                var bridge = root.GetComponent<ExusiaiCombatPresentation>();
+                if (!bridge) bridge = root.AddComponent<ExusiaiCombatPresentation>();
+                bridge.Configure(visual.GetComponent<ExusiaiPresentation>(), visual.transform);
+            }
+            finally { root.SetActive(active); }
         }
     }
 }

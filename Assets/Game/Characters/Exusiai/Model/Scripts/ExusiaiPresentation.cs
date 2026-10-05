@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 // This component accepts movement/attack facts. It never produces gameplay events.
+[DefaultExecutionOrder(100)]
 public sealed class ExusiaiPresentation : MonoBehaviour
 {
     [SerializeField] private Animator animator;

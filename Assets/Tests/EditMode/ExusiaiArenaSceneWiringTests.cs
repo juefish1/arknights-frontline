@@ -25,7 +25,11 @@ namespace ArknightsFrontline.Tests.EditMode
             var unit = root.AddComponent<CombatUnit>();
             unit.Configure(TeamId.Blue, Altitude.Ground, 1000, 50, 2, 6, 0.5f, true, true);
             root.AddComponent<OperatorIdentity>().Configure("Player_Exusiai", TeamId.Blue, OperatorType.Exusiai);
-            if (player) root.AddComponent<PlayerCommandController>();
+            if (player)
+            {
+                root.AddComponent<PlayerCommandController>();
+                root.AddComponent<AttackSequenceExecutor>().Configure(unit);
+            }
             return root;
         }
 
