@@ -10,11 +10,15 @@ namespace ArknightsFrontline.Camera
         private const float EdgeThresholdPixels = 20f;
         private const float MovementSpeed = 18f;
         private const float DragWorldUnitsPerPixel = 0.03f;
-        public static readonly Vector3 DefaultOffset = new Vector3(-14f, 28f, -14f);
-        public const float DefaultFieldOfView = 45f;
+        public const float DefaultPitch = 56f;
+        public const float DefaultHeight = 20f;
+        public static readonly Vector3 DefaultOffset =
+            Quaternion.Euler(DefaultPitch, 45f, 0f) * Vector3.back
+            * (DefaultHeight / Mathf.Sin(DefaultPitch * Mathf.Deg2Rad));
+        public const float DefaultFieldOfView = 40f;
 
         private readonly ArenaLayout layout = ArenaLayout.CreateDefault();
-        [SerializeField] private Vector3 cameraOffset = new Vector3(-14f, 28f, -14f);
+        [SerializeField] private Vector3 cameraOffset = DefaultOffset;
 
         [SerializeField] private Transform centeringTarget;
         private Vector3 focusPosition;

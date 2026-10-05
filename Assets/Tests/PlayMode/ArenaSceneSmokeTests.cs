@@ -134,7 +134,7 @@ namespace ArknightsFrontline.Tests.PlayMode
                 float expectedZ = slot.OperatorType == OperatorType.Eyjafjalla ? -2f
                     : slot.OperatorType == OperatorType.SilverAsh ? 2f : 0f;
                 Assert.That(slot.DeploymentPosition.x, Is.EqualTo(expectedX));
-                Assert.That(slot.DeploymentPosition.y, Is.EqualTo(2f));
+                Assert.That(slot.DeploymentPosition.y, Is.EqualTo(1.2f));
                 Assert.That(slot.DeploymentPosition.z, Is.EqualTo(expectedZ));
                 Assert.That(slot.Template.transform.position, Is.EqualTo(slot.DeploymentPosition));
                 Assert.That(slot.CurrentOperator, Is.Not.Null);
@@ -215,7 +215,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(playerUnit.AttackPower, Is.EqualTo(50f));
             Assert.That(playerUnit.AttackInterval, Is.EqualTo(0.5f));
             Assert.That(playerUnit.AttackRange, Is.EqualTo(6f));
-            Assert.That(player.transform.localScale, Is.EqualTo(new Vector3(1.6f, 2f, 1.6f)));
+            Assert.That(player.transform.localScale, Is.EqualTo(new Vector3(1.2f, 1.2f, 1.2f)));
             Assert.That(player.GetComponent<UnitMotor>().BaseMovementSpeed, Is.EqualTo(5f));
             Assert.That(player.GetComponent<UnitStatModifiers>(), Is.Not.Null);
             Assert.That(player.GetComponent<AttackSequenceExecutor>(), Is.Not.Null);
@@ -223,7 +223,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(player.GetComponent<ExusiaiSkillController>(), Is.Not.Null);
             Assert.That(player.GetComponent<ExusiaiSkillIndicator>(), Is.Not.Null);
             Assert.That(Object.FindFirstObjectByType<SkillHudPresenter>(), Is.Not.Null);
-            Assert.That(player.transform.position.y, Is.EqualTo(2f));
+            Assert.That(player.transform.position.y, Is.EqualTo(1.2f));
             Assert.That(player.GetComponent<HealthBarPresenter>(), Is.Not.Null);
             GameObject enemyOperator = GameObject.Find("Red_Exusiai");
             Assert.That(enemyOperator, Is.Not.Null);

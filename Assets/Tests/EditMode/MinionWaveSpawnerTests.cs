@@ -32,6 +32,29 @@ namespace ArknightsFrontline.Tests.EditMode
         }
 
         [Test]
+        public void SpawnedMinionsAreGroundedOrClearlyAirborneAndRemainSoAfterMovement()
+        {
+            CreateSpawner().SpawnWaveNow();
+            foreach (CombatUnit unit in GetSpawnedMinions())
+            {
+                UnitMotor motor = unit.GetComponent<UnitMotor>();
+                motor.SetDestination(Vector3.zero);
+                motor.Tick(0.5f);
+                Bounds bounds = unit.GetComponent<Renderer>().bounds;
+                if (unit.Altitude == Altitude.Ground)
+                {
+                    Assert.That(bounds.min.y, Is.EqualTo(0f).Within(0.01f));
+                    Assert.That(bounds.size.y, Is.InRange(1.2f, 1.4f));
+                }
+                else
+                {
+                    Assert.That(bounds.min.y, Is.GreaterThan(0.9f));
+                    Assert.That(bounds.size.y, Is.LessThan(1f));
+                }
+            }
+        }
+
+        [Test]
         public void SpawnWaveNowCreatesFourMinionsPerSideWithRequiredComponents()
         {
             MinionWaveSpawner spawner = CreateSpawner();

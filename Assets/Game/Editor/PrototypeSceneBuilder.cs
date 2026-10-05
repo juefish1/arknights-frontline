@@ -46,6 +46,7 @@ namespace ArknightsFrontline.Editor
             OperatorRosterController roster = arenaRoot.AddComponent<OperatorRosterController>();
 
             CreateLane(arenaRoot.transform, laneMaterial, groundLayer);
+            MobaViewSceneTools.AddGroundPresentation(arenaRoot.transform);
             Transform blueTower = CreateTower(
                 arenaRoot.transform,
                 "BlueTower",
@@ -93,7 +94,7 @@ namespace ArknightsFrontline.Editor
                 "Template_Blue_Eyjafjalla",
                 TeamId.Blue,
                 OperatorType.Eyjafjalla,
-                layout.BlueDeployment + Vector3.up * 2f + Vector3.back * 2f,
+                layout.BlueDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.back * 2f,
                 blueMaterial,
                 targetableLayer,
                 groundLayer,
@@ -109,7 +110,7 @@ namespace ArknightsFrontline.Editor
                 "Template_Blue_SilverAsh",
                 TeamId.Blue,
                 OperatorType.SilverAsh,
-                layout.BlueDeployment + Vector3.up * 2f + Vector3.forward * 2f,
+                layout.BlueDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.forward * 2f,
                 blueMaterial,
                 targetableLayer,
                 groundLayer,
@@ -125,7 +126,7 @@ namespace ArknightsFrontline.Editor
                 "Template_Red_Exusiai",
                 TeamId.Red,
                 OperatorType.Exusiai,
-                layout.RedDeployment + Vector3.up * 2f,
+                layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight,
                 redMaterial,
                 targetableLayer,
                 groundLayer,
@@ -141,7 +142,7 @@ namespace ArknightsFrontline.Editor
                 "Template_Red_Eyjafjalla",
                 TeamId.Red,
                 OperatorType.Eyjafjalla,
-                layout.RedDeployment + Vector3.up * 2f + Vector3.back * 2f,
+                layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.back * 2f,
                 redMaterial,
                 targetableLayer,
                 groundLayer,
@@ -157,7 +158,7 @@ namespace ArknightsFrontline.Editor
                 "Template_Red_SilverAsh",
                 TeamId.Red,
                 OperatorType.SilverAsh,
-                layout.RedDeployment + Vector3.up * 2f + Vector3.forward * 2f,
+                layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.forward * 2f,
                 redMaterial,
                 targetableLayer,
                 groundLayer,
@@ -192,22 +193,22 @@ namespace ArknightsFrontline.Editor
                 {
                     new ArenaOperatorSlotConfiguration(
                         "Player_Exusiai", TeamId.Blue, OperatorType.Exusiai, player,
-                        layout.BlueDeployment + Vector3.up * 2f, true),
+                        layout.BlueDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight, true),
                     new ArenaOperatorSlotConfiguration(
                         "Blue_Eyjafjalla", TeamId.Blue, OperatorType.Eyjafjalla, blueEyjafjalla,
-                        layout.BlueDeployment + Vector3.up * 2f + Vector3.back * 2f, false),
+                        layout.BlueDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.back * 2f, false),
                     new ArenaOperatorSlotConfiguration(
                         "Blue_SilverAsh", TeamId.Blue, OperatorType.SilverAsh, blueSilverAsh,
-                        layout.BlueDeployment + Vector3.up * 2f + Vector3.forward * 2f, false),
+                        layout.BlueDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.forward * 2f, false),
                     new ArenaOperatorSlotConfiguration(
                         "Red_Exusiai", TeamId.Red, OperatorType.Exusiai, redExusiai,
-                        layout.RedDeployment + Vector3.up * 2f, false),
+                        layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight, false),
                     new ArenaOperatorSlotConfiguration(
                         "Red_Eyjafjalla", TeamId.Red, OperatorType.Eyjafjalla, redEyjafjalla,
-                        layout.RedDeployment + Vector3.up * 2f + Vector3.back * 2f, false),
+                        layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.back * 2f, false),
                     new ArenaOperatorSlotConfiguration(
                         "Red_SilverAsh", TeamId.Red, OperatorType.SilverAsh, redSilverAsh,
-                        layout.RedDeployment + Vector3.up * 2f + Vector3.forward * 2f, false)
+                        layout.RedDeployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight + Vector3.forward * 2f, false)
                 });
 
             AddMatchPresentation(arenaRoot, canvas, roster, outcome, blueTowerUnit, redTowerUnit);
@@ -424,8 +425,8 @@ namespace ArknightsFrontline.Editor
             tower.layer = targetableLayer;
 
             BoxCollider collider = tower.AddComponent<BoxCollider>();
-            collider.center = new Vector3(0f, 3f, 0f);
-            collider.size = new Vector3(3f, 6f, 3f);
+            collider.center = ArenaVisualMetrics.TowerCenter;
+            collider.size = ArenaVisualMetrics.TowerSize;
 
             CombatUnit combatUnit = tower.AddComponent<CombatUnit>();
             combatUnit.Configure(team, Altitude.Ground, 500f, 20f, 40f, 9f, 1f, true, true);
@@ -445,8 +446,8 @@ namespace ArknightsFrontline.Editor
             GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
             visual.name = towerName + "Visual";
             visual.transform.SetParent(tower.transform, false);
-            visual.transform.localPosition = new Vector3(0f, 3f, 0f);
-            visual.transform.localScale = new Vector3(3f, 6f, 3f);
+            visual.transform.localPosition = ArenaVisualMetrics.TowerCenter;
+            visual.transform.localScale = ArenaVisualMetrics.TowerSize;
             visual.layer = targetableLayer;
             visual.GetComponent<Renderer>().sharedMaterial = material;
             Object.DestroyImmediate(visual.GetComponent<BoxCollider>());
@@ -475,8 +476,8 @@ namespace ArknightsFrontline.Editor
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Exusiai";
             player.transform.SetParent(parent, false);
-            player.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
-            player.transform.position = deployment + Vector3.up * 2f;
+            player.transform.localScale = ArenaVisualMetrics.OperatorScale;
+            player.transform.position = deployment + Vector3.up * ArenaVisualMetrics.OperatorCenterHeight;
             player.layer = targetableLayer;
             player.GetComponent<Renderer>().sharedMaterial = material;
 
@@ -527,7 +528,7 @@ namespace ArknightsFrontline.Editor
             GameObject template = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             template.name = templateName;
             template.transform.SetParent(parent, false);
-            template.transform.localScale = new Vector3(1.6f, 2f, 1.6f);
+            template.transform.localScale = ArenaVisualMetrics.OperatorScale;
             template.transform.position = position;
             template.layer = targetableLayer;
             template.GetComponent<Renderer>().sharedMaterial = material;

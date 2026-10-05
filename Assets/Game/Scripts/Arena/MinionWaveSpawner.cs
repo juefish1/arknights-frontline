@@ -192,7 +192,9 @@ namespace ArknightsFrontline.Arena
             GameObject minionObject = GameObject.CreatePrimitive(primitive);
             minionObject.name = $"{team}{altitude}Minion_{waveNumber}_{sequenceNumber}";
             minionObject.transform.SetParent(minionParent);
-            minionObject.transform.position = GetSpawnPosition(team, zOffset);
+            minionObject.transform.localScale = altitude == Altitude.Ground
+                ? ArenaVisualMetrics.GroundMinionScale : ArenaVisualMetrics.AirMinionScale;
+            minionObject.transform.position = GetSpawnPosition(team, zOffset, altitude);
             minionObject.layer = targetableLayer;
 
             ApplyTeamAppearance(minionObject, material);
@@ -218,11 +220,13 @@ namespace ArknightsFrontline.Arena
                 opposingTower.transform.position);
         }
 
-        private Vector3 GetSpawnPosition(TeamId team, float zOffset)
+        private Vector3 GetSpawnPosition(TeamId team, float zOffset, Altitude altitude)
         {
             Vector3 towerPosition = team == TeamId.Blue ? layout.BlueTower : layout.RedTower;
             float xOffset = team == TeamId.Blue ? 6f : -6f;
-            return towerPosition + new Vector3(xOffset, 1f, zOffset);
+            float centerHeight = altitude == Altitude.Ground
+                ? ArenaVisualMetrics.GroundMinionCenterHeight : ArenaVisualMetrics.AirMinionCenterHeight;
+            return towerPosition + new Vector3(xOffset, centerHeight, zOffset);
         }
 
         private static void ConfigureCombatUnit(CombatUnit combatUnit, TeamId team, Altitude altitude)

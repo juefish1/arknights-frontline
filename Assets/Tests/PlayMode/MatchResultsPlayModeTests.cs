@@ -153,9 +153,11 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(serializedUiActionsAsset, Is.Not.Null);
             Assert.That(serializedUiActionsAsset.name, Is.EqualTo("DefaultInputActions"));
 #if UNITY_EDITOR
+            // Package versions move this asset between InputSystem/Runtime/Plugins and
+            // InputSystem/Plugins. Its GUID is the stable identity saved in the scene.
             Assert.That(
-                UnityEditor.AssetDatabase.GetAssetPath(serializedUiActionsAsset),
-                Is.EqualTo("Packages/com.unity.inputsystem/InputSystem/Runtime/Plugins/PlayerInput/DefaultInputActions.inputactions"),
+                UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(serializedUiActionsAsset)),
+                Is.EqualTo("ca9f5fa95ffab41fb9a615ab714db018"),
                 "The test must start from the exact package asset serialized into the saved scene.");
 #endif
 
