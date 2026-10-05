@@ -1,0 +1,1119 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7331534043005626119
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -9154394556754388017, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Quality
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -9154394556754388017, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -9151579524705939893, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_7
+      objectReference: {fileID: 0}
+    - target: {fileID: -9057054271854192953, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -9047331987232417815, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8581991422448607066, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHandTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -8572040475347847471, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8562018238068363734, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_4
+      objectReference: {fileID: 0}
+    - target: {fileID: -8515712540074320144, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftMiddleFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8434171208481574123, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHair_0_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8115688420624626915, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightElbow
+      objectReference: {fileID: 0}
+    - target: {fileID: -7875857714358750487, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -7845294926663204741, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_4
+      objectReference: {fileID: 0}
+    - target: {fileID: -7838958080005263346, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightShoulderParent
+      objectReference: {fileID: 0}
+    - target: {fileID: -7784711027918174849, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_4
+      objectReference: {fileID: 0}
+    - target: {fileID: -7710506339783772272, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Exusiai_Model
+      objectReference: {fileID: 0}
+    - target: {fileID: -7667516079632683285, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_9
+      objectReference: {fileID: 0}
+    - target: {fileID: -7594192137640846424, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -7520823341875880405, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -7476539349706847514, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Tongue1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7468628385715679180, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftFootTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -7398171249553557522, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -7304192687158825868, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftElbowHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: -7125325025553876875, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7084300416521857361, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7080459526509599361, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Tongue2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7046563574837362286, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftRingFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -6998381617019701855, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_10
+      objectReference: {fileID: 0}
+    - target: {fileID: -6993267792080055100, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -6967163327563861165, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6966315490350726826, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Tongue3
+      objectReference: {fileID: 0}
+    - target: {fileID: -6788436750861287931, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_8
+      objectReference: {fileID: 0}
+    - target: {fileID: -6672225750103117549, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightToeIK
+      objectReference: {fileID: 0}
+    - target: {fileID: -6499251742553737965, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftRingFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: -6466019958504366280, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHair_1_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6392715487256887700, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -6380868723686233189, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -6363229065569660687, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_5
+      objectReference: {fileID: 0}
+    - target: {fileID: -6028373433131689478, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -5684028105230135686, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_5
+      objectReference: {fileID: 0}
+    - target: {fileID: -5670712561547752794, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5630619449152484655, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -5535283828315507537, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -5407726731082092065, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_8
+      objectReference: {fileID: 0}
+    - target: {fileID: -5284176113272035535, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftWing1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5262119933839053714, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -5212637380424768192, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightFootExtra
+      objectReference: {fileID: 0}
+    - target: {fileID: -5180411387356651363, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLittleFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: -5176478943181708030, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_11
+      objectReference: {fileID: 0}
+    - target: {fileID: -5155434097799408243, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftAnkle
+      objectReference: {fileID: 0}
+    - target: {fileID: -5064915395091463520, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightEye
+      objectReference: {fileID: 0}
+    - target: {fileID: -4990166180056206138, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_8
+      objectReference: {fileID: 0}
+    - target: {fileID: -4863082466844083891, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightThumb1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4862653144112590387, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftEye
+      objectReference: {fileID: 0}
+    - target: {fileID: -4852899841969710826, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4799094616813967659, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -4764417827415395543, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperArm
+      objectReference: {fileID: 0}
+    - target: {fileID: -4732750844218144147, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_4
+      objectReference: {fileID: 0}
+    - target: {fileID: -4615332251799221092, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLittleFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: -4558336855823541250, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4438972594113038091, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_2
+      objectReference: {fileID: 0}
+    - target: {fileID: -4413740342740588800, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftIndexFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -4403229303374225799, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftShoulderParent
+      objectReference: {fileID: 0}
+    - target: {fileID: -4401862548801992556, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightRingFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -4365195879705492911, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -4333904151117215893, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -4281386932905801442, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4266815157221194613, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LowerBody
+      objectReference: {fileID: 0}
+    - target: {fileID: -4240460476146707900, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_6
+      objectReference: {fileID: 0}
+    - target: {fileID: -4139056018002574791, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Eyes
+      objectReference: {fileID: 0}
+    - target: {fileID: -4114137574235102649, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_5
+      objectReference: {fileID: 0}
+    - target: {fileID: -4101218237012599900, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: -3908411753406708600, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftMiddleFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -3820023381042519686, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -3812345044647936593, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -3678769181124908464, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftEyeReturn
+      objectReference: {fileID: 0}
+    - target: {fileID: -3635467019883628472, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_9
+      objectReference: {fileID: 0}
+    - target: {fileID: -3510409241009586170, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLittleFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -3506893588517845423, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightThumbTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -3476373518164539929, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHair_2_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3453671549133734949, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightIndexFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: -3312444337820577736, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightWing1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3196203740838595340, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_7
+      objectReference: {fileID: 0}
+    - target: {fileID: -3166430212279493798, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -3065422628022252873, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightThumb2
+      objectReference: {fileID: 0}
+    - target: {fileID: -3021463779056603355, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_4
+      objectReference: {fileID: 0}
+    - target: {fileID: -2914117882104540725, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLegIK
+      objectReference: {fileID: 0}
+    - target: {fileID: -2790291730229184125, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftForearmTwist
+      objectReference: {fileID: 0}
+    - target: {fileID: -2642884459521616353, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2155197888904817775, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightWing2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2139977437033997738, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -1997420252268360578, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightElbowHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: -1914571469564817177, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1889315593801388330, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -1840029372888888833, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftThumb0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1836981280959532637, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLegIKParent
+      objectReference: {fileID: 0}
+    - target: {fileID: -1788377054092208992, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightIndexFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1771005958866566203, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_7
+      objectReference: {fileID: 0}
+    - target: {fileID: -1593151953335908917, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftShoulder
+      objectReference: {fileID: 0}
+    - target: {fileID: -1509467941555891152, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightEyeReturn
+      objectReference: {fileID: 0}
+    - target: {fileID: -1389100209614458371, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_11
+      objectReference: {fileID: 0}
+    - target: {fileID: -1368611405890184469, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_7
+      objectReference: {fileID: 0}
+    - target: {fileID: -1343767431404542609, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: -1286631199168910779, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1273113370453185062, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1264268209997216654, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Center
+      objectReference: {fileID: 0}
+    - target: {fileID: -1193047493372701857, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftWing2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1134157604998547834, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: -1129878095475765966, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -1058928859921679759, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_6
+      objectReference: {fileID: 0}
+    - target: {fileID: -979123824919227185, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Root
+      objectReference: {fileID: 0}
+    - target: {fileID: -896727226246095754, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLegHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: -670344059241991798, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_11
+      objectReference: {fileID: 0}
+    - target: {fileID: -655923553358416784, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_1
+      objectReference: {fileID: 0}
+    - target: {fileID: -598526324448084827, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_0
+      objectReference: {fileID: 0}
+    - target: {fileID: -565797707550636302, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: -537773178691377588, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightRingFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: -528085245332717988, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_6
+      objectReference: {fileID: 0}
+    - target: {fileID: -506912166536292990, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: -408109321909023562, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: -396929802123066301, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: -297341524321730288, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftEye
+      objectReference: {fileID: 0}
+    - target: {fileID: -245064972337636066, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightRingFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: -211431463475997713, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightFootTip
+      objectReference: {fileID: 0}
+    - target: {fileID: -38415590557087255, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLittleFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 61354108948598342, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 85997178726287947, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 141683668470332048, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightMiddleFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 153050309375743690, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 167512190539764899, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: 425221690381824955, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 469463998906402332, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Exusiai_Mesh
+      objectReference: {fileID: 0}
+    - target: {fileID: 534506029891186446, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 585715107983791517, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperArmTwist
+      objectReference: {fileID: 0}
+    - target: {fileID: 666626536866811073, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftElbow
+      objectReference: {fileID: 0}
+    - target: {fileID: 865326464550706659, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightMiddleFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Exusiai_OriginalRig
+      objectReference: {fileID: 0}
+    - target: {fileID: 1004617345165667999, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1093154784965832611, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1203144657264719206, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283538631071413210, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392106386354765099, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightAnkle
+      objectReference: {fileID: 0}
+    - target: {fileID: 1418322681020298563, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftWrist
+      objectReference: {fileID: 0}
+    - target: {fileID: 1503946869171415266, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 1674271199811140251, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLittleFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 1680097072004377977, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightHandDummy
+      objectReference: {fileID: 0}
+    - target: {fileID: 1705435299707400121, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftFootExtra
+      objectReference: {fileID: 0}
+    - target: {fileID: 1760355798168241799, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1789959682817122820, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftMiddleFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1814660261696349066, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2017588520574911530, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftIndexFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2049631037150570864, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftThumb2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112302331845383641, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLittleFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2123641723875193857, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136697161371818396, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2198608860670740286, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Neck
+      objectReference: {fileID: 0}
+    - target: {fileID: 2229942895356830453, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2235336593633255153, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightAnkleDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 2286941711382816713, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Glasses
+      objectReference: {fileID: 0}
+    - target: {fileID: 2333368903692895177, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightEye
+      objectReference: {fileID: 0}
+    - target: {fileID: 2437678461969638359, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHandTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 2609063217730705875, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightEye
+      objectReference: {fileID: 0}
+    - target: {fileID: 2618972336383481677, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_11
+      objectReference: {fileID: 0}
+    - target: {fileID: 2619053997171396909, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLegHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: 2767334225282254347, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837133809683314004, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLittleFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837560719736812069, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2871446637790279788, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 3007355612992986294, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHair_2_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3011589018257973844, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftMiddleFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3065695526655534855, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3232467395214729123, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3281433451409487203, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Additional_LeftElbowHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: 3323152460825417070, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftToe
+      objectReference: {fileID: 0}
+    - target: {fileID: 3359673434350194218, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Spine
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557961438560355844, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3669602067706886831, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightHipCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 3676303455017399367, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHandDummy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3706434034995539987, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3841307916300273160, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3856250934902487645, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3898197149199034925, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938994811098565361, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightForearmTwist
+      objectReference: {fileID: 0}
+    - target: {fileID: 4012672520222145150, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4034488533125859473, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperArm
+      objectReference: {fileID: 0}
+    - target: {fileID: 4061364501635079665, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4067792510420465708, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperLeg
+      objectReference: {fileID: 0}
+    - target: {fileID: 4089625932493661431, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4096265131004161279, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141763129954311421, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftRingFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4197095887078816878, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftKneeDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 4207182485720922195, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4237123855607240377, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightToe
+      objectReference: {fileID: 0}
+    - target: {fileID: 4253004275309464419, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftThumbTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 4276951786499463644, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftEye
+      objectReference: {fileID: 0}
+    - target: {fileID: 4297640362575997149, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4349312358500104745, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftShoulderCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4363879543392219876, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4575540803462472013, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4599407099889173011, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperLeg
+      objectReference: {fileID: 0}
+    - target: {fileID: 4796730116869664721, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4850706864273994499, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Default
+      objectReference: {fileID: 0}
+    - target: {fileID: 4973160200288746173, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightKnee
+      objectReference: {fileID: 0}
+    - target: {fileID: 5043630189554761166, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122562483807472132, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5225575025318699283, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightIndexFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5266370627038511295, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightMiddleFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 5521989039503015440, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5565027313360141026, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftThumb1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5675576827380420064, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLegIK
+      objectReference: {fileID: 0}
+    - target: {fileID: 5857240893355494692, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 2cb63e699e15945928d7614eae2a7d4f, type: 2}
+    - target: {fileID: 5866666021909216657, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: b16f253f1968646148c154f106af31e2, type: 2}
+    - target: {fileID: 5866666021909216657, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5882160039004012548, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Hips
+      objectReference: {fileID: 0}
+    - target: {fileID: 5907335849874671401, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6065149270136703683, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6219300031760635015, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightLegIKParent
+      objectReference: {fileID: 0}
+    - target: {fileID: 6236274693463679754, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftRingFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6282430908699883706, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Exusiai_Armature
+      objectReference: {fileID: 0}
+    - target: {fileID: 6300264780950843991, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightIndexFingerTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 6456424800899767348, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftToeIK
+      objectReference: {fileID: 0}
+    - target: {fileID: 6628142021822149905, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftForearmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6723970168529273877, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHair_1_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741630882631486495, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.3058542
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741630882631486495, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6338063
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741630882631486495, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.3134088
+      objectReference: {fileID: 0}
+    - target: {fileID: 6741630882631486495, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.63758755
+      objectReference: {fileID: 0}
+    - target: {fileID: 6754242472593337126, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperArmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6754446563226563491, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Chest
+      objectReference: {fileID: 0}
+    - target: {fileID: 6863957693468342423, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6878842447930405704, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftIndexFinger2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6891535585379306262, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_3_7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6927296402294086924, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightForearmTwist2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7025191125246057793, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7054261864107134488, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightShoulder
+      objectReference: {fileID: 0}
+    - target: {fileID: 7065672556344279748, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftIndexFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7243425361280086101, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7281576217127294662, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightMiddleFinger1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7383498503154145411, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7389106559811170583, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522449873248951025, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_LeftUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7526219295789485034, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightThumb0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7605104671411191096, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7651120703503684588, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightRingFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7719148863051237503, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7735003312057433351, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperArmTwist
+      objectReference: {fileID: 0}
+    - target: {fileID: 7761874249379248756, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_1_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859657667815864109, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightWrist
+      objectReference: {fileID: 0}
+    - target: {fileID: 8006296827367349177, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_2_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8024635299548121465, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftKnee
+      objectReference: {fileID: 0}
+    - target: {fileID: 8129358160309627592, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Groove
+      objectReference: {fileID: 0}
+    - target: {fileID: 8139473725362141756, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_0_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8187582398049998242, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8461112713831138748, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftLittleFinger3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8501966720961191074, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftUpperArmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8513223942696313457, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_LeftForearmTwist3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8529526765852040599, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Head
+      objectReference: {fileID: 0}
+    - target: {fileID: 8626665014999575239, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_4_11
+      objectReference: {fileID: 0}
+    - target: {fileID: 8649283779085046990, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Dummy_RightUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 8797792361419637515, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Additional_RightElbowHelper
+      objectReference: {fileID: 0}
+    - target: {fileID: 8848077511124943034, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8902740792092020607, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: LeftHair_0_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9007466989133130230, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: Shadow_RightUpperArmTwist1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9023729178773750082, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: RightUpperLegDeform
+      objectReference: {fileID: 0}
+    - target: {fileID: 9147729349518937141, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}
+      propertyPath: m_Name
+      value: SkirtHem_5_7
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a3ede3ee3c5ed4a93a0236f2e934ac5d, type: 3}

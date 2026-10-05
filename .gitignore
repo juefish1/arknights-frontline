@@ -32,3 +32,7 @@ Recordings/
 .superpowers/brainstorm/.last-*
 .superpowers/brainstorm/**/state/
 
+
+# Local-only Generic rig diagnostic animation
+/Assets/Game/Characters/Exusiai/Model/PreservedRig/Animations/Exusiai_RigCheck_Generic.anim
+/Assets/Game/Characters/Exusiai/Model/PreservedRig/Animations/Exusiai_RigCheck_Generic.anim.meta

@@ -1,0 +1,11 @@
+{
+  "name": "ArknightsFrontline.Model.PlayModeVerification.Editor",
+  "references": [
+    "ArknightsFrontline.Model.Runtime",
+    "ArknightsFrontline.Model.EditModeVerification.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}
