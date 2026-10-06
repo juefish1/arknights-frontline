@@ -1,6 +1,10 @@
 # macOS Finder metadata
 .DS_Store
 
+# Local agent instructions
+/AGENT.md
+/AGENTS.md
+
 # Unity generated files
 [Ll]ibrary/
 [Tt]emp/
