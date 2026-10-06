@@ -66,6 +66,7 @@ namespace ArknightsFrontline.Combat
             if (subscribed || !sequence || !owner) return;
             sequence.ShotRequested += OnShot;
             owner.Died += OnDeath;
+            if (retreat) retreat.GuidanceStarted += OnGuidanceStarted;
             if (match) match.MatchEnding += StopPresentation;
             subscribed = true;
         }
@@ -75,6 +76,7 @@ namespace ArknightsFrontline.Combat
             if (!subscribed) return;
             if (sequence) sequence.ShotRequested -= OnShot;
             if (owner) owner.Died -= OnDeath;
+            if (retreat) retreat.GuidanceStarted -= OnGuidanceStarted;
             if (match) match.MatchEnding -= StopPresentation;
             subscribed = false;
         }
@@ -133,6 +135,13 @@ namespace ArknightsFrontline.Combat
         }
 
         private void OnDeath(CombatUnit _) => StopPresentation();
+        private void OnGuidanceStarted(CombatUnit _)
+        {
+            shotTarget = null;
+            shotHold = 0;
+            previousPosition = transform.position;
+            if (presentation) presentation.ResetPresentation();
+        }
         private void StopPresentation()
         {
             stopped = true;

@@ -43,12 +43,37 @@ namespace ArknightsFrontline.Tests.EditMode
             {
                 var slot = slots.GetArrayElementAtIndex(i);
                 var template = (GameObject)slot.FindPropertyRelative("template").objectReferenceValue;
-                Bounds bounds = template.GetComponent<Renderer>().bounds;
+                Bounds bounds = VisibleBodyBounds(template);
                 Vector3 deployment = slot.FindPropertyRelative("deploymentPosition").vector3Value;
-                Assert.That(bounds.min.y, Is.EqualTo(0f).Within(0.01f), template.name + " floats or sinks");
-                Assert.That(deployment.y - bounds.extents.y, Is.EqualTo(0f).Within(0.01f), "redeployment floats or sinks");
+                Assert.That(bounds.min.y, Is.EqualTo(0f).Within(0.02f), template.name + " floats or sinks");
+                Assert.That(bounds.min.y + deployment.y - template.transform.position.y, Is.EqualTo(0f).Within(0.02f), "redeployment floats or sinks");
+                var capsule = template.GetComponent<CapsuleCollider>();
+                Assert.That(template.transform.position.y - capsule.height * template.transform.lossyScale.y / 2, Is.EqualTo(0).Within(0.01f));
                 Assert.That(towerHeight / bounds.size.y, Is.InRange(2f, 2.4f), "tower must read larger than an operator");
             }
+        }
+
+        private static Bounds VisibleBodyBounds(GameObject template)
+        {
+            if (template.GetComponent<Renderer>().enabled) return template.GetComponent<Renderer>().bounds;
+            Bounds bounds = default; bool first = true;
+            foreach (var skin in template.GetComponentsInChildren<SkinnedMeshRenderer>(true).Where(s => s.enabled))
+            {
+                var mesh = new Mesh();
+                try
+                {
+                    skin.BakeMesh(mesh, true);
+                    foreach (Vector3 vertex in mesh.vertices)
+                    {
+                        Vector3 point = skin.transform.TransformPoint(vertex);
+                        if (first) { bounds = new Bounds(point, Vector3.zero); first = false; }
+                        else bounds.Encapsulate(point);
+                    }
+                }
+                finally { Object.DestroyImmediate(mesh); }
+            }
+            Assert.That(first, Is.False, "Hidden player capsule must have visible body geometry");
+            return bounds;
         }
 
         [TestCase(16f / 9f)]

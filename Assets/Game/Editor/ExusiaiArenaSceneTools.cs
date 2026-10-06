@@ -5,9 +5,11 @@ using ArknightsFrontline.Combat;
 using ArknightsFrontline.Commands;
 using ArknightsFrontline.Common;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace ArknightsFrontline.Editor
@@ -16,6 +18,42 @@ namespace ArknightsFrontline.Editor
     {
         public const string PrefabPath = "Assets/Game/Characters/Exusiai/Model/Prefabs/Exusiai_Game_Humanoid.prefab";
         private const string IdlePath = "Assets/Game/Characters/Exusiai/Model/Animations/Exusiai_Idle_Humanoid.anim";
+        private const string ScenePath = "Assets/Game/Scenes/PrototypeArena.unity";
+
+        [MenuItem("Arknights Frontline/Integrate Exusiai Model")]
+        public static void Upgrade()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Exit Play Mode before integrating the model.");
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            if (!scene.IsValid() || !scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            UpgradeScene(scene);
+            if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new InvalidOperationException("Could not save Exusiai integration.");
+            Debug.Log("Formal Exusiai model integrated into the player slot only.");
+        }
+
+        public static void UpgradeScene(Scene scene)
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.IsValid() || !scene.isLoaded)
+                throw new InvalidOperationException("Integration requires a loaded editor scene.");
+            var roster = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<ArenaRosterBootstrap>(true)).Single();
+            var slots = new SerializedObject(roster).FindProperty("slots");
+            var matches = new System.Collections.Generic.List<GameObject>();
+            var others = new System.Collections.Generic.List<GameObject>();
+            for (int i = 0; i < slots.arraySize; i++)
+            {
+                var slot = slots.GetArrayElementAtIndex(i);
+                var template = (GameObject)slot.FindPropertyRelative("template").objectReferenceValue;
+                bool selected = slot.FindPropertyRelative("isPlayerControlled").boolValue &&
+                    slot.FindPropertyRelative("operatorType").intValue == (int)OperatorType.Exusiai;
+                if (selected) matches.Add(template); else others.Add(template);
+            }
+            if (matches.Count != 1 || !matches[0]) throw new InvalidOperationException("Expected exactly one player-controlled Exusiai slot.");
+            if (others.Any(t => !t || t.GetComponentInChildren<ExusiaiPresentation>(true) || t.GetComponent<ExusiaiCombatPresentation>() || t.GetComponent<ProjectileSpawnPoint>()))
+                throw new InvalidOperationException("Other operator slots must retain their original presentation.");
+            AttachVisual(matches[0]);
+            EditorSceneManager.MarkSceneDirty(scene);
+        }
 
         public static GameObject AttachVisual(GameObject operatorRoot)
         {

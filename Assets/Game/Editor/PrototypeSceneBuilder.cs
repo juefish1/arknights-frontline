@@ -505,6 +505,7 @@ namespace ArknightsFrontline.Editor
             player.AddComponent<ExusiaiSkillController>();
             player.AddComponent<ExusiaiSkillIndicator>();
             player.SetActive(false);
+            ExusiaiArenaSceneTools.AttachVisual(player);
             return player;
         }
 

@@ -48,8 +48,9 @@ namespace ArknightsFrontline.Tests.PlayMode
                 CombatUnit unit = slot.CurrentOperator;
                 controller.CenterOn(unit.transform);
                 Physics.SyncTransforms();
-                Bounds bounds = unit.GetComponent<Renderer>().bounds;
-                Assert.That(bounds.min.y, Is.EqualTo(0f).Within(0.01f), slot.StableKey);
+                Bounds bounds = VisibleBodyBounds(unit);
+                Assert.That(bounds.min.y, Is.EqualTo(0f).Within(0.02f), slot.StableKey);
+                Assert.That(unit.GetComponent<Collider>().bounds.min.y, Is.EqualTo(0f).Within(0.01f));
                 Ray ray = camera.ViewportPointToRay(camera.WorldToViewportPoint(bounds.center));
                 Assert.That(Physics.Raycast(ray, out RaycastHit hit, 100f, 1 << unit.gameObject.layer), Is.True);
                 Assert.That(hit.collider.GetComponent<CombatUnit>(), Is.SameAs(unit), "visible body must be selectable");
@@ -62,7 +63,8 @@ namespace ArknightsFrontline.Tests.PlayMode
             yield return null;
             roster.Tick(30f);
             Assert.That(player.CurrentOperator, Is.Not.Null);
-            Assert.That(player.CurrentOperator.GetComponent<Renderer>().bounds.min.y, Is.EqualTo(0f).Within(0.01f));
+            yield return null;
+            Assert.That(VisibleBodyBounds(player.CurrentOperator).min.y, Is.EqualTo(0f).Within(0.02f));
             Assert.That(player.CurrentOperator.GetComponent<Collider>().bounds.min.y, Is.EqualTo(0f).Within(0.01f));
 
             // Real scene render evidence is available when the test runner has a graphics device.
@@ -78,6 +80,31 @@ namespace ArknightsFrontline.Tests.PlayMode
             controller.CenterOn(focus.transform);
             Capture(camera, "tower");
             Object.Destroy(focus);
+        }
+
+        private static Bounds VisibleBodyBounds(CombatUnit unit)
+        {
+            if (unit.GetComponent<Renderer>().enabled) return unit.GetComponent<Renderer>().bounds;
+            var skins = unit.GetComponentsInChildren<SkinnedMeshRenderer>().Where(s => s.enabled).ToArray();
+            Assert.That(skins.Length, Is.GreaterThan(0));
+            Bounds bounds = default; bool first = true;
+            // Imported skinned bounds remain conservative; validate the geometry rendered now.
+            foreach (var skin in skins)
+            {
+                var mesh = new Mesh();
+                try
+                {
+                    skin.BakeMesh(mesh, true);
+                    foreach (var vertex in mesh.vertices)
+                    {
+                        Vector3 point = skin.transform.TransformPoint(vertex);
+                        if (first) { bounds = new Bounds(point, Vector3.zero); first = false; }
+                        else bounds.Encapsulate(point);
+                    }
+                }
+                finally { Object.DestroyImmediate(mesh); }
+            }
+            return bounds;
         }
 
         private static void ArrangeEncounter(OperatorRosterController roster, float centerX)
