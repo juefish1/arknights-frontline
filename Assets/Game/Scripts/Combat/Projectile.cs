@@ -55,7 +55,8 @@ namespace ArknightsFrontline.Combat
             target = combatTarget;
             payload = projectilePayload;
             speed = Mathf.Max(MinimumSpeed, projectileSpeed);
-            transform.position = attacker.transform.position;
+            var spawnPoint = attacker.GetComponent<ProjectileSpawnPoint>();
+            transform.position = spawnPoint ? spawnPoint.ResolvePosition() : attacker.transform.position;
             IsFinished = false;
         }
 

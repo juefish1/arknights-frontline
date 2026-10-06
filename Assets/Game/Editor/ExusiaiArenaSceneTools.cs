@@ -102,6 +102,7 @@ namespace ArknightsFrontline.Editor
 
         private static void ConnectPresentation(GameObject root, GameObject visual)
         {
+            Transform muzzle = visual.GetComponentsInChildren<Transform>(true).Single(t => t.name == "Muzzle");
             bool active = root.activeSelf;
             root.SetActive(false);
             try
@@ -109,6 +110,9 @@ namespace ArknightsFrontline.Editor
                 var bridge = root.GetComponent<ExusiaiCombatPresentation>();
                 if (!bridge) bridge = root.AddComponent<ExusiaiCombatPresentation>();
                 bridge.Configure(visual.GetComponent<ExusiaiPresentation>(), visual.transform);
+                var origin = root.GetComponent<ProjectileSpawnPoint>();
+                if (!origin) origin = root.AddComponent<ProjectileSpawnPoint>();
+                origin.Configure(muzzle);
             }
             finally { root.SetActive(active); }
         }
