@@ -8,7 +8,7 @@ public sealed class ExusiaiPresentation : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private ExusiaiMotionSettings settings;
     private float speed, aimWeight, hold;
-    private bool pendingShot, requestedAim;
+    private bool pendingShot, requestedAim, pendingPoseReset;
     private Quaternion targetRotation;
     public event Action ResetRequested;
 
@@ -48,8 +48,12 @@ public sealed class ExusiaiPresentation : MonoBehaviour
         pendingShot = requestedAim = false;
         if (animator)
         {
-            animator.Rebind();
-            animator.Update(0);
+            pendingPoseReset = !animator.isActiveAndEnabled;
+            if (!pendingPoseReset)
+            {
+                animator.Rebind();
+                animator.Update(0);
+            }
             targetRotation = animator.transform.rotation;
         }
         ResetRequested?.Invoke();
@@ -58,12 +62,17 @@ public sealed class ExusiaiPresentation : MonoBehaviour
     private void OnEnable()
     {
         if (!animator) animator = GetComponentInChildren<Animator>();
-        if (animator) targetRotation = animator.transform.rotation;
+        if (animator)
+        {
+            if (pendingPoseReset) ResetPresentation();
+            else targetRotation = animator.transform.rotation;
+        }
     }
 
     private void Update()
     {
-        if (!animator || !settings || Time.deltaTime <= 0) return;
+        if (!animator || !animator.isActiveAndEnabled || !settings || Time.deltaTime <= 0) return;
+        if (pendingPoseReset) ResetPresentation();
         float dt = Time.deltaTime;
         animator.SetFloat("MoveSpeed", speed > 0.01f ? 1 : 0, 0.12f, dt);
         animator.SetFloat("JogRate", speed > 0.01f ? Mathf.Clamp(speed / Mathf.Max(0.01f, settings.jogSpeed), 0.01f, 3) : 1);

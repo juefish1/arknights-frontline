@@ -158,6 +158,31 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(((Behaviour)adapter).enabled, Is.False);
         }
 
+        [UnityTest] public IEnumerator InactiveConfigurationAndDisableDoNotEvaluateAnimator()
+        {
+            var warnings = new System.Collections.Generic.List<string>();
+            void Capture(string message, string trace, LogType type)
+            {
+                if (message.Contains("Can't call Animator.Update on inactive object")) warnings.Add(message);
+            }
+            Application.logMessageReceived += Capture;
+            try
+            {
+                root.SetActive(false);
+                Call("Configure", visual.GetComponent<ExusiaiPresentation>(), visual.transform);
+                yield return null;
+                Assert.That(warnings, Is.Empty, "Inactive lifecycle attempted to evaluate an Animator");
+                root.SetActive(true);
+                Assert.That(sequence.TryStart(Plan(1), target), Is.True);
+                for (int i = 0; i < 20; i++) yield return null;
+                Assert.That(animator.GetLayerWeight(2), Is.GreaterThan(0.95f));
+                root.SetActive(false); root.SetActive(true);
+                yield return null;
+                Assert.That(warnings, Is.Empty);
+            }
+            finally { Application.logMessageReceived -= Capture; }
+        }
+
         [UnityTest] public IEnumerator TeleportAndMatchEndClearPendingPresentation()
         {
             root.transform.position += Vector3.forward * 10;

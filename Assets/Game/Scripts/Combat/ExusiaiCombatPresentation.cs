@@ -22,7 +22,7 @@ namespace ArknightsFrontline.Combat
         private Vector3 previousPosition;
         private CombatUnit shotTarget;
         private float shotHold;
-        private bool subscribed, stopped;
+        private bool subscribed, stopped, dashCompletedSinceSample;
         public ExusiaiPresentation Presentation => presentation;
         public Transform VisualRoot => visualRoot;
 
@@ -67,6 +67,7 @@ namespace ArknightsFrontline.Combat
             sequence.ShotRequested += OnShot;
             owner.Died += OnDeath;
             if (retreat) retreat.GuidanceStarted += OnGuidanceStarted;
+            if (dash) dash.DashCompleted += OnDashCompleted;
             if (match) match.MatchEnding += StopPresentation;
             subscribed = true;
         }
@@ -77,6 +78,7 @@ namespace ArknightsFrontline.Combat
             if (sequence) sequence.ShotRequested -= OnShot;
             if (owner) owner.Died -= OnDeath;
             if (retreat) retreat.GuidanceStarted -= OnGuidanceStarted;
+            if (dash) dash.DashCompleted -= OnDashCompleted;
             if (match) match.MatchEnding -= StopPresentation;
             subscribed = false;
         }
@@ -86,6 +88,7 @@ namespace ArknightsFrontline.Combat
             previousPosition = transform.position;
             shotTarget = null;
             shotHold = 0;
+            dashCompletedSinceSample = false;
             stopped = owner && owner.IsDead || match && match.IsEnding;
             if (presentation) presentation.ResetPresentation();
         }
@@ -95,6 +98,8 @@ namespace ArknightsFrontline.Combat
             Vector3 displacement = transform.position - previousPosition;
             previousPosition = transform.position;
             displacement.y = 0;
+            bool dashMovement = dash && (dash.IsDashing || dashCompletedSinceSample);
+            dashCompletedSinceSample = false;
             if (!presentation || !visualRoot) return;
             if (stopped || owner.IsDead || match && match.IsEnding) { presentation.SetMoveSpeed(0); return; }
             if (!float.IsFinite(deltaTime) || deltaTime <= 0)
@@ -102,7 +107,7 @@ namespace ArknightsFrontline.Combat
                 presentation.SetMoveSpeed(0);
                 return;
             }
-            if ((!dash || !dash.IsDashing) && displacement.magnitude > Mathf.Max(0.7f, 2 * motor.MovementSpeed * deltaTime))
+            if (!dashMovement && displacement.magnitude > Mathf.Max(0.7f, 2 * motor.MovementSpeed * deltaTime))
             {
                 ResetForDeployment();
                 return;
@@ -135,6 +140,7 @@ namespace ArknightsFrontline.Combat
         }
 
         private void OnDeath(CombatUnit _) => StopPresentation();
+        private void OnDashCompleted() => dashCompletedSinceSample = true;
         private void OnGuidanceStarted(CombatUnit _)
         {
             shotTarget = null;
@@ -145,6 +151,7 @@ namespace ArknightsFrontline.Combat
         private void StopPresentation()
         {
             stopped = true;
+            dashCompletedSinceSample = false;
             shotTarget = null;
             shotHold = 0;
             if (presentation) presentation.ResetPresentation();

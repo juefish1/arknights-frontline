@@ -171,6 +171,35 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(Animator.GetLayerWeight(2), Is.LessThan(0.01f));
             Assert.That(Object.FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length, Is.Zero);
         }
+
+        [UnityTest] public IEnumerator ChargeCompletionAt30FpsPreservesFirstShotFeedback()
+        {
+            yield return ReloadAfterInputSetup();
+            Time.captureFramerate = 30;
+            var enemy = EnemyAt(2);
+            enemy.transform.position += Vector3.forward * 6.5f;
+            int shots = 0;
+            player.GetComponent<AttackSequenceExecutor>().ShotRequested += (_, __) => shots++;
+            var skills = player.GetComponent<ExusiaiSkillController>();
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            Assert.That(skills.TryConfirmCharge(player.transform.position + Vector3.forward * 6.5f, null), Is.True);
+            var dash = player.GetComponent<SkillDashController>();
+            Vector3 previous = player.transform.position;
+            float finalStep = 0;
+            for (int i = 0; i < 15 && dash.IsDashing; i++)
+            {
+                previous = player.transform.position;
+                yield return null;
+                if (!dash.IsDashing) finalStep = Vector3.Distance(previous, player.transform.position);
+            }
+            Assert.That(finalStep, Is.GreaterThan(0.7f), "Fixture did not exercise the final-step teleport threshold");
+            Assert.That(shots, Is.EqualTo(1), "Charge still emits its gameplay shot immediately");
+            // Isolate the first real shot: later E bullets otherwise hide a lost first feedback.
+            player.GetComponent<AttackSequenceExecutor>().Cancel();
+            for (int i = 0; i < 15; i++) yield return null;
+            Assert.That(Animator.GetLayerWeight(2), Is.GreaterThan(0.95f), "Dash completion discarded first-shot feedback");
+            Assert.That(Vector3.Dot(Animator.transform.forward, Vector3.right), Is.GreaterThan(0.9f), "Dash completion discarded the shot target direction");
+        }
         [UnityTest] public IEnumerator AiExusiaiKeepsOriginalCapsuleAndAttackBehavior()
         {
             yield return ReloadAfterInputSetup();
@@ -186,6 +215,22 @@ namespace ArknightsFrontline.Tests.PlayMode
             ai.TakePhysicalDamage(100000); yield return null; roster.Tick(30); yield return null;
             Assert.That(aiSlot.CurrentOperator.GetComponent<Renderer>().enabled, Is.True);
             Assert.That(aiSlot.CurrentOperator.GetComponentInChildren<ExusiaiPresentation>(true), Is.Null);
+        }
+
+        [UnityTest] public IEnumerator ShortDashCompletingBetweenSamplesPreservesFirstShotFeedback()
+        {
+            yield return ReloadAfterInputSetup();
+            Time.captureFramerate = 30;
+            var enemy = EnemyAt(2); enemy.transform.position += Vector3.forward * 0.9f;
+            var skills = player.GetComponent<ExusiaiSkillController>();
+            Assert.That(skills.BeginChargeTargeting(), Is.True);
+            Assert.That(skills.TryConfirmCharge(player.transform.position + Vector3.forward * 0.9f, null), Is.True);
+            player.GetComponent<SkillDashController>().Tick(1f / 30);
+            Assert.That(player.GetComponent<SkillDashController>().IsDashing, Is.False);
+            player.GetComponent<ExusiaiCombatPresentation>().Tick(1f / 30);
+            player.GetComponent<AttackSequenceExecutor>().Cancel();
+            for (int i = 0; i < 15; i++) yield return null;
+            Assert.That(Animator.GetLayerWeight(2), Is.GreaterThan(0.95f), "Dash was never sampled active and lost its real shot feedback");
         }
 
         private void Capture(string name)
