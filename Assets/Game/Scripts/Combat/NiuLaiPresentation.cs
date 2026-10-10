@@ -18,7 +18,7 @@ namespace ArknightsFrontline.Combat
         private void LateUpdate()
         {
             Vector3 direction = transform.position - previous; previous = transform.position;
-            if (animator) { animator.speed = owner.IsDead || !skills.CanShowIndicators ? 0 : 1; animator.SetFloat("Speed", !skills.IsFlying && Time.deltaTime > 0 ? direction.magnitude / Time.deltaTime : 0); }
+            if (animator) { animator.speed = owner.IsDead || !skills.CanShowIndicators ? 0 : 1; animator.SetBool("Flying", skills.IsFlying); animator.SetFloat("Speed", !skills.IsFlying && Time.deltaTime > 0 ? direction.magnitude / Time.deltaTime : 0); }
             if (!visual || owner.IsDead) return;
             if (attacks.CurrentTarget) direction = attacks.CurrentTarget.transform.position - transform.position;
             direction.y = 0;

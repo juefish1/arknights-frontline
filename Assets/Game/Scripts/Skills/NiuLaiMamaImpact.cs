@@ -7,6 +7,7 @@ namespace ArknightsFrontline.Skills
 {
     public sealed class NiuLaiMamaImpact : MonoBehaviour
     {
+        public const float FallDuration = 1.8f;
         private CombatUnit caster;
         private TeamId team;
         private Vector3 point;
@@ -46,8 +47,8 @@ namespace ArknightsFrontline.Skills
             if (resolved) return;
             if (match && match.IsEnding) { Destroy(gameObject); return; }
             elapsed += Mathf.Max(0, deltaTime);
-            if (fallingModel) fallingModel.localPosition = Vector3.up * Mathf.Lerp(8, 0, Mathf.Clamp01(elapsed / 0.9f));
-            if (elapsed < 0.9f) return;
+            if (fallingModel) fallingModel.localPosition = Vector3.up * Mathf.Lerp(8, 0, Mathf.Clamp01(elapsed / FallDuration));
+            if (elapsed < FallDuration) return;
             resolved = true;
             foreach (CombatUnit target in FindObjectsByType<CombatUnit>(FindObjectsSortMode.None))
             {

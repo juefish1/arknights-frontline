@@ -74,7 +74,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             var cow = CreateCow();
             var animator = cow.GetComponentInChildren<Animator>();
             Assert.That(animator, Is.Not.Null);
-            Assert.That(animator.runtimeAnimatorController.animationClips.Length, Is.EqualTo(3));
+            Assert.That(animator.runtimeAnimatorController.animationClips.Length, Is.EqualTo(4));
             Assert.That(animator.applyRootMotion, Is.False);
             animator.Play("Run"); animator.Update(0.2f);
             Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Run"), Is.True);
@@ -106,11 +106,24 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(indicator.IsValid, Is.True);
             cow.TryHandleConfirm(enemy.transform.position, enemy.gameObject);
             Assert.That(cow.RCooldown, Is.EqualTo(36));
-            Object.FindFirstObjectByType<NiuLaiMamaImpact>().Tick(0.9f);
+            Object.FindFirstObjectByType<NiuLaiMamaImpact>().Tick(NiuLaiMamaImpact.FallDuration);
             Assert.That(enemy.CurrentHealth, Is.LessThan(1000));
             cow.HandleSkill2(); cow.GetComponent<CombatUnit>().TakePhysicalDamage(9999);
             indicator.RefreshPreview(Vector3.zero, true); Assert.That(indicator.IsVisible, Is.False);
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator FlightPlaysDedicatedAnimationAndReturnsAfterLanding()
+        {
+            var cow = CreateCow(); var animator = cow.GetComponentInChildren<Animator>();
+            cow.HandleSkill2(); cow.TryHandleConfirm(new Vector3(3, 0, 0), null);
+            yield return new WaitForSeconds(0.15f);
+            Assert.That(cow.IsFlying, Is.True);
+            Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Flight"), Is.True);
+            yield return new WaitForSeconds(0.8f);
+            Assert.That(cow.IsFlying, Is.False);
+            Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Flight"), Is.False);
         }
 
         private static void CapturePreview(GameObject cow, string destination)
@@ -192,6 +205,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             effect.Tick(0.8f); Assert.That(target.CurrentHealth, Is.EqualTo(1000));
             // Already released impacts survive the caster's death.
             cow.GetComponent<CombatUnit>().TakePhysicalDamage(9999);
+            effect.Tick(0.9f); Assert.That(target.CurrentHealth, Is.EqualTo(1000));
             effect.Tick(0.11f); effect.Tick(1);
             Assert.That(target.CurrentHealth, Is.EqualTo(650));
             yield return null;

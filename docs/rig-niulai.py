@@ -58,7 +58,7 @@ mesh.parent=rig
 modifier=mesh.modifiers.new('NiuLaiSkin','ARMATURE'); modifier.object=rig
 modifier.use_deform_preserve_volume=True
 rig.animation_data_create()
-for name,frames in [('Idle',60),('Run',24),('Attack',18)]:
+for name,frames in [('Idle',60),('Run',24),('Attack',18),('Flight',21)]:
     action=bpy.data.actions.new(name); rig.animation_data.action=action
     for frame in range(1,frames+1):
         t=(frame-1)/(frames-1); phase=t*math.tau
@@ -78,6 +78,15 @@ for name,frames in [('Idle',60),('Run',24),('Attack',18)]:
             rig.pose.bones['Chest'].rotation_euler.x=.055
             rig.pose.bones['Chest'].rotation_euler.z=.025*wave
             rig.pose.bones['TailBase'].rotation_euler.z=.16*wave
+        elif name=='Flight':
+            lift=math.sin(math.pi*t)
+            rig.pose.bones['Chest'].rotation_euler.x=-.20*lift
+            rig.pose.bones['Head'].rotation_euler.x=-.15*lift
+            for side in ['L','R']:
+                rig.pose.bones['Thigh.'+side].rotation_euler.x=.60*lift
+                rig.pose.bones['Shin.'+side].rotation_euler.x=-.85*lift
+                rig.pose.bones['Foot.'+side].rotation_euler.x=.20*lift
+            rig.pose.bones['TailBase'].rotation_euler.x=.3*lift
         else:
             # Windup, quick nod/lunge, then recover; all movement is local to the skin.
             amount=math.sin(math.pi*t)**3

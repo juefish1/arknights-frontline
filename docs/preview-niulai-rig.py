@@ -39,7 +39,7 @@ bpy.ops.mesh.primitive_plane_add(size=200,location=(0,0,-.025))
 floor=bpy.context.object; floor.name='PreviewFloor'
 floor_material=bpy.data.materials.new('Floor'); floor_material.diffuse_color=(.055,.07,.09,1); floor.data.materials.append(floor_material)
 report=[]
-for name,frame in [('Idle',1),('Run',7),('Attack',10)]:
+for name,frame in [('Idle',1),('Run',7),('Attack',10),('Flight',11)]:
     rig.animation_data.action=bpy.data.actions[name]; scene.frame_set(frame)
     deps=bpy.context.evaluated_depsgraph_get(); evaluated=body.evaluated_get(deps)
     evaluated_mesh=evaluated.to_mesh()
