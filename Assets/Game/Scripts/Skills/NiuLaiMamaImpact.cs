@@ -32,6 +32,7 @@ namespace ArknightsFrontline.Skills
             if (model)
             {
                 fallingModel = Instantiate(model.gameObject, transform).transform;
+                foreach (var animator in fallingModel.GetComponentsInChildren<Animator>()) animator.enabled = false;
                 fallingModel.localScale = model.lossyScale * 1.5f;
                 fallingModel.localPosition = Vector3.up * 8;
             }

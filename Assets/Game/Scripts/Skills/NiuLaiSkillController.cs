@@ -26,6 +26,10 @@ namespace ArknightsFrontline.Skills
         public bool IsFlying { get; private set; }
         public bool BlocksAttackMove => IsFlying || targeting != 0;
         public bool BlocksNormalCommands => IsFlying;
+        public int TargetingSkill => CanAct ? targeting : 0;
+        public bool CanShowIndicators => CanAct;
+        public const float FlightRange = 5.5f, MamaRange = 7f, MamaRadius = 2.8f;
+        public Vector3 FlightDestination => flightEnd;
         private bool CanAct => owner && !owner.IsDead && (!match || !match.IsEnding) && (!retreat || !retreat.IsGuiding);
 
         private void Awake()
@@ -70,13 +74,7 @@ namespace ArknightsFrontline.Skills
             if (targeting == 0) return false;
             if (!CanAct) { targeting = 0; return true; }
             Vector3 start = transform.position;
-            point.y = start.y;
-            Vector3 delta = point - start;
-            float range = targeting == 2 ? 5.5f : 7f;
-            point = start + Vector3.ClampMagnitude(delta, range);
-            Vector3 clamped = ArenaLayout.CreateDefault().Clamp(point);
-            point.x = clamped.x; point.z = clamped.z;
-            if (!IsLegalLanding(point, owner)) return true;
+            if (!TryPreviewTarget(point, out point)) return true;
             if (targeting == 2)
             {
                 if (Vector3.Distance(start, point) < 0.1f) return true;
@@ -92,6 +90,19 @@ namespace ArknightsFrontline.Skills
                 effect.Initialize(owner, new Vector3(point.x, 0, point.z), owner.AttackPower, visual);
             }
             targeting = 0;
+            return true;
+        }
+
+        public bool TryPreviewTarget(Vector3 point, out Vector3 endpoint)
+        {
+            point.y = transform.position.y;
+            endpoint = transform.position + Vector3.ClampMagnitude(point - transform.position, targeting == 2 ? FlightRange : MamaRange);
+            Vector3 clamped = ArenaLayout.CreateDefault().Clamp(endpoint);
+            endpoint.x = clamped.x; endpoint.z = clamped.z;
+            if (!CanAct || targeting == 0) return false;
+            if (targeting == 2) return Vector3.Distance(transform.position, endpoint) >= 0.1f && IsLegalLanding(endpoint, owner);
+            foreach (Collider collider in Physics.OverlapSphere(endpoint, 0.3f))
+                if (!collider.isTrigger && collider.gameObject.layer == ExusiaiSkillController.ReservedObstacleLayerIndex) return false;
             return true;
         }
 

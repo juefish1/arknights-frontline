@@ -25,6 +25,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             }
             foreach (var unit in Object.FindObjectsByType<CombatUnit>(FindObjectsSortMode.None)) Object.Destroy(unit.gameObject);
             foreach (var effect in Object.FindObjectsByType<NiuLaiMamaImpact>(FindObjectsSortMode.None)) Object.Destroy(effect.gameObject);
+            foreach (var corpse in Object.FindObjectsByType<CorpseLifetimeController>(FindObjectsSortMode.None)) Object.Destroy(corpse.gameObject);
             Time.timeScale = 1;
             yield return null;
         }
@@ -65,6 +66,67 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(slot.CurrentOperator, Is.Not.Null);
             Assert.That(slot.CurrentOperator.MaxHealth, Is.EqualTo(1300));
             Assert.That(slot.CurrentOperator.GetComponent<NiuLaiSkillController>().RCooldown, Is.EqualTo(15));
+        }
+
+        [UnityTest]
+        public IEnumerator RigAndRangePreviewMatchConfirmedLanding()
+        {
+            var cow = CreateCow();
+            var animator = cow.GetComponentInChildren<Animator>();
+            Assert.That(animator, Is.Not.Null);
+            Assert.That(animator.runtimeAnimatorController.animationClips.Length, Is.EqualTo(3));
+            Assert.That(animator.applyRootMotion, Is.False);
+            animator.Play("Run"); animator.Update(0.2f);
+            Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Run"), Is.True);
+            var indicator = cow.GetComponent<NiuLaiSkillIndicator>();
+            cow.HandleSkill2(); indicator.RefreshPreview(new Vector3(20, 0, 0), true);
+            Assert.That(indicator.IsVisible && indicator.IsValid, Is.True);
+            var endpoint = indicator.DisplayedEndpoint;
+            CapturePreview(cow.gameObject, "Logs/niulai-unity-range.png");
+            Assert.That(Vector3.Distance(cow.transform.position, endpoint), Is.EqualTo(5.5f).Within(0.01f));
+            cow.TryHandleConfirm(new Vector3(20, 0, 0), null); cow.Tick(0.65f);
+            Assert.That(Vector3.Distance(cow.transform.position, endpoint), Is.LessThan(0.01f));
+            indicator.RefreshPreview(endpoint, true); Assert.That(indicator.IsVisible, Is.False);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator InvalidFlightPreviewAndMamaTargetOnUnit()
+        {
+            var cow = CreateCow(); var enemy = CreateEnemy(new Vector3(2, 0.75f, 0));
+            enemy.gameObject.AddComponent<CapsuleCollider>(); Physics.SyncTransforms();
+            var indicator = cow.GetComponent<NiuLaiSkillIndicator>();
+            cow.HandleSkill2(); indicator.RefreshPreview(enemy.transform.position, true);
+            Assert.That(indicator.IsValid, Is.False);
+            cow.TryHandleConfirm(enemy.transform.position, enemy.gameObject);
+            Assert.That(cow.ECooldown, Is.Zero); Assert.That(cow.IsFlying, Is.False);
+            cow.TryHandleCancel(); indicator.RefreshPreview(enemy.transform.position, true);
+            Assert.That(indicator.IsVisible, Is.False);
+            cow.Tick(15); cow.HandleSkill3(); indicator.RefreshPreview(enemy.transform.position, true);
+            Assert.That(indicator.IsValid, Is.True);
+            cow.TryHandleConfirm(enemy.transform.position, enemy.gameObject);
+            Assert.That(cow.RCooldown, Is.EqualTo(36));
+            Object.FindFirstObjectByType<NiuLaiMamaImpact>().Tick(0.9f);
+            Assert.That(enemy.CurrentHealth, Is.LessThan(1000));
+            cow.HandleSkill2(); cow.GetComponent<CombatUnit>().TakePhysicalDamage(9999);
+            indicator.RefreshPreview(Vector3.zero, true); Assert.That(indicator.IsVisible, Is.False);
+            yield return null;
+        }
+
+        private static void CapturePreview(GameObject cow, string destination)
+        {
+            var cameraObject = new GameObject("CowPreviewCamera");
+            var camera = cameraObject.AddComponent<UnityEngine.Camera>();
+            camera.transform.position = new Vector3(9, 11, 12); camera.transform.LookAt(new Vector3(1, 0, 0));
+            camera.backgroundColor = new Color(0.12f, 0.17f, 0.23f); camera.clearFlags = CameraClearFlags.SolidColor;
+            var lightObject = new GameObject("CowPreviewLight"); var light = lightObject.AddComponent<Light>();
+            light.type = LightType.Directional; light.intensity = 2; light.transform.rotation = Quaternion.Euler(40, -30, 0);
+            var target = new RenderTexture(960, 720, 24); camera.targetTexture = target; camera.Render();
+            var previous = RenderTexture.active; RenderTexture.active = target;
+            var image = new Texture2D(960, 720, TextureFormat.RGB24, false); image.ReadPixels(new Rect(0, 0, 960, 720), 0, 0); image.Apply();
+            System.IO.File.WriteAllBytes(destination, image.EncodeToPNG());
+            RenderTexture.active = previous; camera.targetTexture = null;
+            Object.Destroy(image); Object.Destroy(target); Object.Destroy(cameraObject); Object.Destroy(lightObject);
         }
 
         private static NiuLaiSkillController CreateCow()
