@@ -30,6 +30,8 @@ namespace ArknightsFrontline.Skills
         public bool CanShowIndicators => CanAct;
         public const float FlightRange = 5.5f, MamaRange = 7f, MamaRadius = 2.8f;
         public Vector3 FlightDestination => flightEnd;
+        public const float FlightDuration = 1.5f;
+        public float FlightProgress => Mathf.Clamp01(flightTime / FlightDuration);
         private bool CanAct => owner && !owner.IsDead && (!match || !match.IsEnding) && (!retreat || !retreat.IsGuiding);
 
         private void Awake()
@@ -80,6 +82,7 @@ namespace ArknightsFrontline.Skills
                 if (Vector3.Distance(start, point) < 0.1f) return true;
                 commands.CancelCurrentCommand(); attacks.ClearTarget(); motor.Stop();
                 flightStart = start; flightEnd = point; flightTime = 0;
+                if (visual) visual.rotation = Quaternion.LookRotation((point - start).normalized);
                 IsFlying = true; motor.enabled = false; attacks.enabled = false;
                 ECooldown = 14;
             }
@@ -133,9 +136,14 @@ namespace ArknightsFrontline.Skills
             RCooldown = Mathf.Max(0, RCooldown - dt); empowered = Mathf.Max(0, empowered - dt);
             if (!IsFlying) return;
             flightTime += dt;
-            float t = Mathf.Clamp01(flightTime / 0.65f);
-            transform.position = Vector3.Lerp(flightStart, flightEnd, t);
-            if (visual) visual.localPosition = visualRest + Vector3.up * (2f * Mathf.Sin(t * Mathf.PI) / transform.lossyScale.y);
+            float t = FlightProgress;
+            // Mirror the 90-frame animation: windup, ascent/cruise/descent, then landing recovery.
+            float frame = 1 + t * 89;
+            float travel = Mathf.SmoothStep(0, 1, Mathf.Clamp01((frame - 10) / 56));
+            transform.position = Vector3.Lerp(flightStart, flightEnd, travel);
+            float height = frame <= 26 ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((frame - 10) / 16))
+                : frame <= 42 ? 1 : 1 - Mathf.SmoothStep(0, 1, Mathf.Clamp01((frame - 42) / 24));
+            if (visual) visual.localPosition = visualRest + Vector3.up * (2f * height / transform.lossyScale.y);
             if (t < 1) return;
             for (int step = 0; step <= 55; step++)
             {

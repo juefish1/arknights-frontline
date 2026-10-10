@@ -84,7 +84,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             var endpoint = indicator.DisplayedEndpoint;
             CapturePreview(cow.gameObject, "Logs/niulai-unity-range.png");
             Assert.That(Vector3.Distance(cow.transform.position, endpoint), Is.EqualTo(5.5f).Within(0.01f));
-            cow.TryHandleConfirm(new Vector3(20, 0, 0), null); cow.Tick(0.65f);
+            cow.TryHandleConfirm(new Vector3(20, 0, 0), null); cow.Tick(NiuLaiSkillController.FlightDuration);
             Assert.That(Vector3.Distance(cow.transform.position, endpoint), Is.LessThan(0.01f));
             indicator.RefreshPreview(endpoint, true); Assert.That(indicator.IsVisible, Is.False);
             yield return null;
@@ -117,11 +117,21 @@ namespace ArknightsFrontline.Tests.PlayMode
         public IEnumerator FlightPlaysDedicatedAnimationAndReturnsAfterLanding()
         {
             var cow = CreateCow(); var animator = cow.GetComponentInChildren<Animator>();
+            animator.Play("Idle"); animator.Update(0);
+            var rootBone = animator.GetComponentsInChildren<Transform>().Single(t => t.name == "Root");
+            var standingRotation = rootBone.localRotation;
             cow.HandleSkill2(); cow.TryHandleConfirm(new Vector3(3, 0, 0), null);
             yield return new WaitForSeconds(0.15f);
             Assert.That(cow.IsFlying, Is.True);
             Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Flight"), Is.True);
-            yield return new WaitForSeconds(0.8f);
+            yield return new WaitForSeconds(0.5f);
+            Assert.That(cow.IsFlying, Is.True);
+            Assert.That(Quaternion.Angle(standingRotation, rootBone.localRotation), Is.GreaterThan(60), "Mid-flight body must tilt horizontally.");
+            CapturePreview(cow.gameObject, "Logs/niulai-flight-runtime.png");
+            yield return new WaitForSeconds(0.55f);
+            Assert.That(cow.IsFlying, Is.True, "Landing recovery should still be playing.");
+            Assert.That(Vector3.Distance(cow.transform.position, new Vector3(3, 0.75f, 0)), Is.LessThan(0.01f));
+            yield return new WaitForSeconds(0.5f);
             Assert.That(cow.IsFlying, Is.False);
             Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Flight"), Is.False);
         }
@@ -211,7 +221,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             cow.TryHandleConfirm(new Vector3(5, 0, 0), null);
             Assert.That(cow.IsFlying, Is.True);
             Assert.That(cow.GetComponent<OperatorRetreatController>().TryBegin(), Is.False);
-            cow.Tick(0.65f);
+            cow.Tick(NiuLaiSkillController.FlightDuration);
             Assert.That(cow.transform.position.x, Is.EqualTo(5).Within(0.01f));
             Assert.That(cow.IsFlying, Is.False);
             Object.Destroy(wall);
