@@ -79,6 +79,7 @@ namespace ArknightsFrontline.Editor
             AssetDatabase.DeleteAsset(Directory + "NiuLai.fbm");
             AssetDatabase.DeleteAsset(Directory + "texture_pbr_20250901_metallic-texture_pbr_20250901_roughness.png");
             if (System.IO.File.Exists("Assets/Game/Characters/NiuLai/Rigged/NiuLai_Rigged.fbx")) NiuLaiRigSetup.Prepare();
+            NiuLaiAppearanceSetup.Prepare();
             Debug.Log("NiuLai prefab and pre-match selection ready.");
         }
 

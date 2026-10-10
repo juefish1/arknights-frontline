@@ -126,6 +126,28 @@ namespace ArknightsFrontline.Tests.PlayMode
             Assert.That(animator.GetCurrentAnimatorStateInfo(0).IsName("Flight"), Is.False);
         }
 
+        [UnityTest]
+        public IEnumerator EmpowerGlowTracksConsumptionExpiryAndDeathAndMamaUsesOwnPalette()
+        {
+            var cow=CreateCow(); var visual=cow.GetComponent<NiuLaiEmpowerVisual>();
+            Assert.That(visual,Is.Not.Null); visual.RefreshVisual(); Assert.That(visual.IsVisible,Is.False);
+            cow.ActivateEmpower(); visual.RefreshVisual(); Assert.That(visual.IsVisible,Is.True);
+            yield return null;
+            CapturePreview(cow.gameObject,"Logs/niulai-w-glow.png");
+            var target=CreateEnemy(new Vector3(1,0.75f,0)); var attacks=cow.GetComponent<BasicAttackController>();
+            attacks.SetTarget(target); attacks.Tick(0.91f); visual.RefreshVisual(); Assert.That(visual.IsVisible,Is.False);
+            attacks.ClearTarget(); cow.Tick(6); cow.ActivateEmpower(); cow.Tick(5.1f); visual.RefreshVisual(); Assert.That(visual.IsVisible,Is.False);
+            cow.Tick(15); cow.HandleSkill3(); cow.TryHandleConfirm(new Vector3(3,0,0),null);
+            var mama=Object.FindFirstObjectByType<NiuLaiMamaImpact>();
+            var renderer=mama.GetComponentInChildren<SkinnedMeshRenderer>();
+            Assert.That(renderer.sharedMaterial,Is.SameAs(Resources.Load<Material>("NiuLaiMama")));
+            Assert.That(renderer.sharedMaterial.shader.name,Is.EqualTo("ArknightsFrontline/NiuLaiMama"));
+            Assert.That(cow.GetComponentInChildren<SkinnedMeshRenderer>().sharedMaterial.shader.name,Is.EqualTo("Universal Render Pipeline/Lit"));
+            mama.Tick(1.2f); CapturePreview(cow.gameObject,"Logs/niulai-mama-color.png");
+            cow.Tick(6); cow.ActivateEmpower(); cow.GetComponent<CombatUnit>().TakePhysicalDamage(9999); visual.RefreshVisual(); Assert.That(visual.IsVisible,Is.False);
+            yield return null;
+        }
+
         private static void CapturePreview(GameObject cow, string destination)
         {
             var cameraObject = new GameObject("CowPreviewCamera");
@@ -137,6 +159,7 @@ namespace ArknightsFrontline.Tests.PlayMode
             var target = new RenderTexture(960, 720, 24); camera.targetTexture = target; camera.Render();
             var previous = RenderTexture.active; RenderTexture.active = target;
             var image = new Texture2D(960, 720, TextureFormat.RGB24, false); image.ReadPixels(new Rect(0, 0, 960, 720), 0, 0); image.Apply();
+            Assert.That(image.GetPixels().Count(c => c.r > 0.8f && c.b > 0.8f && c.g < 0.25f), Is.LessThan(10), "Preview contains shader-error magenta pixels.");
             System.IO.File.WriteAllBytes(destination, image.EncodeToPNG());
             RenderTexture.active = previous; camera.targetTexture = null;
             Object.Destroy(image); Object.Destroy(target); Object.Destroy(cameraObject); Object.Destroy(lightObject);

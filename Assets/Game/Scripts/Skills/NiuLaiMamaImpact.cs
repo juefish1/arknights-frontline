@@ -34,6 +34,8 @@ namespace ArknightsFrontline.Skills
             {
                 fallingModel = Instantiate(model.gameObject, transform).transform;
                 foreach (var animator in fallingModel.GetComponentsInChildren<Animator>()) animator.enabled = false;
+                var mamaMaterial = Resources.Load<Material>("NiuLaiMama");
+                if (mamaMaterial) foreach (var renderer in fallingModel.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = mamaMaterial;
                 fallingModel.localScale = model.lossyScale * 1.5f;
                 fallingModel.localPosition = Vector3.up * 8;
             }
